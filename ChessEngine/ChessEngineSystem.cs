@@ -1,19 +1,27 @@
 using System.Diagnostics;
 
-namespace ChessEngine;
-
+// These are class library files
+//  
+namespace ChessEngine
+{
 public class ChessEngineSystem
 {
 
+   private  BoardRepresentation board  = new BoardRepresentation();
     public ChessEngineSystem()
     {
-        Console.WriteLine(" console initialized");
+        Console.WriteLine("Console initialized");
         Init();
+        board.CreateChessBoard();
+    
+        
     }
 
 
-    public void Init()
+    private void Init()
     {
-        Console.WriteLine("Simple Chess Engine 0.1");
+        Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
     }
+}
+
 }

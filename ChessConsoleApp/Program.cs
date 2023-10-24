@@ -1,6 +1,8 @@
 ﻿
 using ChessEngine;
 
+//Console Entry point
+// Entry point for the program else
 public class Program
 {
 
@@ -8,7 +10,7 @@ public class Program
     {
          ChessEngineSystem chessEng = new ChessEngineSystem();
          
-        
+         
         }
 
 }
