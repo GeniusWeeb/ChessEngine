@@ -17,9 +17,7 @@ namespace ChessEngine {
                 {
                     Console.Write(count + " ");
                     count++;
-                }
-            Console.Write("\n");
-
+                } Console.Write("\n");
          }
 
     }
