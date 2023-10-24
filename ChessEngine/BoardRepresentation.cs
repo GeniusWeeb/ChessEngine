@@ -1,8 +1,7 @@
 
-namespace ChessEngine {
-
-
-// NOTE  :  This will  Handle BOARD CREATION 
+namespace ChessEngine 
+{
+    // NOTE  :  This will  Handle BOARD CREATION 
 
  public class BoardRepresentation {
 
