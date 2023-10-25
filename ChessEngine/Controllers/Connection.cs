@@ -1,6 +1,5 @@
 
-using System.ComponentModel;
-using System.Net.WebSockets;
+
 
 namespace Utility{
     // Note : We are using Fleck package for bidirectional comms
@@ -10,6 +9,9 @@ namespace Utility{
     public class Connection
     {
         private static List<IWebSocketConnection> connectedClient = new List<IWebSocketConnection>();
+        private IWebSocketConnection mainSocket;
+
+        
         public static Connection Instance { get; private set; }
 
         static Connection() {
@@ -40,22 +42,30 @@ namespace Utility{
         
         private void OnMessage(string data)
         {
-            Console.WriteLine(data);
+            Event.inComingData.Invoke(data);
         }
 
         void ClientConnected(IWebSocketConnection socket)
         {
             connectedClient.Add(socket);
-
+            mainSocket = socket;
             Console.WriteLine("Client has connected => " + socket.ConnectionInfo.Id);
         }
 
         void ClientDC(IWebSocketConnection socket)
         {
             Console.Write("Client has disconnected => " + socket.ConnectionInfo.Id);
-
+           
             connectedClient.Remove(socket);
         }
+
+          public void Send(string data)
+            {
+                mainSocket.Send(data);
+            }
+          
+          
+          
 
         #endregion
     }

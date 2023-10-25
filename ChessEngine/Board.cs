@@ -12,6 +12,8 @@ namespace ChessEngine
      public Board()
      {
          square = new int[64];
+         Console.WriteLine("Board is also ready");
+        
      }
 
  }   
