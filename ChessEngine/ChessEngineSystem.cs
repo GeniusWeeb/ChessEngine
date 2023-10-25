@@ -31,6 +31,7 @@ namespace ChessEngine
         public void Dispose()
         {
             Event.inComingData -= PassDataToBoard;
+            b.Dispose();
         }
     }
 

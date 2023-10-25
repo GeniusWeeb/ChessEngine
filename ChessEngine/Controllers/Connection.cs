@@ -1,6 +1,8 @@
 
 
 
+using ChessEngine;
+
 namespace Utility{
     // Note : We are using Fleck package for bidirectional comms
     // It is a websocket
@@ -22,7 +24,7 @@ namespace Utility{
         {
             var server = new WebSocketServer("ws://127.0.0.1:8281");
             server.Start(
-
+    
                 socket =>
                 {
                     socket.OnOpen = () => ClientConnected(socket);
@@ -50,6 +52,11 @@ namespace Utility{
             connectedClient.Add(socket);
             mainSocket = socket;
             Console.WriteLine("Client has connected => " + socket.ConnectionInfo.Id);
+
+           
+             Event.ClientConncted.Invoke();
+
+
         }
 
         void ClientDC(IWebSocketConnection socket)
