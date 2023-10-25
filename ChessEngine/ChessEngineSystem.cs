@@ -1,27 +1,25 @@
 using System.Diagnostics;
+using Utility;
 
-// These are class library files
-//  
+// This class will communicate with engine
+//have handlers whatever
+
 namespace ChessEngine
 {
-public class ChessEngineSystem
-{
-
-   private  BoardRepresentation board  = new BoardRepresentation();
-    public ChessEngineSystem()
+    public class ChessEngineSystem
     {
-        Console.WriteLine("Console initialized");
-        Init();
-        board.CreateChessBoard();
-    
+        private Board b = new Board();
+        public ChessEngineSystem()
+        {
+            Console.WriteLine("Console initialized");
+            Init();
+        }
+        private void Init()
+        {
+            Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
+        }   
+        
         
     }
-
-
-    private void Init()
-    {
-        Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
-    }
-}
 
 }
