@@ -1,5 +1,6 @@
 
 using Utility;
+using Newtonsoft.Json;
 
 namespace ChessEngine 
 {
@@ -7,30 +8,31 @@ namespace ChessEngine
 
  public class Board : IDisposable
  {
-     private  int[] square;
+     private  int[] chessBoard;
      
      public Board()
      {
-         square = new int[64];
-         Console.WriteLine("Board is also ready");
-         Event.ClientConncted += SpawnPiece;
+         chessBoard = new int[64];
+         Console.WriteLine("Board is ready!");
+         Event.ClientConncted += SetupDefaultBoard;
          
      }
     
      
 
-     void SpawnPiece()
+     void SetupDefaultBoard()
      {
-         square[3] = Piece.Black |  Piece.Queen;
-         Console.WriteLine("Sending peice data ");
-         Connection.Instance.Send(square[3].ToString());
+         chessBoard = ChessEngineSystem.Instance.MapFen();
+         var data = JsonConvert.SerializeObject(chessBoard);
+         Console.WriteLine(data);
+         Connection.Instance.Send(data);
        
      }
 
 
      public void Dispose()
      {
-         Event.ClientConncted -= SpawnPiece;
+         Event.ClientConncted -= SetupDefaultBoard;
 
      }
  }   
