@@ -8,16 +8,23 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {
+        public static ChessEngineSystem Instance { get; private set; }
         private Board b = new Board();
         
         public ChessEngineSystem()
         {
             Console.WriteLine("Console initialized");
             Event.inComingData += PassDataToBoard;
-            Init();
         }
+        static ChessEngineSystem()
+        {
+            Instance = new ChessEngineSystem();
+        }
+
+        public int[] MapFen() => FenMapper.MapFen();
         
-        private void Init()
+        
+        public void Init()
         {
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
         }
