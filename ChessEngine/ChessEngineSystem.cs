@@ -9,7 +9,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {
         public static ChessEngineSystem Instance { get; private set; }
-        private Board b = new Board();
+        private Board board = new Board();
         
         public ChessEngineSystem()
         {
@@ -31,14 +31,28 @@ namespace ChessEngine
         
         //This will unwrap the data and send to the board 
         private void PassDataToBoard(string data)
-        {
-            Console.WriteLine(data);
+        {   
+            Protocols incomingData = Newtonsoft.Json.JsonConvert.DeserializeObject<Protocols>(data);
+            if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
+                ProcessMoveInEngine(incomingData);
         }
-        
+
+        private void ProcessMoveInEngine(Protocols incomingDta)
+        {
+            string square = incomingDta.data.Split("-")[1];
+            int pieceType = FenMapper.GetPieceCode((incomingDta.data.Split("-")[0]).Single());
+            int pieceColor = char.IsUpper((incomingDta.data.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
+
+            int piece = pieceType | pieceColor;
+            var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
+            board.MakeMove(piece ,oldIndex, newIndex );
+           
+        }
+
         public void Dispose()
         {
             Event.inComingData -= PassDataToBoard;
-            b.Dispose();
+            board.Dispose();
         }
     }
 
