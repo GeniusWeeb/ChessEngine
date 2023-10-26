@@ -29,6 +29,20 @@ namespace ChessEngine
        
      }
 
+     public void MakeMove(int piece, int oldIndex, int newIndex)
+     {
+         //swap
+         chessBoard[oldIndex] = Piece.Empty;
+         chessBoard[newIndex] = piece;
+         ShowBoard();
+     }
+
+
+     private void ShowBoard()
+     {
+         Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
+     }
+
 
      public void Dispose()
      {
