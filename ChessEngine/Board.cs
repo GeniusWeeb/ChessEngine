@@ -24,17 +24,24 @@ namespace ChessEngine
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();
          var data = JsonConvert.SerializeObject(chessBoard);
+         Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data);
          Console.WriteLine(data);
-         Connection.Instance.Send(data);
+         ChessEngineSystem.Instance.SendDefaultBoardData(finalData);
        
      }
 
-     public void MakeMove(int piece, int oldIndex, int newIndex)
-     {
+     public bool MakeMove(int piece, int oldIndex, int newIndex)
+     {  
+         
+         //FOR TESTING
+         bool canMakeMove = false;
          //swap
          chessBoard[oldIndex] = Piece.Empty;
          chessBoard[newIndex] = piece;
          ShowBoard();
+        //validate  the move here
+        //can we make a move ?
+         return canMakeMove;
      }
 
 
