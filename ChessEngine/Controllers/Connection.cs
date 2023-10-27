@@ -1,6 +1,7 @@
 
 
 
+using System.Diagnostics;
 using ChessEngine;
 
 namespace Utility{
@@ -43,7 +44,8 @@ namespace Utility{
         #region Event handlers
         
         private void OnMessage(string data)
-        {
+        {   
+           
             Event.inComingData.Invoke(data);
         }
 
@@ -52,9 +54,7 @@ namespace Utility{
             connectedClient.Add(socket);
             mainSocket = socket;
             Console.WriteLine("Client has connected => " + socket.ConnectionInfo.Id);
-
-           
-             Event.ClientConncted.Invoke();
+            Event.ClientConncted.Invoke();
 
 
         }

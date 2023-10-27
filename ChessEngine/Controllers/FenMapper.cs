@@ -80,7 +80,7 @@ public static  class FenMapper
             ['h'] = 7,
             
         };
-
+        
         #region oldPosition
             int file = GetFileCode[code[0]];
             int rank = (int)char.GetNumericValue(code[1]) -1;
@@ -93,9 +93,7 @@ public static  class FenMapper
             int file1 = GetFileCode[code[2]];
             int rank1 = (int)char.GetNumericValue(code[3]) -1;
             int newIndex = (8 * rank1) + file1;
-        #endregion   
-       
-
+        #endregion
         Console.WriteLine("old Index is =>" + oldIndex +", new  Index is => " +newIndex);
 
         return (oldIndex,newIndex);

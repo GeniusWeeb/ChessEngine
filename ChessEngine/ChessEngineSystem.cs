@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Newtonsoft.Json;
 using Utility;
 
 // This class will communicate with engine
@@ -32,12 +33,19 @@ namespace ChessEngine
         //This will unwrap the data and send to the board 
         private void PassDataToBoard(string data)
         {   
-            Protocols incomingData = Newtonsoft.Json.JsonConvert.DeserializeObject<Protocols>(data);
+            Protocols incomingData = JsonConvert.DeserializeObject<Protocols>(data);
+            Console.WriteLine(incomingData.msgType);
             if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
-                ProcessMoveInEngine(incomingData);
+            {   
+                Console.WriteLine("Recieved move data");
+                string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
+                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData);
+                Console.WriteLine("Can make this move =>" + validationData);
+                SendDataAfterValidating(finalData);
+            }
         }
 
-        private void ProcessMoveInEngine(Protocols incomingDta)
+        private bool ProcessMoveInEngine(Protocols incomingDta)
         {
             string square = incomingDta.data.Split("-")[1];
             int pieceType = FenMapper.GetPieceCode((incomingDta.data.Split("-")[0]).Single());
@@ -45,7 +53,9 @@ namespace ChessEngine
 
             int piece = pieceType | pieceColor;
             var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
-            board.MakeMove(piece ,oldIndex, newIndex );
+            
+            //can the move be made 
+            return board.MakeMove(piece ,oldIndex, newIndex );
            
         }
 
@@ -53,6 +63,19 @@ namespace ChessEngine
         {
             Event.inComingData -= PassDataToBoard;
             board.Dispose();
+        }
+
+
+        void SendDataAfterValidating <T>(T data)
+        { 
+            string toSend = JsonConvert.SerializeObject(data);
+            Connection.Instance.Send(toSend);
+        }
+
+        public void SendDefaultBoardData<T>(T data)
+        {
+            var toSend = JsonConvert.SerializeObject(data);
+            Connection.Instance.Send(toSend);
         }
     }
 
