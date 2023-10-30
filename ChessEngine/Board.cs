@@ -25,7 +25,7 @@ namespace ChessEngine
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();
          var data = JsonConvert.SerializeObject(chessBoard);
-         Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data);
+         Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,GameConstants.defaultMove.ToString());
          Console.WriteLine(data);
          ChessEngineSystem.Instance.SendDefaultBoardData(finalData);
          

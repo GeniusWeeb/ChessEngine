@@ -41,7 +41,11 @@ namespace ChessEngine
             {   
                 Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
-                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData);
+
+
+                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
+                Console.WriteLine("Can make this move =>" + validationData);
+
                 SendDataAfterValidating(finalData);
                 board.ProcessMovesUpdate();
             }
