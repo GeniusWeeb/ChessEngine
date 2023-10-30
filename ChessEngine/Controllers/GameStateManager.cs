@@ -12,7 +12,7 @@ public class GameStateManager
     private LegalMoves moves = new LegalMoves();
 
     public List<ChessPiece> pieces = new List<ChessPiece>();
-    private int toMove;
+    public int toMove = Piece.White;
 
     
     public static GameStateManager Instance { get; private set; }
@@ -38,12 +38,11 @@ public class GameStateManager
         moves.CheckForMoves(board ,pToMove);
         foreach (var piece in allPiecesThatCanMove)
         {
-           // Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
+            Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
             foreach (var pieceIndex in piece.GetAllMovesForThisPiece )
             { 
-                //    Console.WriteLine("available move indexes are" + pieceIndex);
-            }
-           // Console.WriteLine("-------------------------------------------------------------");
+                   Console.WriteLine("available move indexes are" + pieceIndex);
+            } Console.WriteLine("-------------------------------------------------------------");
             
         }
     }
@@ -63,7 +62,8 @@ public class GameStateManager
     {   
         
         Console.WriteLine("Changing turns");
-        toMove = move == Piece.White ? Piece.Black : Piece.Black;
+        toMove = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.Black;
+        Console.WriteLine("New move col" + toMove);
     }
 
     

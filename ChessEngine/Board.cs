@@ -25,7 +25,7 @@ namespace ChessEngine
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();
          var data = JsonConvert.SerializeObject(chessBoard);
-         Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,GameConstants.defaultMove.ToString());
+         Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          Console.WriteLine(data);
          ChessEngineSystem.Instance.SendDefaultBoardData(finalData);
          
@@ -36,29 +36,38 @@ namespace ChessEngine
        
      }
 
-     public bool MakeMove(int piece, int oldIndex, int newIndex)
-     {  
-       
-        if (GameStateManager.Instance.allPiecesThatCanMove.Any(p 
-                => p.GetPieceCode == piece && p.GetAllMovesForThisPiece.
-                    Contains(newIndex) && oldIndex == p.GetCurrentIndex))
+    public bool MakeMove(int piece, int oldIndex, int newIndex)
+    {   
+        Console.WriteLine($"piece {piece} and old index {oldIndex} and new index {newIndex}");
+        foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
         {
-            //  Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" + newIndex);
-            chessBoard[oldIndex] = Piece.Empty;
-            chessBoard[newIndex] = piece;
-            ShowBoard();
             
-            GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.GetTurnToMove);
-            GameStateManager.Instance.ResetMoves();
-            return true;;
-           
+            if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
+                oldIndex == p.GetCurrentIndex)
+            {
+
+                Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" +
+                                  newIndex);
+                chessBoard[oldIndex] = Piece.Empty;
+                chessBoard[newIndex] = piece;
+                ShowBoard();
+
+            //    GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.GetTurnToMove);
+                GameStateManager.Instance.ResetMoves();
+                return true;
+                ; }
+
+            
+
         }
-         Console.WriteLine("Invalid Move");
-         return false;
+
+        Console.WriteLine("Invalid Move");
+            return false;
      }
 
+   
 
-     private void ShowBoard()
+    private void ShowBoard()
      {
          Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
      }

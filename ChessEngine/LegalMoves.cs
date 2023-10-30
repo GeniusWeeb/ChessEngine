@@ -12,8 +12,8 @@ sealed class LegalMoves
     // further optimize it
     public void CheckForMoves(int[] board  , int colorToMove)
     {
-        int boardSize = 64;
-        for (int i = 0; i < boardSize; i++)
+        
+        for (int i = 0; i < board.Length; i++)
         {
             int pieceCode = board[i] & Piece.CPiece;
             int colorCode = isBlack(board[i]) ? Piece.Black : Piece.White;
@@ -22,7 +22,6 @@ sealed class LegalMoves
             
             if (pieceCode == Piece.Pawn)
             {
-                Console.WriteLine("Pawn detected");
                 ChessPiece p =   GenerateMovesForPawn(i, board[i] , colorCode,board);
               if(p != null)
                   GameStateManager.Instance.allPiecesThatCanMove.Add(p);
@@ -34,11 +33,13 @@ sealed class LegalMoves
     //going thru every peice
     private ChessPiece GenerateMovesForPawn(int ind, int p ,int colCode, int[] board)
     {   
+        
         int index = ind;
         int pCode = p;
         int thisColorCode = colCode;
         Pawn pawn = new Pawn(pCode, ind);
         
+        Console.WriteLine($"checking index {index}");
         
         //front move -> normal move
         if(board[index + pawn.pawnStep] == Piece.Empty)
@@ -47,6 +48,7 @@ sealed class LegalMoves
         int targetRow = (index + pawn.pawnStep )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
         //RIGHT MOVE
         int rdIndex = index + pawn.pawnStep + 1;
+        Console.WriteLine($"board index is {board[rdIndex]}");
         int RDcolorCode = isBlack(board[rdIndex]) ? Piece.Black : Piece.White;
         if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode)
         {   Console.WriteLine("RD Found");
