@@ -19,29 +19,40 @@ namespace ChessEngine
      }
     
      
+     
 
-     void SetupDefaultBoard()
+    private void SetupDefaultBoard()
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data);
          Console.WriteLine(data);
          ChessEngineSystem.Instance.SendDefaultBoardData(finalData);
+         
+         //after turn change TBH
+         
+         Console.WriteLine("Checking for all Pawn moves");
+         GameStateManager.Instance.ProcessMoves(chessBoard);
        
      }
 
      public bool MakeMove(int piece, int oldIndex, int newIndex)
      {  
-         
-         //FOR TESTING
-         bool canMakeMove = false;
-         //swap
-         chessBoard[oldIndex] = Piece.Empty;
-         chessBoard[newIndex] = piece;
-         ShowBoard();
-        //validate  the move here
-        //can we make a move ?
-         return canMakeMove;
+       
+        if (GameStateManager.Instance.allPiecesThatCanMove.Any(p 
+                => p.GetPieceCode == piece && p.GetAllMovesForThisPiece.
+                    Contains(newIndex) && oldIndex == p.GetCurrentIndex))
+        {
+            Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" + newIndex);
+            chessBoard[oldIndex] = Piece.Empty;
+            chessBoard[newIndex] = piece;
+            ShowBoard();
+            GameStateManager.Instance.ResetMoves();
+            return true;;
+           
+        }
+         Console.WriteLine("Invalid Move");
+         return false;
      }
 
 
@@ -55,6 +66,12 @@ namespace ChessEngine
      {
          Event.ClientConncted -= SetupDefaultBoard;
 
+     }
+
+
+     public void ProcessMovesUpdate()
+     {
+         GameStateManager.Instance.ProcessMoves(chessBoard);
      }
  }   
 

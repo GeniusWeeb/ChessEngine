@@ -23,8 +23,10 @@ namespace ChessEngine
         }
 
         public int[] MapFen() => FenMapper.MapFen();
-        
-        
+
+
+      
+
         public void Init()
         {
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
@@ -37,11 +39,11 @@ namespace ChessEngine
             Console.WriteLine(incomingData.msgType);
             if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
             {   
-                Console.WriteLine("Recieved move data");
+                Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData);
-                Console.WriteLine("Can make this move =>" + validationData);
                 SendDataAfterValidating(finalData);
+                board.ProcessMovesUpdate();
             }
         }
 

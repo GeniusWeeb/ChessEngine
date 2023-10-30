@@ -22,5 +22,9 @@ public static  class Piece
     public static int Black = 32; // 10 -0000
     public static int White = 16; // 01 -0000
     
+    
+    //Mask for PIECES
+
+    public static int CPiece = 15;
 
 }
