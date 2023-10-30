@@ -6,12 +6,11 @@ namespace Utility;
 public class GameStateManager
 {
     public List<ChessPiece> pieces = new List<ChessPiece>();
-    private TurnToMove toMove;
-    private bool whiteToMove = true;
+    private int toMove;
     
     public static GameStateManager Instance { get; private set; }
-    public TurnToMove GetTurnToMove => toMove;
-    public void SetTurnToMove(TurnToMove move)
+    public int GetTurnToMove => toMove;
+    public void SetTurnToMove(int move)
     { 
         toMove = move;
     }
@@ -21,16 +20,15 @@ public class GameStateManager
     }
     
     //Entry point
-    public void UpdateTurns()
-    {
-        ChangeTurns();
+    public void UpdateTurns(int move )
+    {   
+        ChangeTurns(move);
         //Update for later and send validation string for turn update alongside move validation
     }
 
-    private bool ChangeTurns()
-    { 
-        whiteToMove = !whiteToMove;
-        return whiteToMove;
+    private void  ChangeTurns(int move)
+    {
+        toMove = move == Piece.White ? Piece.Black : Piece.Black;
     }
 
 
@@ -43,9 +41,3 @@ public class GameStateManager
 
 
 
-public enum TurnToMove
-{
-    black ,
-    white
-    
-}
