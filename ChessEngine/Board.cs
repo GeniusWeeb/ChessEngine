@@ -43,10 +43,12 @@ namespace ChessEngine
                 => p.GetPieceCode == piece && p.GetAllMovesForThisPiece.
                     Contains(newIndex) && oldIndex == p.GetCurrentIndex))
         {
-            Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" + newIndex);
+            //  Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" + newIndex);
             chessBoard[oldIndex] = Piece.Empty;
             chessBoard[newIndex] = piece;
             ShowBoard();
+            
+            GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.GetTurnToMove);
             GameStateManager.Instance.ResetMoves();
             return true;;
            
