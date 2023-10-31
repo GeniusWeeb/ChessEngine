@@ -20,7 +20,7 @@ namespace ChessEngine
     
      
      
-
+    
     private void SetupDefaultBoard()
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();
@@ -31,11 +31,11 @@ namespace ChessEngine
          
          //after turn change TBH
          
-         Console.WriteLine("Checking for all Pawn moves");
+       
          GameStateManager.Instance.ProcessMoves(chessBoard);
        
      }
-
+    
     public bool MakeMove(int piece, int oldIndex, int newIndex)
     {   
         Console.WriteLine($"piece {piece} and old index {oldIndex} and new index {newIndex}");
@@ -45,19 +45,16 @@ namespace ChessEngine
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
-
                 Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" +
                                   newIndex);
                 chessBoard[oldIndex] = Piece.Empty;
                 chessBoard[newIndex] = piece;
                 ShowBoard();
-
-            //    GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.GetTurnToMove);
                 GameStateManager.Instance.ResetMoves();
+                GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.toMove);
                 return true;
                 ; }
 
-            
 
         }
 

@@ -15,6 +15,7 @@ sealed class LegalMoves
         
         for (int i = 0; i < board.Length; i++)
         {
+            Console.WriteLine("Current color code is " + colorToMove);
             int pieceCode = board[i] & Piece.CPiece;
             int colorCode = isBlack(board[i]) ? Piece.Black : Piece.White;
             if (colorCode != colorToMove)
@@ -39,27 +40,27 @@ sealed class LegalMoves
         int thisColorCode = colCode;
         Pawn pawn = new Pawn(pCode, ind);
         
-        Console.WriteLine($"checking index {index}");
-        
+       
+        var ApplyIndexBasedOnColor = colCode == Piece.White ? index + pawn.pawnStep : index - (pawn.pawnStep);
         //front move -> normal move
-        if(board[index + pawn.pawnStep] == Piece.Empty)
-            pawn.SetAllPossibleMoves(index+ pawn.pawnStep);
+        if(board[ApplyIndexBasedOnColor] == Piece.Empty)
+            pawn.SetAllPossibleMoves(ApplyIndexBasedOnColor);
 
-        int targetRow = (index + pawn.pawnStep )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
+        int targetRow = ( ApplyIndexBasedOnColor )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
         //RIGHT MOVE
-        int rdIndex = index + pawn.pawnStep + 1;
-        Console.WriteLine($"board index is {board[rdIndex]}");
+        int rdIndex = ApplyIndexBasedOnColor + 1;
+     
         int RDcolorCode = isBlack(board[rdIndex]) ? Piece.Black : Piece.White;
-        if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode)
-        {   Console.WriteLine("RD Found");
+        if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode &&  board[rdIndex] != Piece.Empty )
+        { ;
             pawn.SetAllPossibleMoves(rdIndex);
         }
 
-        int ldIndex = index + pawn.pawnStep - 1;
+        int ldIndex = ApplyIndexBasedOnColor - 1;
         int LDcolorCode = isBlack(board[ldIndex]) ? Piece.Black : Piece.White;
-        if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode)
+        if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
         {   
-            Console.WriteLine("LD found");
+            
             pawn.SetAllPossibleMoves(ldIndex);
         }
 
