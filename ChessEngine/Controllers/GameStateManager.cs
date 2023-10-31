@@ -31,11 +31,8 @@ public class GameStateManager
     //should be added in after turns are updated
     public void ProcessMoves(int[] board)
     {
-        int pToMove = Piece.White;
-        
         //Test colour to move 
-        
-        moves.CheckForMoves(board ,pToMove);
+        moves.CheckForMoves(board ,toMove);
         foreach (var piece in allPiecesThatCanMove)
         {
             Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
@@ -62,8 +59,8 @@ public class GameStateManager
     {   
         
         Console.WriteLine("Changing turns");
-        toMove = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.Black;
-        Console.WriteLine("New move col" + toMove);
+        toMove = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.White;
+        Console.WriteLine("New move colour is" + toMove);
     }
 
     
