@@ -127,7 +127,8 @@ sealed class LegalMoves
             }
             else if (!sameColor)
             {
-                int newPos = board[knight.knightCanMoveTo[i]];
+                Console.WriteLine("Found one with diff color and can use this");
+                int newPos =knight.knightCanMoveTo[i];
                 //After having all moves  , we try to check for L move shape 
                 //INTERESTING LOGIC FOR THIS
                 int rowDiff = (int)MathF.Abs(newPos / 8 - ind / 8);
