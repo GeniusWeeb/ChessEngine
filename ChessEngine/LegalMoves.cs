@@ -131,10 +131,21 @@ sealed class LegalMoves
         Queen queen = new Queen(myColorCode, index);
 
         int up = index, down = index;
+        int rightDiagIndex = index, leftDiagIndex = index;
+        int botLeftD = index, botRightD = index;
+        int sideStepRight = index;
+        int sideStepLeft = index;
         //UP
         QueenMovement(up , myColorCode ,queen,chessBoard , queen.queenStep);
         //BOTTOM
         QueenMovement(down , myColorCode ,queen,chessBoard, -queen.queenStep);
+        QueenMovement(rightDiagIndex , myColorCode ,queen,chessBoard, queen.queenRightDiag);
+        QueenMovement(leftDiagIndex , myColorCode ,queen,chessBoard, queen.queenLeftDiag);
+        QueenMovement(botLeftD , myColorCode ,queen,chessBoard, queen.queenBotRightDiag);
+        QueenMovement(botRightD , myColorCode ,queen,chessBoard, queen.queenBotLeftDiag);
+        QueenMovement(sideStepRight , myColorCode ,queen,chessBoard, queen.queenSideStep);
+        QueenMovement(sideStepLeft , myColorCode ,queen,chessBoard, -queen.queenSideStep);
+        
         
         return queen.getAllPossibleMovesCount > 0 ? queen : null;
     }
@@ -144,15 +155,29 @@ sealed class LegalMoves
         int movePlace = moveDirection;
         movePlace += queenStep;
         
-        while (movePlace is > 0 and  <64 )
+        while (movePlace is >= 0 and  <64 )
         {
-            Console.WriteLine($"New up is {movePlace}");
+            
+            int fileSide = movePlace % 8;
+            int rankUp = movePlace % 8;
+            Console.WriteLine("Stuck in loop");
             int otherColorCode = GetColorCode(board[movePlace]);
-            if (!isSameColorAsMe(myColorCode, otherColorCode) || board[movePlace] == Piece.Empty)
+
+            if (board[movePlace] == Piece.Empty) {
+                    Console.WriteLine("Stuck in empty loop");
+                    queen.AddAllPossibleMoves(movePlace);
+                    if ( movePlace>0 && fileSide == 7) break;
+                    if ( movePlace>0 && fileSide == 0) break;
+                    //next iteration
+                    movePlace += queenStep;
+            }
+            else if (!isSameColorAsMe(myColorCode, otherColorCode))
             {
+                Console.WriteLine("Stuck in not same color loop");
                 queen.AddAllPossibleMoves(movePlace);
-                movePlace += queenStep;
-                
+                break;
+                //next iteration
+
             }
             else break;
         }
@@ -249,5 +274,5 @@ public abstract class ChessPiece
 
 public enum PieceMovementDirection
 {
-    UP , RIGHT , DOWN , LEFT
+    UP , RIGHT , DOWN , LEFT , RIGHTDIAG ,LEFTDIAG ,RIGHTBOTTOMDIAG,LEFTBOTTOMDIAG 
 }

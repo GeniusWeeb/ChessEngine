@@ -35,13 +35,15 @@ public class GameStateManager
         moves.CheckForMoves(board ,toMove);
         foreach (var piece in allPiecesThatCanMove)
         {
-            Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
-            foreach (var pieceIndex in piece.GetAllMovesForThisPiece )
-            { 
-                   Console.WriteLine("available move indexes are" + pieceIndex);
-            } Console.WriteLine("-------------------------------------------------------------");
-            
-        }
+            if (piece.GetPieceCode == (Piece.White | Piece.Queen) || piece.GetPieceCode == (Piece.Black | Piece.Queen)) {
+                Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
+            foreach (var pieceIndex in piece.GetAllMovesForThisPiece)
+            {
+                Console.WriteLine("available move indexes are" + pieceIndex);
+            }
+
+            Console.WriteLine("-------------------------------------------------------------"); 
+            }}
     }
 
     //Entry point // when this updates -> Process moves here
