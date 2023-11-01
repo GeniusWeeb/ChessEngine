@@ -39,7 +39,7 @@ namespace Utility{
             
         public void Init()
         {
-            Console.WriteLine("The connection class is ready ");
+           // Console.WriteLine("The connection class is ready ");
         }
 
         #region Event handlers
@@ -59,7 +59,7 @@ namespace Utility{
         {
             connectedClient.Add(socket);
             mainSocket = socket;
-            Console.WriteLine("Client has connected => " + socket.ConnectionInfo.Id);
+           // Console.WriteLine("Client has connected => " + socket.ConnectionInfo.Id);
             Event.ClientConncted.Invoke();
 
 
@@ -67,7 +67,7 @@ namespace Utility{
 
         void ClientDC(IWebSocketConnection socket)
         {
-            Console.Write("Client has disconnected => " + socket.ConnectionInfo.Id);
+           // Console.Write("Client has disconnected => " + socket.ConnectionInfo.Id);
            
             connectedClient.Remove(socket);
         }

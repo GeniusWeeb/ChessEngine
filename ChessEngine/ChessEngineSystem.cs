@@ -37,15 +37,15 @@ namespace ChessEngine
         private void PassDataToBoard(string data)
         {   
             Protocols incomingData = JsonConvert.DeserializeObject<Protocols>(data);
-            Console.WriteLine(incomingData.msgType);
+          //  Console.WriteLine(incomingData.msgType);
             if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
             {   
-                Console.WriteLine("Received move data");
+              //   Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
 
 
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
-                Console.WriteLine("Can make this move =>" + validationData);
+               // Console.WriteLine("Can make this move =>" + validationData);
 
                 SendDataToUI(finalData);
                 board.ProcessMovesUpdate();

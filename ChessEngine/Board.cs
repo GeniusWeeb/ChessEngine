@@ -38,7 +38,7 @@ namespace ChessEngine
     
     public bool MakeMove(int piece, int oldIndex, int newIndex)
     {   
-       // Console.WriteLine($"piece {piece} and old index {oldIndex} and new index {newIndex}");
+        Console.WriteLine($"piece {piece} and old index {oldIndex} and new index {newIndex}");
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
         {
             
@@ -54,8 +54,6 @@ namespace ChessEngine
                 GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.toMove);
                 return true;
                 ; }
-
-
         }
 
         Console.WriteLine("Invalid Move");

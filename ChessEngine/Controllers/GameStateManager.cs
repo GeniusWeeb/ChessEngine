@@ -35,16 +35,15 @@ public class GameStateManager
         moves.CheckForMoves(board ,toMove);
         foreach (var piece in allPiecesThatCanMove)
         {   
-                Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
+               // Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
             foreach (var pieceIndex in piece.GetAllMovesForThisPiece)
             {
-                Console.WriteLine("available move indexes are" + pieceIndex);
+                //Console.WriteLine("available move indexes are" + pieceIndex);
                 
                 //TODO : ADD THE DATA SEND HERE MAYBE , MAYBE BETTER
                 //THE DATA CAN BE SENT FROM HERE TOO AND CACHE IN UI
             }
-
-            Console.WriteLine("-------------------------------------------------------------"); 
+//   Console.WriteLine("-------------------------------------------------------------"); 
         }
     }
     
@@ -64,9 +63,9 @@ public class GameStateManager
     private void  ChangeTurns(int move)
     {   
         
-        Console.WriteLine("Changing turns");
+      //  Console.WriteLine("Changing turns");
         toMove = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.White;
-        Console.WriteLine("New move colour is" + toMove);
+       // Console.WriteLine("New move colour is" + toMove);
     }
 
     
