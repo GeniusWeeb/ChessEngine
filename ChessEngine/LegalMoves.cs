@@ -25,18 +25,23 @@ sealed class LegalMoves
             int colorCode = GetColorCode(board[i]);
             if (colorCode != colorToMove)
                continue;
+
+            //TODO : CAN USE SWITCH CASE HERE
             
             if (pieceCode == Piece.Pawn)
             {
                 ChessPiece p =  GenerateMovesForPawn(i, colorCode,board);
                 if(p != null) GameStateManager.Instance.allPiecesThatCanMove.Add(p);
             }
-
-            if (pieceCode == Piece.Knight)
+             if (pieceCode == Piece.Knight)
             {
               ChessPiece p = GenerateMovesForKnight(i , colorCode,board);
               if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
 
+            }  if (pieceCode == Piece.Queen)
+            {
+                ChessPiece p = GenerateMovesForQueen(i , colorCode,board);
+                if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
             }
 
         }
@@ -48,6 +53,8 @@ sealed class LegalMoves
     //going thru every  piece
     private ChessPiece GenerateMovesForPawn(int ind,int colCode, int[] board)
     {
+        
+        //TODO : PREDEFINE MOVEMENT STEPS IN CONSTRUCTOR BASED ON BLACK AND WHITE
         int index = ind;
         int thisColorCode = colCode;
         Pawn pawn = new Pawn(thisColorCode, ind);
@@ -115,6 +122,42 @@ sealed class LegalMoves
         }
         return knight.getAllPossibleMovesCount > 0 ? knight : null;
     }
+
+    private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, int[] board)
+    {
+        int index = ind;
+        int myColorCode = thisColCode;
+        int[] chessBoard = board;
+        Queen queen = new Queen(myColorCode, index);
+
+        int up = index, down = index;
+        //UP
+        QueenMovement(up , myColorCode ,queen,chessBoard , queen.queenStep);
+        //BOTTOM
+        QueenMovement(down , myColorCode ,queen,chessBoard, -queen.queenStep);
+        
+        return queen.getAllPossibleMovesCount > 0 ? queen : null;
+    }
+
+    void QueenMovement(int moveDirection, int myColorCode , Queen queen, int[]board , int queenStep)
+    {    
+        int movePlace = moveDirection;
+        movePlace += queenStep;
+        
+        while (movePlace is > 0 and  <64 )
+        {
+            Console.WriteLine($"New up is {movePlace}");
+            int otherColorCode = GetColorCode(board[movePlace]);
+            if (!isSameColorAsMe(myColorCode, otherColorCode) || board[movePlace] == Piece.Empty)
+            {
+                queen.AddAllPossibleMoves(movePlace);
+                movePlace += queenStep;
+                
+            }
+            else break;
+        }
+    }
+
     private bool isSameColorAsMe(int myColorCode, int otherColorCode)
     {
         return myColorCode == otherColorCode;
@@ -142,11 +185,9 @@ public class Pawn : ChessPiece
         this.currentIndex = index;
     }
     
-    
 }
 
-public class Knight : ChessPiece
-{
+public class Knight : ChessPiece {
     public int[] knightCanMoveTo = new int[8]
     {
         15,17,10,6,-15,-17,-10,-6
@@ -161,6 +202,24 @@ public class Knight : ChessPiece
         }
     }
 
+}
+
+public class Queen : ChessPiece {
+    
+    public readonly int queenStep = 8 ;
+    public readonly int queenRightDiag = 9 ;
+    public readonly int queenBotRightDiag = -7 ;
+    public readonly int queenLeftDiag = 7 ;
+    public readonly int queenBotLeftDiag = -9 ;
+    public readonly int queenSideStep = 1 ;
+    
+    
+    public Queen(int colorCode, int index)
+    {
+        this.pieceCode =  Piece.Queen | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
+        this.currentIndex = index;
+    }
+    
 }
 
 
@@ -186,4 +245,9 @@ public abstract class ChessPiece
      }
      public int getAllPossibleMovesCount => allPossibleMovesIndex.Count;
 
+}
+
+public enum PieceMovementDirection
+{
+    UP , RIGHT , DOWN , LEFT
 }
