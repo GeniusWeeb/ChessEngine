@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using ChessEngine;
+using Newtonsoft.Json;
 
 namespace Utility{
     // Note : We are using Fleck package for bidirectional comms
@@ -44,8 +45,13 @@ namespace Utility{
         #region Event handlers
         
         private void OnMessage(string data)
-        {   
-           
+        {
+            var  incomingData= JsonConvert.DeserializeObject<Protocols>(data);
+            if (incomingData.msgType == ProtocolTypes.INDICATE.ToString())
+            {
+                Event.GetCellsForThisIndex.Invoke(Int32.Parse( incomingData.data));
+            }
+
             Event.inComingData.Invoke(data);
         }
 
