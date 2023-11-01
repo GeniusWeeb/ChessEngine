@@ -9,7 +9,7 @@ public static  class Piece
     
     // 32 16  - 8 4 2 0
     // color    pieces                
-    public static int Empty = 0;
+    public static  int Empty = 0;
     public static int Pawn= 1; // 0001
     public static int Rook= 2; // 0010 
     public static int Knight= 3; // 0011
