@@ -16,6 +16,7 @@ namespace ChessEngine
         {
             Console.WriteLine("Console initialized");
             Event.inComingData += PassDataToBoard;
+            Event.GetCellsForThisIndex += SendUICellIndicatorData;
         }
         static ChessEngineSystem()
         {
@@ -46,7 +47,7 @@ namespace ChessEngine
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
                 Console.WriteLine("Can make this move =>" + validationData);
 
-                SendDataAfterValidating(finalData);
+                SendDataToUI(finalData);
                 board.ProcessMovesUpdate();
             }
         }
@@ -62,27 +63,44 @@ namespace ChessEngine
             
             //can the move be made 
             return board.MakeMove(piece ,oldIndex, newIndex );
-           
+        }
+        
+        
+        //RECIEVE
+        private void SendUICellIndicatorData(int index)
+        {
+            HashSet<int> cellsToSend = new HashSet<int>();
+            foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) {
+                if (index == piece.GetCurrentIndex) {
+                    foreach (var p in piece.GetAllMovesForThisPiece) {
+                        cellsToSend.Add(p);
+                    }
+                    break; 
+                }
+            }
+
+            var setData = JsonConvert.SerializeObject(cellsToSend);
+            Protocols finalData = new Protocols(ProtocolTypes.INDICATE.ToString() , setData, null);
+            SendDataToUI(finalData);
         }
 
         public void Dispose()
         {
             Event.inComingData -= PassDataToBoard;
+            Event.GetCellsForThisIndex -= SendUICellIndicatorData;
             board.Dispose();
         }
 
 
-        void SendDataAfterValidating <T>(T data)
+       public void SendDataToUI <T>(T data)
         { 
             string toSend = JsonConvert.SerializeObject(data);
             Connection.Instance.Send(toSend);
         }
 
-        public void SendDefaultBoardData<T>(T data)
-        {
-            var toSend = JsonConvert.SerializeObject(data);
-            Connection.Instance.Send(toSend);
-        }
+      
+        
+        
     }
 
 }

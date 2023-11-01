@@ -27,7 +27,7 @@ namespace ChessEngine
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          Console.WriteLine(data);
-         ChessEngineSystem.Instance.SendDefaultBoardData(finalData);
+         ChessEngineSystem.Instance.SendDataToUI(finalData);
          
          //after turn change TBH
          

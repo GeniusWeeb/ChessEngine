@@ -34,17 +34,21 @@ public class GameStateManager
         //Test colour to move 
         moves.CheckForMoves(board ,toMove);
         foreach (var piece in allPiecesThatCanMove)
-        {
-            if (piece.GetPieceCode == (Piece.White | Piece.Queen) || piece.GetPieceCode == (Piece.Black | Piece.Queen)) {
+        {   
                 Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
             foreach (var pieceIndex in piece.GetAllMovesForThisPiece)
             {
                 Console.WriteLine("available move indexes are" + pieceIndex);
+                
+                //TODO : ADD THE DATA SEND HERE MAYBE , MAYBE BETTER
+                //THE DATA CAN BE SENT FROM HERE TOO AND CACHE IN UI
             }
 
             Console.WriteLine("-------------------------------------------------------------"); 
-            }}
+        }
     }
+    
+  
 
     //Entry point // when this updates -> Process moves here
   
