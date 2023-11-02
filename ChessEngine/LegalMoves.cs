@@ -164,6 +164,10 @@ sealed class LegalMoves
             else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
             
         }
+        
+        // here we can generate castling content
+        
+        
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
     

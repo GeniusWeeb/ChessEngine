@@ -24,10 +24,7 @@ namespace ChessEngine
         }
 
         public int[] MapFen() => FenMapper.MapFen();
-
-
-      
-
+        
         public void Init()
         {
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
@@ -43,12 +40,12 @@ namespace ChessEngine
               //   Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
 
-
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
                // Console.WriteLine("Can make this move =>" + validationData);
 
-                SendDataToUI(finalData);
-                board.ProcessMovesUpdate();
+               SendDataToUI(finalData);
+               ScanBoardForMoves();
+                
             }
         }
 
@@ -99,8 +96,18 @@ namespace ChessEngine
         }
 
        public bool IsPawnDefIndex(int pawn)  =>board.CheckIfPawnDefaultIndex(pawn);
-      
-       
+
+
+       public void ScanBoardForMoves()
+       {
+           board.ProcessMovesUpdate();
+       }
+        
+       public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour)
+       {
+           board.ProcessMovesUpdate(testBoard , toMoveColour);
+       }
+
        public bool IsBlack(int colorCode)
        {
            return colorCode == Piece.Black;

@@ -100,10 +100,16 @@ namespace ChessEngine
      }
 
      public void ProcessMovesUpdate()
-     {
+     {  
          GameStateManager.Instance.ProcessMoves(chessBoard);
      }
-
+     
+     public void ProcessMovesUpdate(int[] customBoard , int turnToMove)
+     {  
+         GameStateManager.Instance.ProcessMoves(customBoard , turnToMove);
+     }
+     
+    
      private void CreateDefaultPawnIndex()
      {
          int boardLength = chessBoard.Length;
@@ -115,6 +121,8 @@ namespace ChessEngine
                  pawnDefaultIndex.Add(i);
          }
      }
+
+     public int[] GetCurrentBoard => chessBoard;
 
      public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
     
