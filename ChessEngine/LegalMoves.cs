@@ -2,8 +2,6 @@
 using Utility;
 
 namespace ChessEngine;
-
-
 // This is a set in stone , defined file . 
 
 sealed class LegalMoves
@@ -13,7 +11,6 @@ sealed class LegalMoves
     public void CheckForMoves(int[] board  , int colorToMove)
     {
         
-     
         for (int i = 0; i < board.Length; i++)
         {
             
@@ -95,16 +92,17 @@ sealed class LegalMoves
     private ChessPiece GenerateMovesForKnight(int ind, int thisColCode, int[] board)
     {
         int index = ind;
-        int mycolCode = thisColCode;
-        Knight knight = new Knight(mycolCode, index);
+        int myColCode = thisColCode;
+        Knight knight = new Knight(myColCode, index);
         int movesLength = knight.knightCanMoveTo.Length;
         for (int i = 0; i < movesLength; i++)
         {   
             if( knight.knightCanMoveTo[i] <= 0 || knight.knightCanMoveTo[i] > 63)
                 continue;
             
-            int otherColorCode = GetColorCode(knight.knightCanMoveTo[i]);
-            bool sameColor = isSameColorAsMe(mycolCode, otherColorCode);
+            int otherPColorCode = GetColorCode(board[knight.knightCanMoveTo[i]]);
+            bool isSameColor = IsSameColorAsMe(myColCode, otherPColorCode);
+               
     
             if (board[knight.knightCanMoveTo[i]] == Piece.Empty)
             {
@@ -118,13 +116,15 @@ sealed class LegalMoves
                 if((rowDiff ==2 && colDiff == 1) || (rowDiff==1 && colDiff==2))
                     knight.AddAllPossibleMoves(newPos);
             }
-            else if (!sameColor)
+            
+            if (!isSameColor)
             {
                 int newPos =knight.knightCanMoveTo[i];
                 //After having all moves  , we try to check for L move shape 
                 //INTERESTING LOGIC FOR THIS
                 int rowDiff = (int)MathF.Abs(newPos / 8 - ind / 8);
                 int colDiff = (int)MathF.Abs(newPos % 8 - ind % 8);
+                
                 
                 if((rowDiff ==2 && colDiff == 1) || (rowDiff==1 && colDiff==2))
                     knight.AddAllPossibleMoves(newPos);
@@ -146,7 +146,7 @@ sealed class LegalMoves
                 continue;
             
             int otherColorCode = GetColorCode(king.kingCanMoveTo[i]);
-            bool sameColor = isSameColorAsMe(mycolCode, otherColorCode);
+            bool sameColor = IsSameColorAsMe(mycolCode, otherColorCode);
     
             if (board[king.kingCanMoveTo[i]] == Piece.Empty)
             {
@@ -242,8 +242,6 @@ sealed class LegalMoves
                 switch (stepsDirAndMove)
                 {
                     case PieceMovementDirection.Up when (currentIndex / 8 == 7):
-                        Console.WriteLine("ok");
-                        return;
                     case PieceMovementDirection.Down when (currentIndex / 8 == 0):
                     case PieceMovementDirection.Left when (currentIndex % 8 == 0):
                     case PieceMovementDirection.Right when (currentIndex % 8 == 7):
@@ -254,7 +252,7 @@ sealed class LegalMoves
                         return;
                 }
                  int otherPColorCode = GetColorCode(board[myNewPosition]);
-                 if (isSameColorAsMe(myColorCode, otherPColorCode))
+                 if (IsSameColorAsMe(myColorCode, otherPColorCode))
                      break;
                  if (board[myNewPosition] == Piece.Empty)
                  { 
@@ -279,7 +277,7 @@ sealed class LegalMoves
 
     #endregion
     
-    private bool isSameColorAsMe(int myColorCode, int otherColorCode)
+    private bool IsSameColorAsMe(int myColorCode, int otherColorCode)
     {
         return myColorCode == otherColorCode;
     }
@@ -365,9 +363,6 @@ public class Queen : ChessPiece {
 
 public class Bishop : ChessPiece
 {
-   
-    
-    
     public Bishop(int colorCode, int index)
     {   
        
@@ -397,8 +392,6 @@ public class Rook : ChessPiece
 }
 
 
-
-
 public abstract class ChessPiece
 {   
     
@@ -406,7 +399,7 @@ public abstract class ChessPiece
     private HashSet<int> allPossibleMovesIndex = new HashSet<int>();
     protected int currentIndex { get; init; }
     
-    public List<PieceMovementDirection> possibleDirection;
+    protected List<PieceMovementDirection> possibleDirection;
     
     public int GetPieceCode => pieceCode;
     public int GetCurrentIndex => currentIndex;
@@ -426,8 +419,8 @@ public abstract class ChessPiece
      public int getAllPossibleMovesCount => allPossibleMovesIndex.Count;
 
 } 
-
 public enum PieceMovementDirection
 {
     Up  = 8,Down = -8  , Right =1  , Left = -1, RightDiag= 9 , LeftDiag = 7, RightBotDiag = -7 ,LeftBotDiag = -9
 }
+

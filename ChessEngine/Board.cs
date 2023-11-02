@@ -91,12 +91,7 @@ namespace ChessEngine
         }
     }
 
-
-    public void CheckForBonusBasedOnPieceCapture()
-    {
-        
-    }
-
+    
 
 
     private void ShowBoard()

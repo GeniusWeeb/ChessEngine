@@ -28,3 +28,4 @@ public static  class Piece
     public static int CPiece = 15;
 
 }
+
