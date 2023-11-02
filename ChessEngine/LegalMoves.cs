@@ -65,12 +65,20 @@ sealed class LegalMoves
         int index = ind;
         int thisColorCode = colCode;
         Pawn pawn = new Pawn(thisColorCode, ind);
+
+        int stepBasedOnColour = colCode == Piece.White ? pawn.pawnStep : -pawn.pawnStep;
+        var ApplyIndexBasedOnColor = colCode == Piece.White ? index + stepBasedOnColour : index +stepBasedOnColour;
         
-       
-        var ApplyIndexBasedOnColor = colCode == Piece.White ? index + pawn.pawnStep : index - (pawn.pawnStep);
         //front move -> normal move
-        if(board[ApplyIndexBasedOnColor] == Piece.Empty)
+        if (board[ApplyIndexBasedOnColor] == Piece.Empty)
+        {   
             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
+
+            if (ChessEngineSystem.Instance.IsPawnDefIndex(index) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
+                pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
+                
+            
+        }
 
         int targetRow = ( ApplyIndexBasedOnColor )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
         //RIGHT MOVE
@@ -137,23 +145,23 @@ sealed class LegalMoves
     private ChessPiece GenerateMovesForKing(int ind, int thisColCode, int[] board)
     {
         int index = ind;
-        int mycolCode = thisColCode;
-        King king = new King(mycolCode, index);
+        int myColCode = thisColCode;
+        King king = new King(myColCode, index);
         int movesLength = king.kingCanMoveTo.Length;
         for (int i = 0; i < movesLength; i++)
         {   
             if( king.kingCanMoveTo[i] <= 0 || king.kingCanMoveTo[i] > 63)
                 continue;
             
-            int otherColorCode = GetColorCode(king.kingCanMoveTo[i]);
-            bool sameColor = IsSameColorAsMe(mycolCode, otherColorCode);
+            int otherPColorCode = GetColorCode(board[king.kingCanMoveTo[i]]);
+            bool isSameColor = IsSameColorAsMe(myColCode, otherPColorCode);
     
             if (board[king.kingCanMoveTo[i]] == Piece.Empty)
             {
                 king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
                 
             }
-            else if (!sameColor)   king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
+            else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
             
         }
         return king.getAllPossibleMovesCount > 0 ? king : null;

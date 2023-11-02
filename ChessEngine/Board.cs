@@ -9,6 +9,7 @@ namespace ChessEngine
  public class Board : IDisposable
  {
      private  int[] chessBoard;
+     private List<int> pawnDefaultIndex = new List<int>();
      
      public Board()
      {
@@ -19,19 +20,13 @@ namespace ChessEngine
      }
     
      
-     
-    
     private void SetupDefaultBoard()
      {
-         chessBoard = ChessEngineSystem.Instance.MapFen();
+         chessBoard = ChessEngineSystem.Instance.MapFen();//Board is ready at this point -> parsed from fen
+         CreateDefaultPawnIndex();
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
-       //  Console.WriteLine(data);
          ChessEngineSystem.Instance.SendDataToUI(finalData);
-         
-         //after turn change TBH
-         
-       
          GameStateManager.Instance.ProcessMoves(chessBoard);
        
      }
@@ -92,8 +87,6 @@ namespace ChessEngine
     }
 
     
-
-
     private void ShowBoard()
      {
          Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
@@ -106,11 +99,26 @@ namespace ChessEngine
 
      }
 
-
      public void ProcessMovesUpdate()
      {
          GameStateManager.Instance.ProcessMoves(chessBoard);
      }
+
+     private void CreateDefaultPawnIndex()
+     {
+         int boardLength = chessBoard.Length;
+         for (int i = 0; i < boardLength; i++)
+         {  
+             //Storing the default pawn's index so we can perform the 2 square move
+             int pawnCode = chessBoard[i] & Piece.CPiece;
+             if(pawnCode == Piece.Pawn)
+                 pawnDefaultIndex.Add(i);
+         }
+     }
+
+     public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
+    
+
  }   
 
 

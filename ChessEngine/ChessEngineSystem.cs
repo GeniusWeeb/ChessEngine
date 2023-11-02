@@ -98,9 +98,14 @@ namespace ChessEngine
             Connection.Instance.Send(toSend);
         }
 
+       public bool IsPawnDefIndex(int pawn)  =>board.CheckIfPawnDefaultIndex(pawn);
       
-        
-        
+       
+       public bool IsBlack(int colorCode)
+       {
+           return colorCode == Piece.Black;
+       }
+
     }
 
 }
