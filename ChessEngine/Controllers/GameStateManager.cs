@@ -35,10 +35,10 @@ public class GameStateManager
         moves.CheckForMoves(board ,toMove);
         foreach (var piece in allPiecesThatCanMove)
         {   
-                Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
+              //  Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
             foreach (var pieceIndex in piece.GetAllMovesForThisPiece)
             {
-                Console.WriteLine("available move indexes are" + pieceIndex);
+           //     Console.WriteLine("available move indexes are" + pieceIndex);
                 
                 //TODO : ADD THE DATA SEND HERE MAYBE , MAYBE BETTER
                 //THE DATA CAN BE SENT FROM HERE TOO AND CACHE IN UI

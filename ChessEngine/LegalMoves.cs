@@ -1,4 +1,4 @@
-using System.Diagnostics;
+
 using Utility;
 
 namespace ChessEngine;
@@ -8,41 +8,38 @@ namespace ChessEngine;
 
 sealed class LegalMoves
 {
-    private Stopwatch watch = new Stopwatch();
     // need to run like a time check on how long this takes to run and-
     // further optimize it
     public void CheckForMoves(int[] board  , int colorToMove)
     {
         
-        watch.Start();
+     
         for (int i = 0; i < board.Length; i++)
         {
-            if(board[i] ==  Piece.Empty)
-             continue;
-
-           // Console.WriteLine("Current color code is " + colorToMove);
+            
+            if (board[i] == Piece.Empty)
+                continue;
+            
             int pieceCode = board[i] & Piece.CPiece;
             int colorCode = GetColorCode(board[i]);
             if (colorCode != colorToMove)
-               continue;
-
-            //TODO : CAN USE SWITCH CASE HERE
+                continue;
             
             if (pieceCode == Piece.Pawn)
             {
-                ChessPiece p =  GenerateMovesForPawn(i, colorCode,board);
-                if(p != null) GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                ChessPiece p = GenerateMovesForPawn(i, colorCode, board);
+                if (p != null) GameStateManager.Instance.allPiecesThatCanMove.Add(p);
             } 
             if (pieceCode == Piece.Knight)
             {
-              ChessPiece p = GenerateMovesForKnight(i , colorCode,board);
-              if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
-
-            }  if (pieceCode == Piece.Queen)
+               ChessPiece p = GenerateMovesForKnight(i , colorCode,board);
+               if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p); 
+            }
+            if (pieceCode == Piece.Queen)
             {
                 ChessPiece p = GenerateMovesForQueen(i , colorCode,board);
                 if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
-            }
+            } 
             if (pieceCode == Piece.Bishop)
             {
                 ChessPiece p = GenerateMovesForBishop(i , colorCode,board);
@@ -59,12 +56,8 @@ sealed class LegalMoves
                 if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
             
             }
-            
-
         }
-        watch.Stop();
-        //Console.WriteLine( $"Time it take to iterate thru the board{watch.Elapsed}");
-        watch.Reset();
+        
     }
 
     //going thru every  piece
@@ -112,7 +105,7 @@ sealed class LegalMoves
             
             int otherColorCode = GetColorCode(knight.knightCanMoveTo[i]);
             bool sameColor = isSameColorAsMe(mycolCode, otherColorCode);
-
+    
             if (board[knight.knightCanMoveTo[i]] == Piece.Empty)
             {
                 
@@ -127,7 +120,6 @@ sealed class LegalMoves
             }
             else if (!sameColor)
             {
-                Console.WriteLine("Found one with diff color and can use this");
                 int newPos =knight.knightCanMoveTo[i];
                 //After having all moves  , we try to check for L move shape 
                 //INTERESTING LOGIC FOR THIS
@@ -155,7 +147,7 @@ sealed class LegalMoves
             
             int otherColorCode = GetColorCode(king.kingCanMoveTo[i]);
             bool sameColor = isSameColorAsMe(mycolCode, otherColorCode);
-
+    
             if (board[king.kingCanMoveTo[i]] == Piece.Empty)
             {
                 king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
@@ -166,114 +158,143 @@ sealed class LegalMoves
         }
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
-
+    
     private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, int[] board)
     {
-        int index = ind;
+        int currentIndex = ind;
         int myColorCode = thisColCode;
         int[] chessBoard = board;
-        Queen queen = new Queen(myColorCode, index);
-
-        int up = index, down = index;
-        int rightDiagIndex = index, leftDiagIndex = index;
-        int botLeftD = index, botRightD = index;
-        int sideStepRight = index;
-        int sideStepLeft = index;
-        //UP
-        GenerateAllMoves(up , myColorCode ,queen,chessBoard , queen.queenStep);
-        //BOTTOM
-        GenerateAllMoves(down , myColorCode ,queen,chessBoard, -queen.queenStep);
-        GenerateAllMoves(rightDiagIndex , myColorCode ,queen,chessBoard, queen.queenRightDiag);
-        GenerateAllMoves(leftDiagIndex , myColorCode ,queen,chessBoard, queen.queenLeftDiag);
-        GenerateAllMoves(botLeftD , myColorCode ,queen,chessBoard, queen.queenBotRightDiag);
-        GenerateAllMoves(botRightD , myColorCode ,queen,chessBoard, queen.queenBotLeftDiag);
-        GenerateAllMoves(sideStepRight , myColorCode ,queen,chessBoard, queen.queenSideStep);
-        GenerateAllMoves(sideStepLeft , myColorCode ,queen,chessBoard, -queen.queenSideStep);
+        Queen queen = new Queen(myColorCode, currentIndex);
         
-        
+        GenerateAllMoves(currentIndex , myColorCode ,queen,chessBoard);
         return queen.getAllPossibleMovesCount > 0 ? queen : null;
     }
     
     private ChessPiece GenerateMovesForBishop(int ind, int thisColCode,int[] board)
-    {    int index = ind;
+    {    int currentIndex = ind;
         int myColorCode = thisColCode;
         int[] chessBoard = board;
-        Bishop bishop = new Bishop(myColorCode, index);
-
-
-        int LD = index , RD = index , leftBotDiag = index , rightBotDiag = index;
+        Bishop bishop = new Bishop(myColorCode, currentIndex);
         
-        GenerateAllMoves(LD , myColorCode , bishop, chessBoard , bishop.leftDiagonal);
-        GenerateAllMoves(RD , myColorCode , bishop, chessBoard , bishop.rightDiagonal);
-        GenerateAllMoves(leftBotDiag, myColorCode , bishop, chessBoard , bishop.bottomLeftDiagonal);
-        GenerateAllMoves(rightBotDiag, myColorCode , bishop, chessBoard , bishop.bottomRightDiagonal);
-
+        GenerateAllMoves(currentIndex, myColorCode, bishop, chessBoard);
         return bishop.getAllPossibleMovesCount>0? bishop: null;
     }
     
     private ChessPiece GenerateMovesForRook(int ind, int thisColCode,int[] board)
-    {    int index = ind;
+    {   
+        int currentIndex = ind;
         int myColorCode = thisColCode;
         int[] chessBoard = board;
-        Rook rook = new Rook(myColorCode, index);
-
-
-        int up = index , down = index , left = index , right = index;
+        Rook rook = new Rook(myColorCode, currentIndex);
         
-        GenerateAllMoves(up , myColorCode , rook, chessBoard , rook.up);
-        GenerateAllMoves(down , myColorCode , rook, chessBoard , rook.down);
-        GenerateAllMoves(left, myColorCode , rook, chessBoard , rook.left);
-        GenerateAllMoves(right, myColorCode , rook, chessBoard , rook.right);
-
+        GenerateAllMoves(currentIndex , myColorCode , rook, chessBoard);
         return rook.getAllPossibleMovesCount>0? rook: null;
     }
 
-    private void GenerateAllMoves(int moveDirection, int myColorCode , ChessPiece mainPiece, int[]board , int queenStep)
-    {    
-        int movePlace = moveDirection;
-        movePlace += queenStep;
+
+    #region MovementLogic For Queen , Rook , Bishop 
         
-        while (movePlace is >= 0 and  <64 )
+        private void GenerateAllMoves(int currentIndex, int myColorCode , ChessPiece thisPiece, int[]board )
         {
-            
-            int fileSide = movePlace % 8;
-            int rankUp = movePlace % 8;
-            int otherColorCode = GetColorCode(board[movePlace]);
-            if (board[movePlace] == Piece.Empty) {
-                
-                    mainPiece.AddAllPossibleMoves(movePlace);
-                    if ( movePlace>0 && fileSide == 7) break;
-                    if ( movePlace>0 && fileSide == 0) break;
-                    //next iteration
-                    movePlace += queenStep;
-            }
-            else if (!isSameColorAsMe(myColorCode, otherColorCode))
+            foreach (PieceMovementDirection direction in thisPiece.GetMovDirectionForThis)
             {
-               
-                mainPiece.AddAllPossibleMoves(movePlace);
-                break;
-                //next iteration
-
+                switch (direction)
+                {
+                    case PieceMovementDirection.Up:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.Up);
+                        break;
+                    case PieceMovementDirection.Down:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.Down);
+                        break;
+                    case PieceMovementDirection.Right:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.Right);
+                        break;
+                    case PieceMovementDirection.Left:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.Left);
+                        break;
+                    case PieceMovementDirection.RightDiag:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.RightDiag);
+                        break;
+                    case PieceMovementDirection.LeftDiag:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.LeftDiag);
+                        break;
+                    case PieceMovementDirection.RightBotDiag:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.RightBotDiag);
+                        break;
+                    case PieceMovementDirection.LeftBotDiag:
+                        DirectionMovement( currentIndex,  myColorCode , thisPiece, board , PieceMovementDirection.LeftBotDiag);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
-            else break;
+            
         }
-    }
-    
 
+        private void DirectionMovement(int currentIndex, int myColorCode , ChessPiece thisPiece, int[]board ,PieceMovementDirection stepsDirAndMove)
+        {
+            int stepsICanMove = (int)stepsDirAndMove;
+            int myNewPosition = currentIndex;
+            myNewPosition  = myNewPosition + stepsICanMove;
+            
+            while (myNewPosition > 0 && myNewPosition < 64)
+            {
+                switch (stepsDirAndMove)
+                {
+                    case PieceMovementDirection.Up when (currentIndex / 8 == 7):
+                        Console.WriteLine("ok");
+                        return;
+                    case PieceMovementDirection.Down when (currentIndex / 8 == 0):
+                    case PieceMovementDirection.Left when (currentIndex % 8 == 0):
+                    case PieceMovementDirection.Right when (currentIndex % 8 == 7):
+                    case PieceMovementDirection.RightDiag when (currentIndex % 8 == 7):
+                    case PieceMovementDirection.LeftDiag when (currentIndex % 8 == 0):
+                    case PieceMovementDirection.LeftBotDiag when (currentIndex % 8 == 0):
+                    case PieceMovementDirection.RightBotDiag when (currentIndex % 8 == 7):
+                        return;
+                }
+                 int otherPColorCode = GetColorCode(board[myNewPosition]);
+                 if (isSameColorAsMe(myColorCode, otherPColorCode))
+                     break;
+                 if (board[myNewPosition] == Piece.Empty)
+                 { 
+                      thisPiece.AddAllPossibleMoves(myNewPosition);
+                      if (stepsDirAndMove == PieceMovementDirection.Up && (myNewPosition / 8 == 7))    break;
+                      if (stepsDirAndMove == PieceMovementDirection.Down && (myNewPosition / 8 == 0))   break;
+                      if (stepsDirAndMove == PieceMovementDirection.Left && (myNewPosition % 8 == 0))   break;
+                      if (stepsDirAndMove == PieceMovementDirection.Right && (myNewPosition % 8 == 7))  break;
+                      if (stepsDirAndMove == PieceMovementDirection.RightDiag && (myNewPosition % 8 == 7)) break;
+                      if (stepsDirAndMove == PieceMovementDirection.LeftDiag && (myNewPosition % 8 == 0)) break;
+                      if (stepsDirAndMove == PieceMovementDirection.LeftBotDiag && (myNewPosition % 8 == 0)) break;
+                      if (stepsDirAndMove == PieceMovementDirection.RightBotDiag && (myNewPosition % 8 == 7) ) break;
+                      myNewPosition += stepsICanMove;
+                     continue;
+                 }
+                 
+                 //Encountered an Opponent piece
+                thisPiece.AddAllPossibleMoves(myNewPosition);
+                 break;
+            }
+        }
+
+    #endregion
+    
     private bool isSameColorAsMe(int myColorCode, int otherColorCode)
     {
         return myColorCode == otherColorCode;
     }
-
-
+    
     private bool isBlack(int pCode)
     {
         return (pCode & Piece.Black) == Piece.Black;
     }
 
-    public int GetColorCode(int code )
+    private int GetColorCode(int code )
     {
-       return isBlack(code) ? Piece.Black : Piece.White;
+        if (isBlack(code))
+            return Piece.Black;
+        
+        return (code & Piece.White) == Piece.White ? Piece.White : Piece.Empty;
     }
 
 }
@@ -282,7 +303,7 @@ public class Pawn : ChessPiece
 {   
     public  readonly int pawnStep = 8;
     public Pawn(int colorCode, int index)
-    {
+    {   
         this.pieceCode =  Piece.Pawn | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
     }
@@ -326,18 +347,17 @@ public class King : ChessPiece {
 
 public class Queen : ChessPiece {
     
-    public readonly int queenStep = 8 ;
-    public readonly int queenRightDiag = 9 ;
-    public readonly int queenBotRightDiag = -7 ;
-    public readonly int queenLeftDiag = 7 ;
-    public readonly int queenBotLeftDiag = -9 ;
-    public readonly int queenSideStep = 1 ;
-    
-    
     public Queen(int colorCode, int index)
     {
         this.pieceCode =  Piece.Queen | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
+        possibleDirection = new List<PieceMovementDirection>()
+            {
+                PieceMovementDirection.Up , PieceMovementDirection.Down ,
+                PieceMovementDirection.Left , PieceMovementDirection.Right ,
+                PieceMovementDirection.RightDiag , PieceMovementDirection.LeftDiag ,
+                PieceMovementDirection.RightBotDiag , PieceMovementDirection.LeftBotDiag
+            };
     }
     
 }
@@ -345,29 +365,34 @@ public class Queen : ChessPiece {
 
 public class Bishop : ChessPiece
 {
-    public readonly int rightDiagonal = 9;
-    public readonly int leftDiagonal =  7;
-    public readonly int bottomLeftDiagonal = -9;
-    public readonly int bottomRightDiagonal = -7;
+   
+    
     
     public Bishop(int colorCode, int index)
-    {
+    {   
+       
         this.pieceCode =  Piece.Bishop | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
+        possibleDirection = new List<PieceMovementDirection>()
+        {
+            PieceMovementDirection.RightDiag , PieceMovementDirection.LeftDiag ,
+            PieceMovementDirection.RightBotDiag , PieceMovementDirection.LeftBotDiag
+        };
     }
 }
 
 public class Rook : ChessPiece
 {
-    public readonly int up = +8;
-    public readonly int down =  -8;
-    public readonly int left = -1;
-    public readonly int right = +1;
     
     public Rook(int colorCode, int index)
     {
         this.pieceCode =  Piece.Rook | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
+        possibleDirection = new List<PieceMovementDirection>()
+        {
+            PieceMovementDirection.Up, PieceMovementDirection.Down,
+            PieceMovementDirection.Right, PieceMovementDirection.Left
+        };
     }
 }
 
@@ -381,6 +406,8 @@ public abstract class ChessPiece
     private HashSet<int> allPossibleMovesIndex = new HashSet<int>();
     protected int currentIndex { get; init; }
     
+    public List<PieceMovementDirection> possibleDirection;
+    
     public int GetPieceCode => pieceCode;
     public int GetCurrentIndex => currentIndex;
     public HashSet<int> GetAllMovesForThisPiece => allPossibleMovesIndex;
@@ -389,6 +416,8 @@ public abstract class ChessPiece
     {
         return colorCode == Piece.Black;
     }
+
+     public List<PieceMovementDirection> GetMovDirectionForThis => possibleDirection;
      
      public  virtual void AddAllPossibleMoves(int index)
      {       
@@ -396,9 +425,9 @@ public abstract class ChessPiece
      }
      public int getAllPossibleMovesCount => allPossibleMovesIndex.Count;
 
-}
+} 
 
 public enum PieceMovementDirection
 {
-    UP , RIGHT , DOWN , LEFT , RIGHTDIAG ,LEFTDIAG ,RIGHTBOTTOMDIAG,LEFTBOTTOMDIAG 
+    Up  = 8,Down = -8  , Right =1  , Left = -1, RightDiag= 9 , LeftDiag = 7, RightBotDiag = -7 ,LeftBotDiag = -9
 }
