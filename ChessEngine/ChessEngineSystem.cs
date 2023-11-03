@@ -8,7 +8,8 @@ using Utility;
 namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
-    {
+    {   
+        
         public static ChessEngineSystem Instance { get; private set; }
         private Board board = new Board();
         
@@ -24,10 +25,7 @@ namespace ChessEngine
         }
 
         public int[] MapFen() => FenMapper.MapFen();
-
-
-      
-
+        
         public void Init()
         {
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
@@ -43,12 +41,12 @@ namespace ChessEngine
               //   Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
 
-
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
                // Console.WriteLine("Can make this move =>" + validationData);
 
-                SendDataToUI(finalData);
-                board.ProcessMovesUpdate();
+               SendDataToUI(finalData);
+               ScanBoardForMoves();
+                
             }
         }
 
@@ -64,6 +62,23 @@ namespace ChessEngine
             //can the move be made 
             return board.MakeMove(piece ,oldIndex, newIndex );
         }
+        
+        
+        //CustomMoveInput
+        public bool ProcessMoveInEngine(string incomingDta)
+        {
+            // need some changes for capture
+            string square = incomingDta.Split("-")[1];
+            int pieceType = FenMapper.GetPieceCode((incomingDta.Split("-")[0]).Single());
+            int pieceColor = char.IsUpper((incomingDta.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
+
+            int piece = pieceType | pieceColor;
+            var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
+            
+            //can the move be made 
+            return board.MakeMove(piece ,oldIndex, newIndex );
+        }
+
         
         
         //RECIEVE
@@ -98,9 +113,37 @@ namespace ChessEngine
             Connection.Instance.Send(toSend);
         }
 
-      
+       public bool IsPawnDefIndex(int pawn)  =>board.CheckIfPawnDefaultIndex(pawn);
+
+
+       public void ScanBoardForMoves()
+       {
+           board.ProcessMovesUpdate();
+       }
         
-        
+       public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour)
+       {
+           board.ProcessMovesUpdate(testBoard , toMoveColour);
+       }
+
+       public bool IsBlack(int colorCode)
+       {
+           return (colorCode & Piece.Black) == Piece.Black;
+       }
+
+       public int GetPieceCode(int code)
+       {
+           return (code & Piece.CPiece);
+       }
+       
+       //USE THIS FOR ANY BOT UI UPDATE
+       public void UpdateUIWithNewIndex(int oldIndex , int newIndex)
+       {
+           List<int> update = new List<int>() { oldIndex, newIndex };
+           var data = JsonConvert.SerializeObject(update);
+           Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.GetTurnToMove.ToString());
+           SendDataToUI(finalData);
+       }
     }
 
 }

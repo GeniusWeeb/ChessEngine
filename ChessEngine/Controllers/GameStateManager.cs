@@ -7,13 +7,30 @@ public class GameStateManager
 {
 
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
-   
-    private bool whiteToMove = true;
     private LegalMoves moves = new LegalMoves();
-
     public List<ChessPiece> pieces = new List<ChessPiece>();
     public int toMove = Piece.White;
 
+    public List<ChessPiece> OppAllPiecesThatCanMove = new List<ChessPiece>();
+    
+    //public Dictionary<>
+    
+    
+    public bool whiteKingInCheck = false;
+    public bool blackKingInCheck = false;
+    
+    public bool isBlackCastlingAvailable = true;
+    public bool isWhiteCastlingAvailable = true;
+    
+   
+   
+    public bool blackKingSideRookMoved = false;
+    public bool blackQueenSideRookMoved = false;
+    public bool whiteKingSideRookMoved = false;
+    public bool whiteQueenSideRookMoved = false;
+    
+    
+    
     
     public static GameStateManager Instance { get; private set; }
     public int GetTurnToMove => toMove;
@@ -26,57 +43,45 @@ public class GameStateManager
         Instance = new GameStateManager();
     }
     
-
     
     //should be added in after turns are updated
     public void ProcessMoves(int[] board)
     {
-        //Test colour to move 
-        moves.CheckForMoves(board ,toMove);
-        foreach (var piece in allPiecesThatCanMove)
-        {   
-              //  Console.WriteLine($"piece code is {piece.GetPieceCode}- piece index is {piece.GetCurrentIndex}");
-            foreach (var pieceIndex in piece.GetAllMovesForThisPiece)
-            {
-           //     Console.WriteLine("available move indexes are" + pieceIndex);
-                
-                //TODO : ADD THE DATA SEND HERE MAYBE , MAYBE BETTER
-                //THE DATA CAN BE SENT FROM HERE TOO AND CACHE IN UI
-            }
-//   Console.WriteLine("-------------------------------------------------------------"); 
-        }
+        // Checking  based on colour
+        moves.CheckForMoves(board ,toMove , ref allPiecesThatCanMove);
+ 
     }
     
-  
+    
+    //Overloading so that , even the Ai can scan the board at any time
+    public void ProcessMoves(int[] board , int customToMove)
+    {   
+        //like passing a temporary  board state rather than  original and checking counter moves
+        moves.CheckForMoves(board ,customToMove, ref  OppAllPiecesThatCanMove);
+        
+    }
+    
 
     //Entry point // when this updates -> Process moves here
-  
-
-    //Entry point
     public void UpdateTurns(int move )
     {   
         ChangeTurns(move);
-
         //Update for later and send validation string for turn update alongside move validation
     }
 
     private void  ChangeTurns(int move)
-    {   
-        
-      //  Console.WriteLine("Changing turns");
+    {
         toMove = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.White;
-       // Console.WriteLine("New move colour is" + toMove);
     }
 
     
     public void ResetMoves()
     {
-        allPiecesThatCanMove.Clear();    
+        allPiecesThatCanMove.Clear();   
+        OppAllPiecesThatCanMove.Clear();
     }
 
-
-
-
+    
 
 }
 

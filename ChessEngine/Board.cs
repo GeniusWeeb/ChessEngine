@@ -9,6 +9,9 @@ namespace ChessEngine
  public class Board : IDisposable
  {
      private  int[] chessBoard;
+     private List<int> pawnDefaultIndex = new List<int>();
+     private List<int> RookDefaultIndex = new List<int>();
+     private List<int> KingDef = new List<int>();
      
      public Board()
      {
@@ -19,19 +22,13 @@ namespace ChessEngine
      }
     
      
-     
-    
     private void SetupDefaultBoard()
      {
-         chessBoard = ChessEngineSystem.Instance.MapFen();
+         chessBoard = ChessEngineSystem.Instance.MapFen();//Board is ready at this point -> parsed from fen
+         CreateDefaultPawnIndex();
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
-       //  Console.WriteLine(data);
          ChessEngineSystem.Instance.SendDataToUI(finalData);
-         
-         //after turn change TBH
-         
-       
          GameStateManager.Instance.ProcessMoves(chessBoard);
        
      }
@@ -45,10 +42,9 @@ namespace ChessEngine
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
-               // Console.WriteLine("Piece that moved" + piece + "with old index -> " + oldIndex + " and new index ->" +newIndex);
+               
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
-                chessBoard[oldIndex] = Piece.Empty;
-                chessBoard[newIndex] = piece;
+                PerformPostMoveCalculation(oldIndex , newIndex ,piece);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
                 GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.toMove);
@@ -92,8 +88,6 @@ namespace ChessEngine
     }
 
     
-
-
     private void ShowBoard()
      {
          Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
@@ -106,11 +100,127 @@ namespace ChessEngine
 
      }
 
-
      public void ProcessMovesUpdate()
-     {
+     {  
          GameStateManager.Instance.ProcessMoves(chessBoard);
      }
+     
+     public void ProcessMovesUpdate(int[] customBoard , int turnToMove)
+     {  
+         GameStateManager.Instance.ProcessMoves(customBoard , turnToMove);
+     }
+     
+    
+     private void CreateDefaultPawnIndex()
+     {
+         int boardLength = chessBoard.Length;
+         for (int i = 0; i < boardLength; i++)
+         {  
+             if(chessBoard[i] == Piece.Empty)
+                 continue;
+             //Storing the default pawn's index so we can perform the 2 square move
+             int pawnCode = chessBoard[i] & Piece.CPiece;
+             if(pawnCode == Piece.Pawn)
+                 pawnDefaultIndex.Add(i);
+         }
+     }
+
+     public int[] GetCurrentBoard => chessBoard;
+
+     public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
+
+
+     public void PerformPostMoveCalculation(int oldIndex,  int newIndex, int piece)
+     { 
+        
+         
+         int pCode = piece & Piece.CPiece;
+         int pColor = ChessEngineSystem.Instance.IsBlack(piece) ? Piece.Black : Piece.White;
+
+         switch (pColor)
+         {
+             case 32: //BLACK
+                 if (pCode == Piece.King)
+                 {
+                     if (MathF.Abs(newIndex - oldIndex) == 2)
+                     {
+                         int newRookIndex;
+                         int oldRookIndex;
+                         if (newIndex > oldIndex)
+                         {
+                             chessBoard[newIndex - 1] = chessBoard[63];
+                             chessBoard[63] = Piece.Empty;
+                             newRookIndex = newIndex-1;
+                             oldRookIndex = 63;
+                         }
+                         else
+                         {
+                             chessBoard[newIndex + 1] = chessBoard[56];
+                             chessBoard[56] = Piece.Empty;
+                             newRookIndex = newIndex+1;
+                             oldRookIndex = 56;
+                         }
+                         
+                         Console.WriteLine("Black Castling is confirmed");
+                         ChessEngineSystem.Instance.UpdateUIWithNewIndex(oldRookIndex, newRookIndex);
+                     } // Confirm castling
+                    
+                     GameStateManager.Instance.isBlackCastlingAvailable = false;
+                 }
+                 else if (pCode == Piece.Rook)
+                 {
+                     Console.WriteLine("Rook moved , castling cancelled");
+                     if (oldIndex % 8 == 7)
+                         GameStateManager.Instance.blackKingSideRookMoved = true;
+                     else
+                         GameStateManager.Instance.blackQueenSideRookMoved = true;
+                 }
+
+                 break;
+             case 16: //WHITE
+                 if (pCode == Piece.King)
+                 {  
+                     if ( MathF.Abs( newIndex - oldIndex) == 2)
+                     {
+                         int newRookIndex;
+                         int oldRookIndex;
+                         if (newIndex > oldIndex)
+                         {
+                             chessBoard[newIndex - 1] = chessBoard[7];
+                             chessBoard[7] = Piece.Empty;
+                             newRookIndex = newIndex-1;
+                             oldRookIndex = 7;
+                         }
+                         else
+                         {
+                             chessBoard[newIndex + 1] = chessBoard[0];
+                             chessBoard[0] = Piece.Empty;
+                             newRookIndex = newIndex + 1;
+                             oldRookIndex = 0;
+                         }
+                         ChessEngineSystem.Instance.UpdateUIWithNewIndex( oldRookIndex, newRookIndex);
+                         Console.WriteLine("White Castling is confirmed");
+                     } // Confirm castling
+                   
+                     GameStateManager.Instance.isWhiteCastlingAvailable = false;
+                 }
+
+                 else if (pCode == Piece.Rook) {   
+                     Console.WriteLine("Rook moved , castling cancelled");
+                     if (oldIndex % 8 == 7)
+                         GameStateManager.Instance.whiteKingSideRookMoved = true;
+                     else
+                         GameStateManager.Instance.whiteQueenSideRookMoved = true;
+                 }
+                 break;
+         }
+         
+         
+         chessBoard[oldIndex] = Piece.Empty;
+         chessBoard[newIndex] = piece;
+     }
+     
+     
  }   
 
 

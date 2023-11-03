@@ -13,7 +13,7 @@ public class Protocols  : IPCMessage
 
 public enum ProtocolTypes
 {
-    MOVE , GAMESTART , GAMEND , GAMESTATE , VALIDATE , INDICATE
+    MOVE , GAMESTART , GAMEND , GAMESTATE , VALIDATE , INDICATE , UPDATEUI
 }
 
 public abstract class IPCMessage
