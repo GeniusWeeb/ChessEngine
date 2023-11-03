@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ChessEngine.Bot;
 using Newtonsoft.Json;
 using Utility;
 
@@ -12,6 +13,7 @@ namespace ChessEngine
         
         public static ChessEngineSystem Instance { get; private set; }
         private Board board = new Board();
+        private BotBrain bot = new BotBrain();
         
         public ChessEngineSystem()
         {
@@ -25,36 +27,53 @@ namespace ChessEngine
         }
 
         public int[] MapFen() => FenMapper.MapFen();
+        public Board getBoard => board;
         
         public void Init()
         {
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
         }
         
+        
+        public void CheckForGameModeAndPerform()
+        {
+        
+            Console.WriteLine($"Game mode is {GameStateManager.Instance.GetCurrentGameMode}");
+            
+            switch (GameStateManager.Instance.GetCurrentGameMode)
+            {
+                case GameMode.PlayerVsBot :
+                    if ( GameStateManager.Instance.player1Move != GameStateManager.Instance.player2Col) // for the first turn
+                    {   
+                        Console.WriteLine("Bot is gonna make the move");
+                        bot.Think(ref GameStateManager.Instance.allPiecesThatCanMove);
+                    }
+                    break;
+                case GameMode.PlayerVsPlayer :
+                    break;
+            }
+        }
+        
+        
         //This will unwrap the data and send to the board 
         private void PassDataToBoard(string data)
         {   
-            Protocols incomingData = JsonConvert.DeserializeObject<Protocols>(data);
-          //  Console.WriteLine(incomingData.msgType);
-            if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
-            {   
               //   Console.WriteLine("Received move data");
-                string validationData = ProcessMoveInEngine(incomingData) ? "true" : "false";
-
+                string validationData = ProcessMoveInEngine(data) ? "true" : "false";
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
-               // Console.WriteLine("Can make this move =>" + validationData);
-
-               SendDataToUI(finalData);
-               ScanBoardForMoves();
+                SendDataToUI(finalData);
+                ScanBoardForMoves();
+                //After we performed moves -> we get if it is validated and the above things happen as usual 
                 
-            }
+               CheckForGameModeAndPerform();
+               
         }
 
-        private bool ProcessMoveInEngine(Protocols incomingDta)
+        private bool ProcessMoveInEngine(string incomingDta)
         {
-            string square = incomingDta.data.Split("-")[1];
-            int pieceType = FenMapper.GetPieceCode((incomingDta.data.Split("-")[0]).Single());
-            int pieceColor = char.IsUpper((incomingDta.data.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
+            string square = incomingDta.Split("-")[1];
+            int pieceType = FenMapper.GetPieceCode((incomingDta.Split("-")[0]).Single());
+            int pieceColor = char.IsUpper((incomingDta.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
 
             int piece = pieceType | pieceColor;
             var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
@@ -65,7 +84,7 @@ namespace ChessEngine
         
         
         //CustomMoveInput
-        public bool ProcessMoveInEngine(string incomingDta)
+        public bool ProcessMoveInEngine(string incomingDta , int a)
         {
             // need some changes for capture
             string square = incomingDta.Split("-")[1];
@@ -80,7 +99,7 @@ namespace ChessEngine
         }
 
         
-        
+        //BASICALLY , JUST DO POST FORMAT FOR MOVES CASTLING, PROMOTION ETC
         //RECIEVE
         private void SendUICellIndicatorData(int index)
         {
@@ -89,6 +108,7 @@ namespace ChessEngine
                 if (index == piece.GetCurrentIndex) {
                     foreach (var p in piece.GetAllMovesForThisPiece) {
                         cellsToSend.Add(p);
+                        
                     }
                     break; 
                 }

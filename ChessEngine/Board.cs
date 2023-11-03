@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+using ChessEngine.Bot;
 using Utility;
 using Newtonsoft.Json;
 
@@ -10,44 +12,49 @@ namespace ChessEngine
  {
      private  int[] chessBoard;
      private List<int> pawnDefaultIndex = new List<int>();
-     private List<int> RookDefaultIndex = new List<int>();
-     private List<int> KingDef = new List<int>();
-     
+     public BotBrain botBrain = new BotBrain();
+   
      public Board()
      {
          chessBoard = new int[64];
          Console.WriteLine("Board is ready!");
+         
+         //Entry point , get the game mode and set it too .
          Event.ClientConncted += SetupDefaultBoard;
          
      }
-    
-     
-    private void SetupDefaultBoard()
+        
+    //HAPPENS AT THE TIME OF NEW BOARD -> COULD BE USED FOR A FORCE RESET 
+    private void SetupDefaultBoard(string gameMode)
      {
          chessBoard = ChessEngineSystem.Instance.MapFen();//Board is ready at this point -> parsed from fen
          CreateDefaultPawnIndex();
+         GameStateManager.Instance.SetCurrentGameModeAndTurn(gameMode);
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          ChessEngineSystem.Instance.SendDataToUI(finalData);
          GameStateManager.Instance.ProcessMoves(chessBoard);
-       
+         ChessEngineSystem.Instance.CheckForGameModeAndPerform();
+
      }
     
     public bool MakeMove(int piece, int oldIndex, int newIndex)
     {   
-        //Console.WriteLine($"piece {piece} and old index {oldIndex} and new index {newIndex}");
+        
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
         {
             
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
-               
+               Console.WriteLine($"move made{piece} from {oldIndex} to {newIndex} ");
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
                 PerformPostMoveCalculation(oldIndex , newIndex ,piece);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
-                GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.toMove);
+                GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.player1Move);
+                Console.WriteLine("now resetting moves");
+                Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
                 return true;
                 ; }
         }
@@ -55,6 +62,7 @@ namespace ChessEngine
         Console.WriteLine("Invalid Move");
             return false;
      }
+    
 
     private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     
@@ -219,8 +227,10 @@ namespace ChessEngine
          chessBoard[oldIndex] = Piece.Empty;
          chessBoard[newIndex] = piece;
      }
-     
-     
+
+
+   
+
  }   
 
 

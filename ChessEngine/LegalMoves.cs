@@ -12,7 +12,6 @@ sealed class LegalMoves
     {
         
         if(myTurnList.Count != 0) return; // it has already been worked on
-        Console.WriteLine("Entered Move gen area");
         for (int i = 0; i < board.Length; i++)
         {
             
@@ -208,7 +207,7 @@ sealed class LegalMoves
         for (int i =index +minStep; i <=  index + maxStep; i++)
         {
             if (board[i] != Piece.Empty) break;
-            //Scan for opponent moves
+            //Scan for opponent moves - in Advance
             ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
