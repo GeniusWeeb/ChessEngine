@@ -173,7 +173,7 @@ sealed class LegalMoves
         
         if (thisColCode == Piece.Black && GameStateManager.Instance.isBlackCastlingAvailable &&
             !GameStateManager.Instance.blackKingInCheck
-            && GameStateManager.Instance.isBlackCastlingAvailable)
+          )
         {
             if (!GameStateManager.Instance.blackKingSideRookMoved)
             {
@@ -187,8 +187,7 @@ sealed class LegalMoves
 
         }
         else if (thisColCode == Piece.White && GameStateManager.Instance.isWhiteCastlingAvailable &&
-                 !GameStateManager.Instance.whiteKingInCheck &&
-                 GameStateManager.Instance.isWhiteCastlingAvailable)
+                 !GameStateManager.Instance.whiteKingInCheck)
         {
             if (!GameStateManager.Instance.whiteKingSideRookMoved)
             {
