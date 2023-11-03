@@ -11,11 +11,24 @@ public class GameStateManager
     public List<ChessPiece> pieces = new List<ChessPiece>();
     public int toMove = Piece.White;
 
-
-    public bool WhiteKingHasBeenChecked = false;
-    public bool BlackKingHasBeenChecked = false;
-    public bool WhiteKingInCheck = false;
-    public bool BlackKingInCheck = false;
+    public List<ChessPiece> OppAllPiecesThatCanMove = new List<ChessPiece>();
+    
+    //public Dictionary<>
+    
+    
+    public bool whiteKingInCheck = false;
+    public bool blackKingInCheck = false;
+    
+    public bool isBlackCastlingAvailable = true;
+    public bool isWhiteCastlingAvailable = true;
+    
+   
+   
+    public bool blackKingSideRookMoved = false;
+    public bool blackQueenSideRookMoved = false;
+    public bool whiteKingSideRookMoved = false;
+    public bool whiteQueenSideRookMoved = false;
+    
     
     
     
@@ -35,7 +48,7 @@ public class GameStateManager
     public void ProcessMoves(int[] board)
     {
         // Checking  based on colour
-        moves.CheckForMoves(board ,toMove);
+        moves.CheckForMoves(board ,toMove , ref allPiecesThatCanMove);
  
     }
     
@@ -44,7 +57,8 @@ public class GameStateManager
     public void ProcessMoves(int[] board , int customToMove)
     {   
         //like passing a temporary  board state rather than  original and checking counter moves
-        moves.CheckForMoves(board ,customToMove);
+        moves.CheckForMoves(board ,customToMove, ref  OppAllPiecesThatCanMove);
+        
     }
     
 
@@ -63,12 +77,11 @@ public class GameStateManager
     
     public void ResetMoves()
     {
-        allPiecesThatCanMove.Clear();    
+        allPiecesThatCanMove.Clear();   
+        OppAllPiecesThatCanMove.Clear();
     }
 
-
-
-
+    
 
 }
 

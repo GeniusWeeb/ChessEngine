@@ -8,9 +8,11 @@ sealed class LegalMoves
 {
     // need to run like a time check on how long this takes to run and-
     // further optimize it
-    public void CheckForMoves(int[] board  , int colorToMove)
+    public void CheckForMoves(int[] board  , int colorToMove ,ref List<ChessPiece> myTurnList)
     {
         
+        if(myTurnList.Count != 0) return; // it has already been worked on
+        Console.WriteLine("Entered Move gen area");
         for (int i = 0; i < board.Length; i++)
         {
             
@@ -25,32 +27,32 @@ sealed class LegalMoves
             if (pieceCode == Piece.Pawn)
             {
                 ChessPiece p = GenerateMovesForPawn(i, colorCode, board);
-                if (p != null) GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                if (p != null) myTurnList.Add(p);
             } 
             if (pieceCode == Piece.Knight)
             {
                ChessPiece p = GenerateMovesForKnight(i , colorCode,board);
-               if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p); 
+               if(p!=null)  myTurnList.Add(p); 
             }
             if (pieceCode == Piece.Queen)
             {
                 ChessPiece p = GenerateMovesForQueen(i , colorCode,board);
-                if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                if(p!=null)  myTurnList.Add(p);
             } 
             if (pieceCode == Piece.Bishop)
             {
                 ChessPiece p = GenerateMovesForBishop(i , colorCode,board);
-                if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                if(p!=null) myTurnList.Add(p);
             } 
             if (pieceCode == Piece.Rook)
             {
                 ChessPiece p = GenerateMovesForRook(i , colorCode,board);
-                if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                if(p!=null) myTurnList.Add(p);
             }
             if (pieceCode == Piece.King)
             {
                 ChessPiece p = GenerateMovesForKing(i , colorCode,board);
-                if(p!=null)  GameStateManager.Instance.allPiecesThatCanMove.Add(p);
+                if(p!=null) myTurnList.Add(p);
             
             }
         }
@@ -74,7 +76,7 @@ sealed class LegalMoves
         {   
             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
-            if (ChessEngineSystem.Instance.IsPawnDefIndex(index) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
+            if (ChessEngineSystem.Instance.IsPawnDefIndex(index) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty && ( ApplyIndexBasedOnColor + stepBasedOnColour is  > 0 and  < 64 ))
                 pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
                 
             
@@ -162,15 +164,81 @@ sealed class LegalMoves
                 
             }
             else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
-            
         }
-        
         // here we can generate castling content
+        //
+
+        if (index is < 0 or >= 64) return king.getAllPossibleMovesCount > 0 ? king : null;
         
         
+        if (thisColCode == Piece.Black && GameStateManager.Instance.isBlackCastlingAvailable &&
+            !GameStateManager.Instance.blackKingInCheck
+            && GameStateManager.Instance.isBlackCastlingAvailable)
+        {
+            if (!GameStateManager.Instance.blackKingSideRookMoved)
+            {
+                CastlingKingSideCompute(index, board, king, +2, +1, Piece.White);
+            }
+
+            if (!GameStateManager.Instance.blackQueenSideRookMoved)
+            {
+                CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.White);
+            }
+
+        }
+        else if (thisColCode == Piece.White && GameStateManager.Instance.isWhiteCastlingAvailable &&
+                 !GameStateManager.Instance.whiteKingInCheck &&
+                 GameStateManager.Instance.isWhiteCastlingAvailable)
+        {
+            if (!GameStateManager.Instance.whiteKingSideRookMoved)
+            {
+                CastlingKingSideCompute(index, board, king, +2, +1, Piece.Black);
+            }
+
+            if (!GameStateManager.Instance.whiteQueenSideRookMoved)
+            {
+                CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.Black);
+            }
+        }
+
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
-    
+
+    private void  CastlingKingSideCompute(int index,int[] board , ChessPiece king , int maxStep ,int minStep, int turnToCheck )
+    {
+        for (int i =index +minStep; i <=  index + maxStep; i++)
+        {
+            if (board[i] != Piece.Empty) break;
+            //Scan for opponent moves
+            ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
+            foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
+            {
+                if (piece.GetAllMovesForThisPiece.Contains(i)) break;
+                if (i == index + maxStep)
+                {
+                    king.AddAllPossibleMoves(i);
+                }
+            }
+        }
+    }
+    private void  CastlingKingQueenSideCompute(int index,int[] board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
+    {
+        for (int i =index +minStep; i >=  index + maxStep; i--)
+        {
+            if (board[i] != Piece.Empty) break;
+            //Scan for opponent moves
+            ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
+            foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
+            {
+                if (piece.GetAllMovesForThisPiece.Contains(i)) break;
+                if (i == index + maxStep)
+                {
+                    king.AddAllPossibleMoves(i);
+                }
+            }
+        }
+    }
+
     private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, int[] board)
     {
         int currentIndex = ind;
@@ -307,6 +375,9 @@ sealed class LegalMoves
         return (code & Piece.White) == Piece.White ? Piece.White : Piece.Empty;
     }
 
+
+ 
+
 }
 
 public class Pawn : ChessPiece
@@ -321,6 +392,7 @@ public class Pawn : ChessPiece
 }
 
 public class Knight : ChessPiece {
+    
     public int[] knightCanMoveTo = new int[8]
     {
         15,17,10,6,-15,-17,-10,-6
@@ -338,7 +410,9 @@ public class Knight : ChessPiece {
 }
 
 
-public class King : ChessPiece { 
+public class King : ChessPiece
+{
+    public int KingCastlingUnits = 2;
     public int[] kingCanMoveTo = new int[8]
     {
        7 ,8,9 ,-1,+1 ,-9,-8,-7
