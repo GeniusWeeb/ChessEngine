@@ -38,7 +38,6 @@ namespace ChessEngine
         public void CheckForGameModeAndPerform()
         {
         
-            Console.WriteLine($"Game mode is {GameStateManager.Instance.GetCurrentGameMode}");
             
             switch (GameStateManager.Instance.GetCurrentGameMode)
             {
@@ -60,12 +59,11 @@ namespace ChessEngine
         {   
               //   Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(data) ? "true" : "false";
-                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,validationData , GameStateManager.Instance.GetTurnToMove.ToString());
+                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, GameStateManager.Instance.GetTurnToMove.ToString());
                 SendDataToUI(finalData);
                 ScanBoardForMoves();
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
-                
-               CheckForGameModeAndPerform();
+                CheckForGameModeAndPerform();
                
         }
 

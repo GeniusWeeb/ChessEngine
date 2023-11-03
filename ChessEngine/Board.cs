@@ -47,14 +47,19 @@ namespace ChessEngine
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
-               Console.WriteLine($"move made{piece} from {oldIndex} to {newIndex} ");
+               
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
                 PerformPostMoveCalculation(oldIndex , newIndex ,piece);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
                 GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.player1Move);
-                Console.WriteLine("now resetting moves");
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{p.GetPieceCode} moved from {oldIndex} to {newIndex}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
+                
+                
+                Console.ResetColor();
                 return true;
                 ; }
         }

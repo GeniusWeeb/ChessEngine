@@ -24,9 +24,9 @@ public class BotBrain
         //------------------------------------------------------------
         if (ChessEngineSystem.Instance.getBoard.MakeMove(piece.GetPieceCode, oldIndex, newIndex))
         {
-            Console.WriteLine("Move made");
-            Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,"true" , GameStateManager.Instance.GetTurnToMove.ToString());
-            ChessEngineSystem.Instance. SendDataToUI(finalData);
+            
+          //  Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,"true" , GameStateManager.Instance.GetTurnToMove.ToString());
+            //ChessEngineSystem.Instance. SendDataToUI(finalData);
             ChessEngineSystem.Instance. UpdateUIWithNewIndex(oldIndex, newIndex);
             ChessEngineSystem.Instance. ScanBoardForMoves();
         }

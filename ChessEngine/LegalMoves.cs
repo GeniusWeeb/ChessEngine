@@ -75,10 +75,12 @@ sealed class LegalMoves
         {   
             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
-            if (ChessEngineSystem.Instance.IsPawnDefIndex(index) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty && ( ApplyIndexBasedOnColor + stepBasedOnColour is  > 0 and  < 64 ))
-                pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
-                
-            
+            if (ChessEngineSystem.Instance.IsPawnDefIndex(index))
+            {
+                if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty && (ApplyIndexBasedOnColor + stepBasedOnColour is > 0 and < 64))
+                    pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
+
+            }
         }
 
         int targetRow = ( ApplyIndexBasedOnColor )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
