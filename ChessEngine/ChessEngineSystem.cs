@@ -67,6 +67,8 @@ namespace ChessEngine
                
         }
 
+        
+        //convert notations to the board index
         private bool ProcessMoveInEngine(string incomingDta)
         {
             string square = incomingDta.Split("-")[1];
@@ -76,29 +78,26 @@ namespace ChessEngine
             int piece = pieceType | pieceColor;
             var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
             
-            //can the move be made 
-            return board.MakeMove(piece ,oldIndex, newIndex );
-        }
-        
-        
-        //CustomMoveInput
-        public bool ProcessMoveInEngine(string incomingDta , int a)
-        {
-            // need some changes for capture
-            string square = incomingDta.Split("-")[1];
-            int pieceType = FenMapper.GetPieceCode((incomingDta.Split("-")[0]).Single());
-            int pieceColor = char.IsUpper((incomingDta.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
-
-            int piece = pieceType | pieceColor;
-            var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
             
-            //can the move be made 
-            return board.MakeMove(piece ,oldIndex, newIndex );
+            //TODO : AT THE END , ITS JUST INDEX THATS GIVEN
+            return board.MakeMove(oldIndex, newIndex );
         }
-
+        
+            
+        
+        //SENDS THE UI UPDATE FOR POST PERFORM -> CASTLING , EN PASSANT,  PROMOTION
+        //USED BY BOTS
+        public void UpdateUIWithNewIndex(int oldIndex , int newIndex)
+        {
+            List<int> update = new List<int>() { oldIndex, newIndex };
+            var data = JsonConvert.SerializeObject(update);
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.GetTurnToMove.ToString());
+            SendDataToUI(finalData);
+        }
+        
         
         //BASICALLY , JUST DO POST FORMAT FOR MOVES CASTLING, PROMOTION ETC
-        //RECIEVE
+        //RECEIVE
         private void SendUICellIndicatorData(int index)
         {
             HashSet<int> cellsToSend = new HashSet<int>();
@@ -155,13 +154,7 @@ namespace ChessEngine
        }
        
        //USE THIS FOR ANY BOT UI UPDATE
-       public void UpdateUIWithNewIndex(int oldIndex , int newIndex)
-       {
-           List<int> update = new List<int>() { oldIndex, newIndex };
-           var data = JsonConvert.SerializeObject(update);
-           Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.GetTurnToMove.ToString());
-           SendDataToUI(finalData);
-       }
+      
     }
 
 }

@@ -22,11 +22,9 @@ public class BotBrain
         int  newIndex = tempList[newRandomIndex];
         
         //------------------------------------------------------------
-        if (ChessEngineSystem.Instance.getBoard.MakeMove(piece.GetPieceCode, oldIndex, newIndex))
+        if (ChessEngineSystem.Instance.getBoard.MakeMove( oldIndex, newIndex))
         {
-            
-          //  Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString() ,"true" , GameStateManager.Instance.GetTurnToMove.ToString());
-            //ChessEngineSystem.Instance. SendDataToUI(finalData);
+            //board doesnt need to send validate to the ui  , since it is authoritative
             ChessEngineSystem.Instance. UpdateUIWithNewIndex(oldIndex, newIndex);
             ChessEngineSystem.Instance. ScanBoardForMoves();
         }

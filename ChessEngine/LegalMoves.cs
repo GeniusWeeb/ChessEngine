@@ -62,7 +62,6 @@ sealed class LegalMoves
     private ChessPiece GenerateMovesForPawn(int ind,int colCode, int[] board)
     {
         
-        //TODO : PREDEFINE MOVEMENT STEPS IN CONSTRUCTOR BASED ON BLACK AND WHITE
         int index = ind;
         int thisColorCode = colCode;
         Pawn pawn = new Pawn(thisColorCode, ind);
@@ -76,7 +75,8 @@ sealed class LegalMoves
             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
             if (ChessEngineSystem.Instance.IsPawnDefIndex(index))
-            {
+            {   
+                //TODO : THIS SEEMS TO BE COUNTING AS DEFAULT INDEX, THAT IS WHITE PAWN AT BLACK PAWNS POSITION
                 if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty && (ApplyIndexBasedOnColor + stepBasedOnColour is > 0 and < 64))
                     pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
 

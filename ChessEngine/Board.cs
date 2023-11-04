@@ -38,8 +38,11 @@ namespace ChessEngine
 
      }
     
-    public bool MakeMove(int piece, int oldIndex, int newIndex)
-    {   
+    public bool MakeMove( int oldIndex, int newIndex)
+    {
+
+
+        var piece = chessBoard[oldIndex];
         
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
         {
@@ -57,7 +60,6 @@ namespace ChessEngine
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{p.GetPieceCode} moved from {oldIndex} to {newIndex}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
-                
                 
                 Console.ResetColor();
                 return true;

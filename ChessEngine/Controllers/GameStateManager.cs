@@ -21,7 +21,6 @@ public class GameStateManager
     
     public bool whiteKingInCheck = false;
     public bool blackKingInCheck = false;
-    
     public bool isBlackCastlingAvailable = true;
     public bool isWhiteCastlingAvailable = true;
     
@@ -30,7 +29,6 @@ public class GameStateManager
     public bool blackQueenSideRookMoved = false;
     public bool whiteKingSideRookMoved = false;
     public bool whiteQueenSideRookMoved = false;
-
     
     
     
@@ -100,8 +98,8 @@ public class GameStateManager
     }
 
     
-
 }
+
 
 
 
