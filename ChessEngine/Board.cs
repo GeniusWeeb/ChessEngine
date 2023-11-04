@@ -17,8 +17,9 @@ namespace ChessEngine
      public Board()
      {
          chessBoard = new int[64];
+         Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine("Board is ready!");
-         
+         Console.ResetColor();
          //Entry point , get the game mode and set it too .
          Event.ClientConncted += SetupDefaultBoard;
          

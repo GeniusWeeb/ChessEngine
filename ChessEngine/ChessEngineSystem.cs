@@ -31,7 +31,10 @@ namespace ChessEngine
         
         public void Init()
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
+            Connection.Instance.Init(); 
+            Console.ResetColor();
         }
         
         
@@ -81,7 +84,6 @@ namespace ChessEngine
             return board.MakeMove(currentSquare, targetSquare );
         }
         
-            
         
         //SENDS THE UI UPDATE FOR POST PERFORM -> CASTLING , EN PASSANT,  PROMOTION
         //USED BY BOTS

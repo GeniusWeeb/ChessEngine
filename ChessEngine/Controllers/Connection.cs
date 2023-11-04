@@ -5,6 +5,7 @@ using System.Diagnostics;
 using ChessEngine;
 using Newtonsoft.Json;
 
+
 namespace Utility{
     // Note : We are using Fleck package for bidirectional comms
     // It is a websocket
@@ -14,6 +15,7 @@ namespace Utility{
     {
         private static List<IWebSocketConnection> connectedClient = new List<IWebSocketConnection>();
         private IWebSocketConnection mainSocket;
+        private WebSocketServer server;
 
         
         public static Connection Instance { get; private set; }
@@ -24,7 +26,7 @@ namespace Utility{
 
         private Connection()
         {
-            var server = new WebSocketServer("ws://127.0.0.1:8281");
+            server = new WebSocketServer("ws://127.0.0.1:8281");
             server.Start(
     
                 socket =>
@@ -53,6 +55,7 @@ namespace Utility{
 
         void ClientConnected(IWebSocketConnection socket)
         {
+            
             connectedClient.Add(socket);
             mainSocket = socket;
             //Move this to wait till a game mode has been passed.
@@ -62,7 +65,9 @@ namespace Utility{
         {
            // Console.Write("Client has disconnected => " + socket.ConnectionInfo.Id);
            
+            socket.Close();
             connectedClient.Remove(socket);
+           
         }
 
           public void Send(string data)
@@ -95,10 +100,15 @@ namespace Utility{
                   Event.inComingData.Invoke(incomingData.data);
                   return;
 
+                  
               }
 
           }
 
+          private void Dispose()
+          {
+              server.Dispose();
+          }
 
           #endregion
     }
