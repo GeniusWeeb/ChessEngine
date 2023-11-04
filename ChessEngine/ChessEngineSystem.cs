@@ -71,16 +71,14 @@ namespace ChessEngine
         //convert notations to the board index
         private bool ProcessMoveInEngine(string incomingDta)
         {
-            string square = incomingDta.Split("-")[1];
-            int pieceType = FenMapper.GetPieceCode((incomingDta.Split("-")[0]).Single());
-            int pieceColor = char.IsUpper((incomingDta.Split("-")[0]).Single()) ? Piece.White : Piece.Black;
+            
+          //  var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square); -> h2h3
 
-            int piece = pieceType | pieceColor;
-            var (oldIndex, newIndex) = FenMapper.AlgebricToBoard(square);
-            
-            
+          int currentSquare = int.Parse( incomingDta.Split("-")[0]);
+          int targetSquare = int.Parse( incomingDta.Split("-")[1]);
+          
             //TODO : AT THE END , ITS JUST INDEX THATS GIVEN
-            return board.MakeMove(oldIndex, newIndex );
+            return board.MakeMove(currentSquare, targetSquare );
         }
         
             
