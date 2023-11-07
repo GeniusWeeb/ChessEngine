@@ -9,23 +9,23 @@ public static  class Piece
     
     // 32 16  - 8 4 2 0
     // color    pieces                
-    public static  int Empty = 0;
-    public static int Pawn= 1; // 0001
-    public static int Rook= 2; // 0010 
-    public static int Knight= 3; // 0011
-    public static int Bishop= 4; // 0100
+    public const  int Empty = 0;
+    public const int Pawn= 1; // 0001
+    public const int Rook= 2; // 0010 
+    public const int Knight= 3; // 0011
+    public const int Bishop= 4; // 0100
     
-    public static int King = 8; //1000K
-    public static int Queen = 6; // 0110
+    public const int King = 8; //1000K
+    public const int Queen = 6; // 0110
 
 
-    public static int Black = 32; // 10 -0000
-    public static int White = 16; // 01 -0000
+    public const int Black = 32; // 10 -0000
+    public const int White = 16; // 01 -0000
     
     
     //Mask for PIECES
 
-    public static int CPiece = 15;
+    public const int CPiece = 15;
 
 }
 

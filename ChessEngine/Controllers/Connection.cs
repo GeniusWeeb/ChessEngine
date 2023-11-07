@@ -79,28 +79,30 @@ namespace Utility{
 
           private  void EvaluateIncomingData(Protocols incomingData)
           {
-              
-              if (incomingData.msgType == ProtocolTypes.INDICATE.ToString())
-              {
-                  Event.GetCellsForThisIndex.Invoke(Int32.Parse( incomingData.data));
+
+              if (incomingData.msgType.Equals(ProtocolTypes.INDICATE.ToString()) )
+              { 
+                  Console.WriteLine("UI requesting data");
+                  Event.GetCellsForThisIndex?.Invoke(Int32.Parse( incomingData.data));
                   return;
               }
-              
-              if (incomingData.msgType == ProtocolTypes.GAMEMODE.ToString())
+              else  if (incomingData.msgType.Equals(ProtocolTypes.GAMEMODE.ToString()))
               { 
                  
-                  Event.ClientConncted.Invoke(incomingData.data);
+                  Event.ClientConncted?.Invoke(incomingData.data);
                   return;
 
               }
-          
-              if (incomingData.msgType == ProtocolTypes.MOVE.ToString())
+              else  if (incomingData.msgType.Equals(ProtocolTypes.MOVE.ToString()))
               {   
                  
-                  Event.inComingData.Invoke(incomingData.data);
+                  Event.inComingData?.Invoke(incomingData.data);
                   return;
-
-                  
+              }
+              else if (incomingData.msgType.Equals(ProtocolTypes.UNDO.ToString()))
+              {     
+                    Event.undoMove?.Invoke(incomingData.data);
+                    return;
               }
 
           }

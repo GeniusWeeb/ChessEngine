@@ -14,8 +14,9 @@ public class GameStateManager
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
     public List<ChessPiece> pieces = new List<ChessPiece>();
-    public int player1Move = Piece.White;
-    public int player2Col; // 
+    public int player1MoveCol;
+    public int player2MoveCol; // 
+    public int playerToMove =  Piece.White;
 
     public List<ChessPiece> OppAllPiecesThatCanMove = new List<ChessPiece>();
     
@@ -29,11 +30,14 @@ public class GameStateManager
     public bool blackQueenSideRookMoved = false;
     public bool whiteKingSideRookMoved = false;
     public bool whiteQueenSideRookMoved = false;
+
+
+
     
     
     
     public static GameStateManager Instance { get; private set; }
-    public int GetTurnToMove =>player1Move;
+    public int GetTurnToMove =>playerToMove;
    
     static  GameStateManager()
     {
@@ -52,9 +56,16 @@ public class GameStateManager
             this.currentGameMode = GameMode.PlayerVsPlayer;
         else if (gMode.Equals(GameMode.PlayerVsBot.ToString()))
             this.currentGameMode = GameMode.PlayerVsBot;
+        else if (gMode.Equals(GameMode.BotVsBot.ToString()))
+            this.currentGameMode = GameMode.BotVsBot;
        
         
-        player2Col = int.Parse(pColChoice);
+        //ui side player
+        player2MoveCol = int.Parse(pColChoice);
+
+        player1MoveCol = player2MoveCol == playerToMove ? Piece.Black : Piece.White;
+
+
 
     }
     
@@ -64,7 +75,7 @@ public class GameStateManager
     public void ProcessMoves(int[] board)
     {
         // Checking  based on colour
-        moves.CheckForMoves(board , player1Move , ref allPiecesThatCanMove);
+        moves.CheckForMoves(board , playerToMove , ref allPiecesThatCanMove);
  
     }
     
@@ -79,18 +90,15 @@ public class GameStateManager
     
 
     //Entry point // when this updates -> Process moves here
-    public void UpdateTurns(int move )
+    public void UpdateTurns( )
     {   
-        ChangeTurns(move);
+       
         //Update for later and send validation string for turn update alongside move validation
+        playerToMove = playerToMove == (int)Piece.White ?(int) Piece.Black :(int) Piece.White;
     }
 
-    private void  ChangeTurns(int move)
-    {
-       player1Move = move == (int)Piece.White ?(int) Piece.Black :(int) Piece.White;
-    }
+   
 
-    
     public void ResetMoves()
     {
         allPiecesThatCanMove.Clear();   

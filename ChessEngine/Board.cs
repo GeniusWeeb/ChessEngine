@@ -42,7 +42,7 @@ namespace ChessEngine
     public bool MakeMove( int oldIndex, int newIndex)
     {
 
-
+    
         var piece = chessBoard[oldIndex];
         
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
@@ -53,14 +53,16 @@ namespace ChessEngine
             {
                
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
-                PerformPostMoveCalculation(oldIndex , newIndex ,piece);
+                PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
-                GameStateManager.Instance.UpdateTurns(GameStateManager.Instance.player1Move);
-
+                GameStateManager.Instance.UpdateTurns();
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{p.GetPieceCode} moved from {oldIndex} to {newIndex}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
+                
+            
+                //Wrap the move in a command
                 
                 Console.ResetColor();
                 return true;
@@ -104,7 +106,7 @@ namespace ChessEngine
     }
 
     
-    private void ShowBoard()
+    public  void ShowBoard()
      {
          Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
      }
@@ -146,99 +148,92 @@ namespace ChessEngine
      public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
 
 
-     public void PerformPostMoveCalculation(int oldIndex,  int newIndex, int piece)
+     public void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece)
      { 
         
          
          int pCode = piece & Piece.CPiece;
          int pColor = ChessEngineSystem.Instance.IsBlack(piece) ? Piece.Black : Piece.White;
+        
 
-         switch (pColor)
-         {
-             case 32: //BLACK
-                 if (pCode == Piece.King)
-                 {
-                     if (MathF.Abs(newIndex - oldIndex) == 2)
-                     {
-                         int newRookIndex;
-                         int oldRookIndex;
-                         if (newIndex > oldIndex)
-                         {
-                             chessBoard[newIndex - 1] = chessBoard[63];
-                             chessBoard[63] = Piece.Empty;
-                             newRookIndex = newIndex-1;
-                             oldRookIndex = 63;
-                         }
-                         else
-                         {
-                             chessBoard[newIndex + 1] = chessBoard[56];
-                             chessBoard[56] = Piece.Empty;
-                             newRookIndex = newIndex+1;
-                             oldRookIndex = 56;
-                         }
-                         
-                         Console.WriteLine("Black Castling is confirmed");
-                         ChessEngineSystem.Instance.UpdateUIWithNewIndex(oldRookIndex, newRookIndex);
-                     } // Confirm castling
-                    
-                     GameStateManager.Instance.isBlackCastlingAvailable = false;
-                 }
-                 else if (pCode == Piece.Rook)
-                 {
-                     Console.WriteLine("Rook moved , castling cancelled");
-                     if (oldIndex % 8 == 7)
-                         GameStateManager.Instance.blackKingSideRookMoved = true;
-                     else
-                         GameStateManager.Instance.blackQueenSideRookMoved = true;
-                 }
+        switch(pCode)
+        {
 
-                 break;
-             case 16: //WHITE
-                 if (pCode == Piece.King)
-                 {  
-                     if ( MathF.Abs( newIndex - oldIndex) == 2)
-                     {
-                         int newRookIndex;
-                         int oldRookIndex;
-                         if (newIndex > oldIndex)
-                         {
-                             chessBoard[newIndex - 1] = chessBoard[7];
-                             chessBoard[7] = Piece.Empty;
-                             newRookIndex = newIndex-1;
-                             oldRookIndex = 7;
-                         }
-                         else
-                         {
-                             chessBoard[newIndex + 1] = chessBoard[0];
-                             chessBoard[0] = Piece.Empty;
-                             newRookIndex = newIndex + 1;
-                             oldRookIndex = 0;
-                         }
-                         ChessEngineSystem.Instance.UpdateUIWithNewIndex( oldRookIndex, newRookIndex);
-                         Console.WriteLine("White Castling is confirmed");
-                     } // Confirm castling
+          case Piece.Queen:
+          case Piece.Bishop:
+          case Piece.Knight:
+                ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance);
+                eng.ExecuteCommand(justMove);
+                break;
+
+
+          case Piece.King:
+
+                if (MathF.Abs(newIndex - oldIndex) == 2)
+                    {   //if castling
+                        ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor );
+                        eng.ExecuteCommand(kingCastlingCommand);     
+                    }
+                else { 
+                    ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor);   
+                    eng.ExecuteCommand(moveKing);  
+                }
+                    break;
+          case Piece.Pawn:
+                if(newIndex / 8 == 7 || newIndex / 8 == 0)
+                    Console.WriteLine("Trying to promote");            
+                else  {
+                    ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
+                    eng.ExecuteCommand(movePawn);
+                    }   
+                    //What about en Passant??
+                     break; 
+          case Piece.Rook:
+                    ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor);
+                    eng.ExecuteCommand(moveRook);
+            break;                  
+          
+        }
+
+
+
+        
+
                    
-                     GameStateManager.Instance.isWhiteCastlingAvailable = false;
-                 }
+             
 
-                 else if (pCode == Piece.Rook) {   
-                     Console.WriteLine("Rook moved , castling cancelled");
-                     if (oldIndex % 8 == 7)
-                         GameStateManager.Instance.whiteKingSideRookMoved = true;
-                     else
-                         GameStateManager.Instance.whiteQueenSideRookMoved = true;
-                 }
-                 break;
-         }
-         
-         
-         chessBoard[oldIndex] = Piece.Empty;
-         chessBoard[newIndex] = piece;
+             
+    
+
+                 
+
+                //  else if (pCode == Piece.Rook) {   
+                //      Console.WriteLine("Rook moved , castling cancelled");
+                //      if (oldIndex % 8 == 7)
+                //          GameStateManager.Instance.whiteKingSideRookMoved = true;
+                //      else
+                //          GameStateManager.Instance.whiteQueenSideRookMoved = true;
+                   //  else if (pCode == Piece.Rook)
+                //  {
+                //      Console.WriteLine("Rook moved , castling cancelled");
+                //      if (oldIndex % 8 == 7)
+                //          GameStateManager.Instance.blackKingSideRookMoved = true;
+                //      else
+                //          GameStateManager.Instance.blackQueenSideRookMoved = true;
+                //  }
      }
+           
+
+                   
+
+         
+         
+         
+        
+     
 
 
    
-
  }   
 
 
