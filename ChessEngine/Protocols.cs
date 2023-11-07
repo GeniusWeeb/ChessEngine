@@ -13,16 +13,16 @@ public class Protocols  : IPCMessage
 
 public enum ProtocolTypes
 {
-    MOVE , GAMESTART , GAMEND , GAMEMODE , VALIDATE , INDICATE , UPDATEUI
+    MOVE , GAMESTART , GAMEND , GAMEMODE , VALIDATE , INDICATE , UPDATEUI , UNDO
 }
 
 public abstract class IPCMessage
 {
-    public string msgType { get;   set; }
-    public string data {get;   set;
+    public  string msgType { get;   set; }
+    public   string data {get;   set;
     }
 
-    public string toMove { get; set; }
+    public  string toMove { get; set; }
 }
 
 

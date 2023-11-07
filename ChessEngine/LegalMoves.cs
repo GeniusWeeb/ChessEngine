@@ -55,6 +55,7 @@ sealed class LegalMoves
             
             }
         }
+    
         
     }
 
