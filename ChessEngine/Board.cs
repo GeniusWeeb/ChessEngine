@@ -10,7 +10,7 @@ namespace ChessEngine
 
  public class Board : IDisposable
  {
-     private  int[] chessBoard;
+     public  int[] chessBoard;
      private List<int> pawnDefaultIndex = new List<int>();
      public BotBrain botBrain = new BotBrain();
    
@@ -143,7 +143,10 @@ namespace ChessEngine
          }
      }
 
-     public int[] GetCurrentBoard => chessBoard;
+     public ref int[] GetCurrentBoard()
+     {
+         return ref chessBoard;
+     }
 
      public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
 

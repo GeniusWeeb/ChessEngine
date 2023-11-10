@@ -230,8 +230,8 @@ namespace ChessEngine
        }
 
        public Board GetBoardClass => board;
+
        
-       public  int[] GetBoard => board.GetCurrentBoard; 
        //USE THIS FOR ANY BOT UI UPDATE
 
 
@@ -240,6 +240,7 @@ namespace ChessEngine
        {      
             moveHistory.Push(move);
             move.Execute();
+            
        }
 
 

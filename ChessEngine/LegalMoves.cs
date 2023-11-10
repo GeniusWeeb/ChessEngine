@@ -75,13 +75,17 @@ sealed class LegalMoves
         {   
             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
-            if (ChessEngineSystem.Instance.IsPawnDefIndex(index))
-            {   
-                //TODO : THIS SEEMS TO BE COUNTING AS DEFAULT INDEX, THAT IS WHITE PAWN AT BLACK PAWNS POSITION
-                if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty && (ApplyIndexBasedOnColor + stepBasedOnColour is > 0 and < 64))
-                    pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
-
-            }
+            // if (ChessEngineSystem.Instance.IsPawnDefIndex(index))
+            // {
+            //     if (ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64)
+            //     {   
+            //         Console.WriteLine("Stuck at default index {}");
+            //       //  TODO : THIS SEEMS TO BE COUNTING AS DEFAULT INDEX, THAT IS WHITE PAWN AT BLACK PAWNS POSITION
+            //          if (ApplyIndexBasedOnColor + stepBasedOnColour == Piece.Empty)
+            //              pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
+            //     }
+            //
+            // }
         }
 
         int targetRow = ( ApplyIndexBasedOnColor )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)

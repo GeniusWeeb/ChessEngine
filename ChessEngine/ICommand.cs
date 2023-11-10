@@ -42,9 +42,9 @@ public class MoveCommand : Command
     //Processed in Engine from UI or the board itself
     public override void Execute()
     {   
-        this.capturedPiece = engine.GetBoard[targetCell];
-        engine.GetBoard[targetCell] = engine.GetBoard[currentCell];
-        engine.GetBoard[currentCell] =  Piece.Empty ;
+        this.capturedPiece = engine.GetBoardClass.chessBoard[targetCell];
+        engine.GetBoardClass.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
+        engine.GetBoardClass.chessBoard[currentCell] =  Piece.Empty ;
       
     }
 
@@ -54,8 +54,8 @@ public class MoveCommand : Command
     public override void Undo()
     {
         
-         engine.GetBoard[currentCell] = engine.GetBoard[targetCell];
-         engine.GetBoard[targetCell] =  capturedPiece;
+         engine.GetBoardClass.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
+         engine.GetBoardClass.chessBoard[targetCell] =  capturedPiece;
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
          this.capturedPiece = Piece.Empty;
 
@@ -126,24 +126,30 @@ public class CastlingCommand : Command
             GameStateManager.Instance.isWhiteCastlingAvailable = true;
             break;
         }
-        engine.GetBoard[kingDefaultCell]  = engine.GetBoard[kingNewCell];
-        engine.GetBoard[RookDefaultCell] = engine.GetBoard[RookDefaultCell];
-        engine.GetBoard[kingNewCell] = Piece.Empty;
-        engine.GetBoard[RookNewCell] = Piece.Empty;
+        engine.GetBoardClass.chessBoard[kingDefaultCell]  = engine.GetBoardClass.chessBoard[kingNewCell];
+        engine.GetBoardClass.chessBoard[RookDefaultCell] = engine.GetBoardClass.chessBoard[RookNewCell];
+        engine.GetBoardClass.chessBoard[kingNewCell] = Piece.Empty;
+        engine.GetBoardClass.chessBoard[RookNewCell] = Piece.Empty;
         engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
         engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
+      
         
         Console.WriteLine("Castling Undo happening now");
            
     }
 
 
-    private void PerformCastle(int step , int rookCell )
+    private void PerformCastle(int step , int rookCell ) // +1 , 0
     {
-            engine.GetBoard[kingNewCell + step] = engine.GetBoard[rookCell];
-            engine.GetBoard[rookCell] = Piece.Empty;
+            Console.WriteLine($"King new cell is  {kingNewCell}, Rook default cell is at 0 and  {engine.GetBoardClass.chessBoard[rookCell]}");
+            engine.GetBoardClass.chessBoard[kingNewCell + step] = engine.GetBoardClass.chessBoard[rookCell];
+            engine.GetBoardClass.chessBoard[kingNewCell] = engine.GetBoardClass.chessBoard[kingDefaultCell];
+            engine.GetBoardClass.chessBoard[kingDefaultCell] = Piece.Empty;
+            engine.GetBoardClass.chessBoard[rookCell] = Piece.Empty;
             RookNewCell = kingNewCell + step;
-            RookDefaultCell = rookCell;
+            this.RookDefaultCell = rookCell;
+            Console.WriteLine($" CRook new cell is  {RookNewCell}");
+          
     }
 }
 
@@ -181,9 +187,9 @@ public class RookMoveCommand : Command
     public override void Execute()
     {   
 
-      capturedPiece = engine.GetBoard[targetCell];   
-      engine.GetBoard[targetCell] = engine.GetBoard[currentCell];
-      engine.GetBoard[currentCell] = Piece.Empty;
+      capturedPiece = engine.GetBoardClass.chessBoard[targetCell];   
+      engine.GetBoardClass.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
+      engine.GetBoardClass.chessBoard[currentCell] = Piece.Empty;
         
       if(!GameStateManager.Instance.isWhiteCastlingAvailable && !GameStateManager.Instance.isBlackCastlingAvailable)
         return;
@@ -224,8 +230,8 @@ public class RookMoveCommand : Command
                 break;    
         }
 
-    engine.GetBoard[currentCell] = engine.GetBoard[targetCell];
-    engine.GetBoard[targetCell] = capturedPiece;
+    engine.GetBoardClass.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
+    engine.GetBoardClass.chessBoard[targetCell] = capturedPiece;
    
 
     engine.UpdateUIWithNewIndex(targetCell, currentCell,capturedPiece );
