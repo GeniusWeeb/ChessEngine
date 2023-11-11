@@ -189,11 +189,7 @@ namespace ChessEngine
             var setData = JsonConvert.SerializeObject(cellsToSend);
             Protocols finalData = new Protocols(ProtocolTypes.INDICATE.ToString() , setData, null);
             SendDataToUI(finalData);
-            foreach (var cell in  cellsToSend)
-            {
-                Console.WriteLine(cell);
-                
-            }
+           
         }
 
         public void Dispose()
