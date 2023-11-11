@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using ChessEngine.Bot;
 using Newtonsoft.Json;
@@ -10,32 +11,26 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {       
-        
-       
-        
         public static ChessEngineSystem Instance { get; private set; }
-        private Board board = new Board();
-        private BotBrain bot1 = new BotBrain();
-        private BotBrain bot2 = new BotBrain();
+        private Board? board = new Board();
+        private BotBrain? bot1 = new BotBrain();
+        private BotBrain? bot2 = new BotBrain();
         private readonly int boardSetupDelay = 50;
         private readonly int botDecisionDelay = 50;
         private Stack<ICommand> moveHistory = new Stack<ICommand>();
+        private bool newServerInstance = true;
         private bool startingNewBoard = true;
 
         private bool isUndoRequest;
-
-
-       
-        private GameStateManager gameStateManager ;
-
-        public GameStateManager GetGameStateManager => gameStateManager;
         
         public ChessEngineSystem()
         {
             Console.WriteLine("Console initialized");
+           
             Event.inComingData += PassDataToBoard;
             Event.GetCellsForThisIndex += SendUICellIndicatorData;
             Event.undoMove  += UndoCommand;
+            Event.ClientConncted += SetupDefaultBoard;
         }
         static ChessEngineSystem()
         {
@@ -51,7 +46,6 @@ namespace ChessEngine
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
             Connection.Instance.Init(); 
-            gameStateManager = new GameStateManager();
             Console.ResetColor();
         }
         
@@ -161,9 +155,21 @@ namespace ChessEngine
           
         }
 
-        
-        
-        
+
+        private void SetupDefaultBoard(string gameMode)
+        {
+            if (newServerInstance)
+            {
+                board.SetupDefaultBoard(gameMode);
+                newServerInstance = false; 
+            }
+            else
+            {
+                ReloadEngine();
+                board.SetupDefaultBoard(gameMode);
+            }
+        }
+
         //BASICALLY , JUST DO POST FORMAT FOR MOVES CASTLING, PROMOTION ETC
         //RECEIVE
         private void SendUICellIndicatorData(int index)
@@ -195,7 +201,8 @@ namespace ChessEngine
             Event.inComingData -= PassDataToBoard;
             Event.GetCellsForThisIndex -= SendUICellIndicatorData;
             Event.undoMove -= UndoCommand;
-            board.Dispose();
+            Event.ClientConncted -= SetupDefaultBoard;
+            
         }
 
 
@@ -259,11 +266,27 @@ namespace ChessEngine
             GameStateManager.Instance.ResetMoves();
             ScanBoardForMoves();
             CheckForGameModeAndPerform();
-            
-
 
         }
-      
+
+        public void ReloadEngine()
+        { 
+            board = null;
+            bot1 = null;
+            bot2 = null;
+        Board newBoard = new Board();
+        BotBrain newBot1 = new BotBrain();
+        BotBrain newBot2 = new BotBrain();
+         board = newBoard;
+         bot1 = newBot1;
+         bot2 = newBot2;
+         moveHistory.Clear();
+         startingNewBoard = true;
+         GameStateManager.Instance.ResetGameState();
+       
+         
+        }
+
     }
 
 }

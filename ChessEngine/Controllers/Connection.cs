@@ -82,7 +82,7 @@ namespace Utility{
 
               if (incomingData.msgType.Equals(ProtocolTypes.INDICATE.ToString()) )
               { 
-                  Console.WriteLine("UI requesting data");
+                
                   Event.GetCellsForThisIndex?.Invoke(Int32.Parse( incomingData.data));
                   return;
               }

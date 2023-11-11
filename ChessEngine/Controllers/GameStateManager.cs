@@ -14,8 +14,8 @@ public class GameStateManager
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
     public List<ChessPiece> pieces = new List<ChessPiece>();
-    public int player1MoveCol;
-    public int player2MoveCol; // 
+    public int? player1MoveCol;
+    public int? player2MoveCol; // 
     public int playerToMove =  Piece.White;
 
     public List<ChessPiece> OppAllPiecesThatCanMove = new List<ChessPiece>();
@@ -105,7 +105,26 @@ public class GameStateManager
         OppAllPiecesThatCanMove.Clear();
     }
 
-    
+    public void ResetGameState()
+    {
+     
+     allPiecesThatCanMove.Clear();
+     OppAllPiecesThatCanMove.Clear();
+     pieces.Clear();
+     player1MoveCol = null;
+     player2MoveCol = null;
+     playerToMove = Piece.White;
+     whiteKingInCheck = false;
+     blackKingInCheck = false;
+     isBlackCastlingAvailable = true;
+     isWhiteCastlingAvailable = true;
+     blackKingSideRookMoved = false;
+     blackQueenSideRookMoved = false;
+     whiteKingSideRookMoved = false;
+     whiteQueenSideRookMoved = false;
+    }
+
+
 }
 
 

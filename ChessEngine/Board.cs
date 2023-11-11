@@ -12,22 +12,24 @@ namespace ChessEngine
  {
      public  int[] chessBoard;
      private List<int> pawnDefaultIndex = new List<int>();
-     public BotBrain botBrain = new BotBrain();
+  
    
      public Board()
      {
          chessBoard = new int[64];
          Console.ForegroundColor = ConsoleColor.Green;
-         Console.WriteLine("Board is ready!");
+         Console.WriteLine("Board is Initialised!");
          Console.ResetColor();
          //Entry point , get the game mode and set it too .
-         Event.ClientConncted += SetupDefaultBoard;
+        
          
      }
         
     //HAPPENS AT THE TIME OF NEW BOARD -> COULD BE USED FOR A FORCE RESET 
-    private void SetupDefaultBoard(string gameMode)
+    public  void SetupDefaultBoard(string gameMode)
      {
+         
+         Console.WriteLine("Trying to setup Default board");
          chessBoard = ChessEngineSystem.Instance.MapFen();//Board is ready at this point -> parsed from fen
          CreateDefaultPawnIndex();
          GameStateManager.Instance.SetCurrentGameModeAndTurn(gameMode);
@@ -114,7 +116,7 @@ namespace ChessEngine
 
      public void Dispose()
      {
-         Event.ClientConncted -= SetupDefaultBoard;
+       
 
      }
 
@@ -175,9 +177,9 @@ namespace ChessEngine
                 if (MathF.Abs(newIndex - oldIndex) == 2)
                     {   //if castling
                         ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor );
-                        eng.ExecuteCommand(kingCastlingCommand);     
+                        eng.ExecuteCommand(kingCastlingCommand); 
                     }
-                else { 
+                else{ 
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor);   
                     eng.ExecuteCommand(moveKing);  
                 }
@@ -198,44 +200,9 @@ namespace ChessEngine
           
         }
 
-
-
         
-
-                   
-             
-
-             
-    
-
-                 
-
-                //  else if (pCode == Piece.Rook) {   
-                //      Console.WriteLine("Rook moved , castling cancelled");
-                //      if (oldIndex % 8 == 7)
-                //          GameStateManager.Instance.whiteKingSideRookMoved = true;
-                //      else
-                //          GameStateManager.Instance.whiteQueenSideRookMoved = true;
-                   //  else if (pCode == Piece.Rook)
-                //  {
-                //      Console.WriteLine("Rook moved , castling cancelled");
-                //      if (oldIndex % 8 == 7)
-                //          GameStateManager.Instance.blackKingSideRookMoved = true;
-                //      else
-                //          GameStateManager.Instance.blackQueenSideRookMoved = true;
-                //  }
      }
-           
-
-                   
-
-         
-         
-         
-        
      
-
-
    
  }   
 
