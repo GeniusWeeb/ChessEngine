@@ -221,10 +221,8 @@ sealed class LegalMoves
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
-                
-              
 
-                    king.AddAllPossibleMoves(i);
+                king.AddAllPossibleMoves(i);
                 
             }
         }
@@ -240,12 +238,8 @@ sealed class LegalMoves
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i))
-                {
-                    Console.WriteLine($"{piece.GetPieceCode} is attacking at index {i}");
                     return;
-                }
-
-
+                
                 king.AddAllPossibleMoves(i);
                 
             }
