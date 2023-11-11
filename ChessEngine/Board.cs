@@ -36,7 +36,7 @@ namespace ChessEngine
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          ChessEngineSystem.Instance.SendDataToUI(finalData);
-         GameStateManager.Instance.ProcessMoves(chessBoard);
+         GameStateManager.Instance.ProcessMoves(ref chessBoard);
          ChessEngineSystem.Instance.CheckForGameModeAndPerform();
 
      }
@@ -122,12 +122,12 @@ namespace ChessEngine
 
      public void ProcessMovesUpdate()
      {  
-         GameStateManager.Instance.ProcessMoves(chessBoard);
+         GameStateManager.Instance.ProcessMoves(ref chessBoard);
      }
      
      public void ProcessMovesUpdate(int[] customBoard , int turnToMove)
      {  
-         GameStateManager.Instance.ProcessMoves(customBoard , turnToMove);
+         GameStateManager.Instance.ProcessMoves(ref customBoard , turnToMove);
      }
      
     

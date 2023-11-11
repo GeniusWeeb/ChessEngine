@@ -1,6 +1,6 @@
-using System.Diagnostics;
+
 using ChessEngine;
-using ChessEngine.Bot;
+
 
 namespace Utility;
 
@@ -72,19 +72,19 @@ public class GameStateManager
    // public  GameMode GetCurrentGameMode => currentGameMode;
     
     //should be added in after turns are updated
-    public void ProcessMoves(int[] board)
+    public void ProcessMoves(ref int[] board)
     {
         // Checking  based on colour
-        moves.CheckForMoves(board , playerToMove , ref allPiecesThatCanMove);
+        moves.CheckForMoves(ref board , playerToMove , ref allPiecesThatCanMove);
  
     }
     
     
     //Overloading so that , even the Ai can scan the board at any time
-    public void ProcessMoves(int[] board , int customToMove)
+    public void ProcessMoves(ref int[] board , int customToMove)
     {   
         //like passing a temporary  board state rather than  original and checking counter moves
-        moves.CheckForMoves(board ,customToMove, ref  OppAllPiecesThatCanMove);
+        moves.CheckForMoves(ref board ,customToMove, ref  OppAllPiecesThatCanMove);
         
     }
     

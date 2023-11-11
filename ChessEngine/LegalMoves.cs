@@ -8,7 +8,7 @@ sealed class LegalMoves
 {
     // need to run like a time check on how long this takes to run and-
     // further optimize it
-    public void CheckForMoves(int[] board  , int colorToMove ,ref List<ChessPiece> myTurnList)
+    public void CheckForMoves(ref int[] board  , int colorToMove ,ref List<ChessPiece> myTurnList)
     {
         
         if(myTurnList.Count != 0) return; // it has already been worked on
@@ -181,6 +181,7 @@ sealed class LegalMoves
             !GameStateManager.Instance.blackKingInCheck
           )
         {
+            Console.WriteLine("Checking black castling");
             if (!GameStateManager.Instance.blackKingSideRookMoved)
             {
                 CastlingKingSideCompute(index, board, king, +2, +1, Piece.White);
@@ -188,13 +189,14 @@ sealed class LegalMoves
 
             if (!GameStateManager.Instance.blackQueenSideRookMoved)
             {
-                CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.White);
+                CastlingKingQueenSideCompute(index, ref board, king, -2, -1, Piece.White);
             }
 
         }
         else if (thisColCode == Piece.White && GameStateManager.Instance.isWhiteCastlingAvailable &&
                  !GameStateManager.Instance.whiteKingInCheck)
         {
+           
             if (!GameStateManager.Instance.whiteKingSideRookMoved)
             {
                 CastlingKingSideCompute(index, board, king, +2, +1, Piece.Black);
@@ -202,7 +204,7 @@ sealed class LegalMoves
 
             if (!GameStateManager.Instance.whiteQueenSideRookMoved)
             {
-                CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.Black);
+                CastlingKingQueenSideCompute(index,ref  board, king, -2, -1, Piece.Black);
             }
         }
 
@@ -218,31 +220,39 @@ sealed class LegalMoves
             ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
-                if (piece.GetAllMovesForThisPiece.Contains(i)) break;
-                if (i == index + maxStep)
-                {
+                if (piece.GetAllMovesForThisPiece.Contains(i)) return;
+                
+              
+
                     king.AddAllPossibleMoves(i);
-                }
+                
             }
         }
     }
-    private void  CastlingKingQueenSideCompute(int index,int[] board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
+    private void  CastlingKingQueenSideCompute(int index,ref int[] board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
     {
         for (int i =index +minStep; i >=  index + maxStep; i--)
         {
+          
             if (board[i] != Piece.Empty) break;
             //Scan for opponent moves
-            ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
+            ChessEngineSystem.Instance.CustomScanBoardForMoves( board , turnToCheck);
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
-                if (piece.GetAllMovesForThisPiece.Contains(i)) break;
-                if (i == index + maxStep)
+                if (piece.GetAllMovesForThisPiece.Contains(i))
                 {
-                    king.AddAllPossibleMoves(i);
+                    Console.WriteLine($"{piece.GetPieceCode} is attacking at index {i}");
+                    return;
                 }
+
+
+                king.AddAllPossibleMoves(i);
+                
             }
         }
     }
+
+   
 
     private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, int[] board)
     {
