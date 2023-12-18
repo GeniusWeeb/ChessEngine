@@ -154,8 +154,24 @@ namespace ChessEngine
             var data = JsonConvert.SerializeObject(update);
             Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString() );
             SendDataToUI(finalData);
+            
+         //EnPassant 
+        }  public void UpdateUIWithNewIndex(int oldIndex , int newIndex , int capturedPiece , int capturedPawnIndex)
+        {
+            List<int> update = new List<int>() { oldIndex, newIndex , capturedPiece, capturedPawnIndex};
+            var data = JsonConvert.SerializeObject(update);
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString() );
+            SendDataToUI(finalData);
           
         }
+        public void UpdateUIWithNewIndex(int singleIndexToRemove)
+        {
+            List<int> update = new List<int>() { singleIndexToRemove };
+            var data = JsonConvert.SerializeObject(update);
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString());
+            SendDataToUI(finalData);    
+        }
+        
 
 
         private void SetupDefaultBoard(string gameMode)
@@ -270,7 +286,9 @@ namespace ChessEngine
             Console.ResetColor();
             ICommand lastMove = moveHistory.Pop();
             lastMove.Undo();
-            Console.WriteLine($"Received Undo Command showing board");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Received Undo Command showing board\n");
+            Console.ResetColor();
             board.ShowBoard();
             GameStateManager.Instance.ResetMoves();
             ScanBoardForMoves();

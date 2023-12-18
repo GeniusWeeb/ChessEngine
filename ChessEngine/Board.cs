@@ -112,7 +112,19 @@ namespace ChessEngine
     
     public  void ShowBoard()
      {
-         Console.WriteLine(JsonConvert.SerializeObject(chessBoard));
+         Console.ForegroundColor = ConsoleColor.Green;
+
+         for (int i = 7; i >= 0; i--) // Start from the last row and go upwards
+         {  
+             
+             for (int j = 0; j < 8; j++)
+             {
+                 Console.Write($"{chessBoard[8 * i + j], -3} ");
+                
+             }
+             Console.WriteLine();
+         }
+         Console.ResetColor();
      }
 
 
@@ -205,9 +217,12 @@ namespace ChessEngine
                   var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
+                  
 
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal);
                   eng.ExecuteCommand(enPassMoveCommand);
+                  
+                  Console.WriteLine($"Executed En Passant at {cellFinal}");
                   //Execute command and keep track
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)

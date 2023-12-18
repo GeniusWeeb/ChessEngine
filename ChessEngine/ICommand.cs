@@ -327,6 +327,7 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[capturedPawnIndex] =  Piece.Empty ; 
             
             Console.WriteLine($"en Passant executed , caching the captured index -> {capturedPawnIndex}");
+            engine.UpdateUIWithNewIndex(capturedPawnIndex);
           
         }
 
@@ -335,7 +336,7 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
             engine.GetBoardClass.chessBoard[capturedPawnIndex] = capturedPiece;
             engine.GetBoardClass.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
-            engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
+            engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece, capturedPawnIndex);
             this.capturedPiece = Piece.Empty;
 
         }
