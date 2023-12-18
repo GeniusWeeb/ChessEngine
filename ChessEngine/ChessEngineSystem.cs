@@ -17,7 +17,8 @@ namespace ChessEngine
         private BotBrain? bot2 = new BotBrain();
         private readonly int boardSetupDelay = 50;
         private readonly int botDecisionDelay = 50;
-        private Stack<ICommand> moveHistory = new Stack<ICommand>();
+        public  Stack<ICommand> moveHistory = new Stack<ICommand>();
+       
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
 
@@ -25,6 +26,7 @@ namespace ChessEngine
         
         public ChessEngineSystem()
         {
+            
             Console.WriteLine("Console initialized");
            
             Event.inComingData += PassDataToBoard;
@@ -201,8 +203,10 @@ namespace ChessEngine
             
         }
 
+      
 
-       public void SendDataToUI <T>(T data)
+
+        public void SendDataToUI <T>(T data)
        {
           
             string toSend = JsonConvert.SerializeObject(data);
@@ -266,7 +270,8 @@ namespace ChessEngine
             Console.ResetColor();
             ICommand lastMove = moveHistory.Pop();
             lastMove.Undo();
-            Console.WriteLine($"Received Undo Command showing board  , { GameStateManager.Instance.playerToMove} has to move again ABEG");
+            Console.WriteLine($"Received Undo Command showing board");
+            board.ShowBoard();
             GameStateManager.Instance.ResetMoves();
             ScanBoardForMoves();
             CheckForGameModeAndPerform();

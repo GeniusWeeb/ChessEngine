@@ -5,14 +5,22 @@
          void Execute();
 
          void Undo();
+
+         (int, int)? GetInfo();
+
+
     }
 
+    
     public abstract class Command : ICommand 
     {   
         
         public abstract void Execute();
         public abstract void Undo();
-       
+
+        public abstract (int, int)? GetInfo();
+
+
     }
 
 
@@ -49,6 +57,11 @@ public class MoveCommand : Command
     }
 
 
+    public override (int, int)? GetInfo()
+    {
+        return (currentCell, targetCell);
+
+    }
 
     //Sent to board for UI .
     public override void Undo()
@@ -63,6 +76,7 @@ public class MoveCommand : Command
 
 }
 
+    
 public class CastlingCommand : Command
 {   
     private int kingDefaultCell ;
@@ -136,6 +150,11 @@ public class CastlingCommand : Command
         
         Console.WriteLine("Castling Undo happening now");
            
+    }
+
+    public override (int, int)? GetInfo()
+    {
+        return null;
     }
 
 
@@ -238,6 +257,11 @@ public class RookMoveCommand : Command
     capturedPiece = Piece.Empty;
 
     }
+
+    public override (int, int)? GetInfo()
+    {
+        return null;
+    }
 }
 
 public class kingMoveCommand : MoveCommand
@@ -285,3 +309,34 @@ public class kingMoveCommand : MoveCommand
     }
 
 }
+    public class EnPassantCommand : MoveCommand
+    {
+        private int capturedPawnIndex;
+        
+        public EnPassantCommand(int currnt, int target, ChessEngineSystem eng ,int capPawnIndex ) : base(currnt, target, eng)
+        {
+            capturedPawnIndex = capPawnIndex;
+        }
+
+
+        public override void Execute()
+        {
+            this.capturedPiece = engine.GetBoardClass.chessBoard[capturedPawnIndex];
+            engine.GetBoardClass.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
+            engine.GetBoardClass.chessBoard[currentCell] =  Piece.Empty ;
+            engine.GetBoardClass.chessBoard[capturedPawnIndex] =  Piece.Empty ; 
+            
+            Console.WriteLine($"en Passant executed , caching the captured index -> {capturedPawnIndex}");
+          
+        }
+
+        public override void Undo()
+        {
+            engine.GetBoardClass.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
+            engine.GetBoardClass.chessBoard[capturedPawnIndex] = capturedPiece;
+            engine.GetBoardClass.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
+            engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
+            this.capturedPiece = Piece.Empty;
+
+        }
+    }    

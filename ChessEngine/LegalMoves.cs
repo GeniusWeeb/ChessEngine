@@ -102,9 +102,46 @@ sealed class LegalMoves
         int LDcolorCode = isBlack(board[ldIndex]) ? Piece.Black : Piece.White;
         if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
             pawn.AddAllPossibleMoves(ldIndex);
-
+        PawnCheckEnPassant(pawn, index, colCode, board);
 
         return pawn.getAllPossibleMovesCount > 0 ? pawn : null;
+    }
+
+
+
+
+    private void   PawnCheckEnPassant(Pawn pawn , int index,int colCode ,int[] board)
+    {
+        int cellFinal, cellOld;
+       
+
+        if (ChessEngineSystem.Instance.moveHistory.Count == 0)
+            return;
+        
+       var piece =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
+       if (piece == null) return;
+
+
+       cellFinal = piece.Value.Item2;
+       cellOld = piece.Value.Item1;
+     
+       if (Math.Abs(cellFinal - cellOld) == 16 && // The last move was a double move
+           ( board[cellFinal] & Piece.CPiece)  == Piece.Pawn  && 
+           !IsSameColorAsMe(colCode, GetColorCode( board[cellFinal]))
+           )
+       {
+           if (Math.Abs(cellFinal % 8 - index % 8) == 1 && (cellFinal / 8 == index /8))
+           {
+               int enPassantIndex = colCode == Piece.White ? cellFinal + 8 : cellFinal - 8;
+               Console.WriteLine($"Found En Passant move for at {enPassantIndex} ");
+               
+               //we also need cellFinal
+               pawn.specialIndex = enPassantIndex; //Success
+               pawn.AddAllPossibleMoves(enPassantIndex);
+           }
+       }
+       
+//SEPERATE EN PASSANT LIST FOR UNDOING AND A SPECIAL ORDER , track of en passant index
     }
 
     private ChessPiece GenerateMovesForKnight(int ind, int thisColCode, int[] board)
@@ -183,7 +220,7 @@ sealed class LegalMoves
             !GameStateManager.Instance.blackKingInCheck
           )
         {
-            Console.WriteLine("Checking black castling");
+            
             if (!GameStateManager.Instance.blackKingSideRookMoved)
             {
                 CastlingKingSideCompute(index, board, king, +2, +1, Piece.White);
@@ -399,7 +436,9 @@ public class Pawn : ChessPiece
         this.pieceCode =  Piece.Pawn | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
     }
-    
+
+    public List<int> enPassantMoveList;
+
 }
 
 public class Knight : ChessPiece {
@@ -495,7 +534,8 @@ public abstract class ChessPiece
     protected int pieceCode { get; init; }
     private HashSet<int> allPossibleMovesIndex = new HashSet<int>();
     protected int currentIndex { get; init; }
-    
+    public int specialIndex { get; set; }
+
     protected List<PieceMovementDirection> possibleDirection;
     
     public int GetPieceCode => pieceCode;

@@ -48,14 +48,16 @@ namespace ChessEngine
         var piece = chessBoard[oldIndex];
         
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
-        {
+        {   
+            
             
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
+                
                
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
-                PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece);
+                PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
                 GameStateManager.Instance.UpdateTurns();
@@ -143,10 +145,12 @@ namespace ChessEngine
              if (pawnCode == Piece.Pawn)
              {
                  pawnDefaultIndex.Add(new PawnDefaultPos(ChessEngineSystem.Instance.GetColorCode(chessBoard[i]) ,i ));
-                 Console.WriteLine($"${ChessEngineSystem.Instance.GetColorCode(chessBoard[i])} pawn saved at  {i}");
              }
              
          }
+         
+         
+         
      }
 
      public ref int[] GetCurrentBoard()
@@ -166,14 +170,11 @@ namespace ChessEngine
      }
 
 
-     public void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece)
+     public void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece, ChessPiece p)
      { 
-        
-         
          int pCode = piece & Piece.CPiece;
          int pColor = ChessEngineSystem.Instance.IsBlack(piece) ? Piece.Black : Piece.White;
-        
-
+         
         switch(pCode)
         {
 
@@ -198,8 +199,22 @@ namespace ChessEngine
                 }
                     break;
           case Piece.Pawn:
-                if(newIndex / 8 == 7 || newIndex / 8 == 0)
-                    Console.WriteLine("Trying to promote");            
+              if (newIndex == p.specialIndex)
+              {
+                  Console.WriteLine("En Passant done !");
+                  var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
+                  if (capturedPawnIndex == null) return;
+                  int  cellFinal = capturedPawnIndex.Value.Item2;
+
+                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal);
+                  eng.ExecuteCommand(enPassMoveCommand);
+                  //Execute command and keep track
+              }
+              else if (newIndex / 8 == 7 || newIndex / 8 == 0)
+              {
+                  Console.WriteLine("Trying to promote");
+                  //What about Capture and promote?
+              }            
                 else  {
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
                     eng.ExecuteCommand(movePawn);
@@ -234,7 +249,9 @@ namespace ChessEngine
          this.colorCode = cCode;
          this.indexCode = index;
      }
+ }
 
-
+ public struct SmallMoveHistory
+ {
  }
 }
