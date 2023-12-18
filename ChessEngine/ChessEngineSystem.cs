@@ -209,7 +209,7 @@ namespace ChessEngine
             Connection.Instance.Send(toSend);
         }
 
-       public bool IsPawnDefIndex(int pawn)  =>board.CheckIfPawnDefaultIndex(pawn);
+       public bool IsPawnDefIndex(int pCode, int index)  =>board.CheckIfPawnDefaultIndex(pCode, index);
 
 
        public void ScanBoardForMoves()
@@ -231,6 +231,14 @@ namespace ChessEngine
        {
            return (code & Piece.CPiece);
        }
+       public  int GetColorCode(int code )
+       {
+           if (IsBlack(code))
+               return Piece.Black;
+        
+           return (code & Piece.White) == Piece.White ? Piece.White : Piece.Empty;
+       }
+
 
        public Board GetBoardClass => board;
 
@@ -283,6 +291,8 @@ namespace ChessEngine
          
         }
 
+        
+        
     }
 
 }

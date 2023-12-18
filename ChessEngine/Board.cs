@@ -11,7 +11,7 @@ namespace ChessEngine
  public class Board : IDisposable
  {
      public  int[] chessBoard;
-     private List<int> pawnDefaultIndex = new List<int>();
+     private List<PawnDefaultPos> pawnDefaultIndex = new List<PawnDefaultPos>();
   
    
      public Board()
@@ -140,8 +140,12 @@ namespace ChessEngine
                  continue;
              //Storing the default pawn's index so we can perform the 2 square move
              int pawnCode = chessBoard[i] & Piece.CPiece;
-             if(pawnCode == Piece.Pawn)
-                 pawnDefaultIndex.Add(i);
+             if (pawnCode == Piece.Pawn)
+             {
+                 pawnDefaultIndex.Add(new PawnDefaultPos(ChessEngineSystem.Instance.GetColorCode(chessBoard[i]) ,i ));
+                 Console.WriteLine($"${ChessEngineSystem.Instance.GetColorCode(chessBoard[i])} pawn saved at  {i}");
+             }
+             
          }
      }
 
@@ -150,7 +154,16 @@ namespace ChessEngine
          return ref chessBoard;
      }
 
-     public bool CheckIfPawnDefaultIndex(int pawn)  => pawnDefaultIndex.Contains(pawn);
+     public bool CheckIfPawnDefaultIndex(int pColor , int index)
+     {
+
+         foreach (var p in pawnDefaultIndex )
+         {
+             if (p.colorCode == pColor && p.indexCode == index)  // False if White piece at a Black piece default index
+                 return true;
+         }
+         return false; 
+     }
 
 
      public void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece)
@@ -204,7 +217,24 @@ namespace ChessEngine
      }
      
    
- }   
+ }
 
 
+
+
+ public class PawnDefaultPos
+ {
+     //dont need pieceCode coz its either 17 or 33 so its constant//
+     //This way we can map the white to the lower half that is 8-16 and black to the reverse order from  their default position.
+     public  int colorCode;
+     public  int indexCode;
+
+     public PawnDefaultPos(int cCode , int index)
+     {
+         this.colorCode = cCode;
+         this.indexCode = index;
+     }
+
+
+ }
 }
