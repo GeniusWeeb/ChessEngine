@@ -8,55 +8,61 @@ sealed class LegalMoves
 {
     // need to run like a time check on how long this takes to run and-
     // further optimize it
-    public void CheckForMoves(ref int[] board  , int colorToMove ,ref List<ChessPiece> myTurnList)
+    public void CheckForMoves(ref int[] board, int colorToMove, List<ChessPiece> myTurnList)
     {
-        
-        if(myTurnList.Count != 0) return; // it has already been worked on
+
+        if (myTurnList.Count != 0) return; // it has already been worked on
         for (int i = 0; i < board.Length; i++)
         {
-            
+
             if (board[i] == Piece.Empty)
                 continue;
-            
+
             int pieceCode = board[i] & Piece.CPiece;
             int colorCode = GetColorCode(board[i]);
             if (colorCode != colorToMove)
                 continue;
-            
+
             if (pieceCode == Piece.Pawn)
             {
                 ChessPiece p = GenerateMovesForPawn(i, colorCode, board);
                 if (p != null) myTurnList.Add(p);
-            } 
+            }
+
             if (pieceCode == Piece.Knight)
             {
-               ChessPiece p = GenerateMovesForKnight(i , colorCode,board);
-               if(p!=null)  myTurnList.Add(p); 
+                ChessPiece p = GenerateMovesForKnight(i, colorCode, board);
+                if (p != null) myTurnList.Add(p);
             }
+
             if (pieceCode == Piece.Queen)
             {
-                ChessPiece p = GenerateMovesForQueen(i , colorCode,board);
-                if(p!=null)  myTurnList.Add(p);
-            } 
+                ChessPiece p = GenerateMovesForQueen(i, colorCode, board);
+                if (p != null) myTurnList.Add(p);
+            }
+
             if (pieceCode == Piece.Bishop)
             {
-                ChessPiece p = GenerateMovesForBishop(i , colorCode,board);
-                if(p!=null) myTurnList.Add(p);
-            } 
+                ChessPiece p = GenerateMovesForBishop(i, colorCode, board);
+                if (p != null) myTurnList.Add(p);
+            }
+
             if (pieceCode == Piece.Rook)
             {
-                ChessPiece p = GenerateMovesForRook(i , colorCode,board);
-                if(p!=null) myTurnList.Add(p);
+                ChessPiece p = GenerateMovesForRook(i, colorCode, board);
+                if (p != null) myTurnList.Add(p);
             }
+
             if (pieceCode == Piece.King)
             {
-                ChessPiece p = GenerateMovesForKing(i , colorCode,board);
-                if(p!=null) myTurnList.Add(p);
-            
+                ChessPiece p = GenerateMovesForKing(i, colorCode, board);
+                if (p != null) myTurnList.Add(p);
+
             }
         }
-    
-        
+
+        //This wraps up all the moves, we need the FINISHED ALL PIECES THAT CAN MAKE MOVE
+
     }
 
     //going thru every  piece
@@ -103,9 +109,13 @@ sealed class LegalMoves
         if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
             pawn.AddAllPossibleMoves(ldIndex);
         PawnCheckEnPassant(pawn, index, colCode, board);
-
-        return pawn.getAllPossibleMovesCount > 0 ? pawn : null;
+        
+        
+        //Prevent looping all times
+        return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
     }
+    
+
 
 
 
@@ -532,9 +542,9 @@ public abstract class ChessPiece
 {   
     
     protected int pieceCode { get; init; }
-    private HashSet<int> allPossibleMovesIndex = new HashSet<int>();
+    public HashSet<int> allPossibleMovesIndex = new HashSet<int>();
     protected int currentIndex { get; init; }
-    public int specialIndex { get; set; }
+    public int specialIndex = 999;
 
     protected List<PieceMovementDirection> possibleDirection;
     

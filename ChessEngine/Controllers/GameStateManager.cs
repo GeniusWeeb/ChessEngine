@@ -38,7 +38,14 @@ public class GameStateManager
     
     public static GameStateManager Instance { get; private set; }
     public int GetTurnToMove =>playerToMove;
-   
+
+
+    public int GetOpponent(int currentTurn)
+
+    {
+       return currentTurn == Piece.White ? Piece.Black : Piece.White;
+    }
+
     static  GameStateManager()
     {
         Instance = new GameStateManager();
@@ -75,7 +82,9 @@ public class GameStateManager
     public void ProcessMoves(ref int[] board)
     {
         // Checking  based on colour
-        moves.CheckForMoves(ref board , playerToMove , ref allPiecesThatCanMove);
+        moves.CheckForMoves(ref board , playerToMove ,  allPiecesThatCanMove);
+        //Check for King Check after Processing Moves
+        
  
     }
     
@@ -84,7 +93,15 @@ public class GameStateManager
     public void ProcessMoves(ref int[] board , int customToMove)
     {   
         //like passing a temporary  board state rather than  original and checking counter moves
-        moves.CheckForMoves(ref board ,customToMove, ref  OppAllPiecesThatCanMove);
+        moves.CheckForMoves(ref board ,customToMove,  OppAllPiecesThatCanMove);
+        
+    }
+    
+    //Improvised version -> new allocation and no static storage would be the best choice
+    public void ProcessMoves(ref int[] board , int customToMove , List<ChessPiece> allPiecesThatCanMove)
+    {   
+        //like passing a temporary  board state rather than  original and checking counter moves
+        moves.CheckForMoves(ref board ,customToMove,  allPiecesThatCanMove);
         
     }
     

@@ -43,8 +43,7 @@ namespace ChessEngine
     
     public bool MakeMove( int oldIndex, int newIndex)
     {
-
-    
+        
         var piece = chessBoard[oldIndex];
         
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
@@ -55,8 +54,8 @@ namespace ChessEngine
                 oldIndex == p.GetCurrentIndex)
             {
                 
-               
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
+
                 PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
                 ShowBoard();
                 GameStateManager.Instance.ResetMoves();
@@ -64,11 +63,15 @@ namespace ChessEngine
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{p.GetPieceCode} moved from {oldIndex} to {newIndex}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
-                
             
                 //Wrap the move in a command
-                
+               
                 Console.ResetColor();
+
+                //Castling flag doesnt change yet
+                // IsKingInCheck(chessBoard, 
+                //     (GameStateManager.Instance.GetTurnToMove));
+                //Check condition after move has been made
                 return true;
                 ; }
         }
@@ -181,9 +184,11 @@ namespace ChessEngine
          return false; 
      }
 
+        
+     //Check for check on opponent king here
+     private void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece,  ChessPiece p)
+     {
 
-     public void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece, ChessPiece p)
-     { 
          int pCode = piece & Piece.CPiece;
          int pColor = ChessEngineSystem.Instance.IsBlack(piece) ? Piece.Black : Piece.White;
          
@@ -193,11 +198,11 @@ namespace ChessEngine
           case Piece.Queen:
           case Piece.Bishop:
           case Piece.Knight:
-                ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance);
-                eng.ExecuteCommand(justMove);
-                break;
 
-
+              KingCheckCalculation(pColor,oldIndex,newIndex,p);
+              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance);
+              eng.ExecuteCommand(justMove);
+              break;
           case Piece.King:
 
                 if (MathF.Abs(newIndex - oldIndex) == 2)
@@ -206,6 +211,7 @@ namespace ChessEngine
                         eng.ExecuteCommand(kingCastlingCommand); 
                     }
                 else{ 
+                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor);   
                     eng.ExecuteCommand(moveKing);  
                 }
@@ -218,7 +224,7 @@ namespace ChessEngine
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
-
+                  KingCheckCalculation(pColor,oldIndex,newIndex,p);
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal);
                   eng.ExecuteCommand(enPassMoveCommand);
                   
@@ -231,22 +237,143 @@ namespace ChessEngine
                   //What about Capture and promote?
               }            
                 else  {
+                  
+                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
                     eng.ExecuteCommand(movePawn);
                     }   
                     //What about en Passant??
                      break; 
           case Piece.Rook:
+                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
                     ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor);
                     eng.ExecuteCommand(moveRook);
-            break;                  
-          
+            break;
         }
-
+        
         
      }
+
+     //Opposite king
+     private void KingCheckCalculation(int pColor, int oldIndex, int newIndex , ChessPiece p)
+     {
+         if (!IsOppKingInCheck(pColor, oldIndex, newIndex, p)) return; //Help us build on Undo
+         if (GameStateManager.Instance.whiteKingInCheck == false && pColor == Piece.Black)
+             GameStateManager.Instance.whiteKingInCheck = true;
+         else if  (GameStateManager.Instance.blackKingInCheck == false && pColor == Piece.White)
+             GameStateManager.Instance.blackKingInCheck = true;
+
+
+         Console.ForegroundColor = ConsoleColor.Red;
+         Console.WriteLine("White King" + GameStateManager.Instance.whiteKingInCheck);
+         Console.WriteLine("Black King" + GameStateManager.Instance.blackKingInCheck);
+         Console.ResetColor();
+     }
+
+     private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, ChessPiece p)
+     {
+         int oppCol = GameStateManager.Instance.GetOpponent(pColor);
+         int King = Piece.King | oppCol;
+
+       
+         Console.WriteLine($"Checking if {oppCol} {King}  is  in check");
+         int[] b =   (int[])chessBoard.Clone();
+         b[oldIndex] = Piece.Empty;
+         b[newIndex] = p.GetPieceCode;
+         Console.WriteLine("Oppoent col would be " + GameStateManager.Instance.GetOpponent(oppCol));
+         GameStateManager.Instance.OppAllPiecesThatCanMove.Clear();
+         ChessEngineSystem.Instance.CustomScanBoardForMoves(b , GameStateManager.Instance.GetOpponent(oppCol));
+         foreach (var Pieces in GameStateManager.Instance.OppAllPiecesThatCanMove)
+         {
+             foreach (var movesIndex in Pieces.allPossibleMovesIndex)
+             {
+                 
+                 Console.WriteLine($"MOVES ARE {Pieces.GetPieceCode} To {movesIndex}");
+                 if (chessBoard[movesIndex] == King)
+                 {
+                     Console.WriteLine("King is in check");
+                     return true;
+                 }
+             }
+         }
+
+         return false;
+     }
      
+     public void KingBePreCheckTest(int[] board, int colCode)
+     {
+         bool hasLegalMoves = false;
+         int checkOpponentMoves = GameStateManager.Instance.GetOpponent(colCode);
+
+         foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove.ToList()) // Create a copy to avoid modification during iteration
+         {
+             List<int> movesToRemove = new List<int>();
+
+             foreach (int moveIndex in piece.allPossibleMovesIndex.ToList()) // Create a copy to avoid modification during iteration
+             {
+                 int[] b = (int[])board.Clone(); // Create a copy of the board
+
+                 b[piece.GetCurrentIndex] = Piece.Empty;
+                 b[moveIndex] = ChessEngineSystem.Instance.GetBoardClass.chessBoard[piece.GetCurrentIndex];
+
+                 List<ChessPiece> tempPiecesThatCanMakeMove = new List<ChessPiece>();
+
+                // Console.WriteLine($"Testing index {moveIndex}---------->");
+
+                 // Temp test
+                 GameStateManager.Instance.ProcessMoves(ref b, checkOpponentMoves, tempPiecesThatCanMakeMove);
+
+                 foreach (var cp in tempPiecesThatCanMakeMove)
+                 {
+                     foreach (var OppmovIndex in cp.allPossibleMovesIndex)
+                     {
+                         if (b[OppmovIndex] == (Piece.King | GameStateManager.Instance.GetOpponent(checkOpponentMoves)))
+                         {
+                             Console.WriteLine("King has been checked");
+                             movesToRemove.Add(moveIndex);
+                         //    Console.WriteLine($"Removed index {moveIndex} for check safety");
+                             break; // Break the inner loop once a move is removed
+                         }
+                     }
+                 }
+
+                
+             }
+
+             //Added in main, performed functionlity on shallow and stored toRemove in a list
+             //Removed from main list
+             foreach (var moveToRemove in movesToRemove)
+             {
+                 piece.allPossibleMovesIndex.Remove(moveToRemove);
+             }
+             
+             if (movesToRemove.Count < piece.getAllPossibleMovesCount)
+                 hasLegalMoves = true;
+             
+             
+         }
+            Console.WriteLine("Final allowed move list");
+         
+         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
+         {
+             foreach (var mov in p.allPossibleMovesIndex)
+             {
+                 Console.WriteLine($"piece {p.GetPieceCode} can move to" + mov);
+             }
+         }
+         
+
+         // if (!hasLegalMoves)
+         // {
+         //     Console.WriteLine($"Checkmate {GameStateManager.Instance.GetOpponent(colCode)} Wins");
+         // }
+     }
+
+     
+     //playerToMove = playerToMove
    
+
+
  }
 
 
@@ -266,7 +393,5 @@ namespace ChessEngine
      }
  }
 
- public struct SmallMoveHistory
- {
- }
+
 }

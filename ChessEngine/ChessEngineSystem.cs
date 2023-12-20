@@ -68,7 +68,7 @@ namespace ChessEngine
                     if ( GameStateManager.Instance.player1MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
                     {   
                         Console.WriteLine("Bot is gonna make the move");
-                        bot1.Think(ref GameStateManager.Instance.allPiecesThatCanMove);
+                        bot1.Think();
                         ScanBoardForMoves();
                     }
                     break;
@@ -79,8 +79,7 @@ namespace ChessEngine
                     if ( GameStateManager.Instance.player1MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
                     {
                         BotMove(ref bot1);
-
-
+                        
                     }
                     else if ( GameStateManager.Instance.player2MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
                     {   
@@ -100,9 +99,13 @@ namespace ChessEngine
         {
             Console.WriteLine($"Bot {GameStateManager.Instance.playerToMove.ToString()}  is  gonna make the move , Waiting ...");
             Thread.Sleep(botDecisionDelay);
-            brain.Think(ref GameStateManager.Instance.allPiecesThatCanMove);
+            
+            //main issue is here
             ScanBoardForMoves();
+            brain.Think();
             CheckForGameModeAndPerform();
+            
+            //Fix this
         }
 
         //This will unwrap the data and send to the board 
@@ -112,7 +115,10 @@ namespace ChessEngine
                 string validationData = ProcessMoveInEngine(data) ? "true" : "false";
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, GameStateManager.Instance.GetTurnToMove.ToString());
                 SendDataToUI(finalData);
-                ScanBoardForMoves();
+                
+                if(GameStateManager.Instance.GetCurrentGameMode != GameMode.BotVsBot)
+                    ScanBoardForMoves();
+                
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
                 CheckForGameModeAndPerform();
 
@@ -210,6 +216,7 @@ namespace ChessEngine
            
         }
 
+        
         public void Dispose()
         {
             Event.inComingData -= PassDataToBoard;
@@ -232,14 +239,38 @@ namespace ChessEngine
        public bool IsPawnDefIndex(int pCode, int index)  =>board.CheckIfPawnDefaultIndex(pCode, index);
 
 
+       
+       //Main Scan
        public void ScanBoardForMoves()
        {
+            
+           Console.ForegroundColor = ConsoleColor.Yellow;
+           Console.WriteLine("Scanning board");
+           Console.ResetColor();
            board.ProcessMovesUpdate();
+           
+          GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
+       }
+       public void ScanBoardForMoves(string botName)
+       {
+            
+           Console.ForegroundColor = ConsoleColor.Yellow;
+           Console.WriteLine($" {botName} is Scanning board");
+           Console.ResetColor();
+           board.ProcessMovesUpdate();
+           
+           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
        }
         
+       
+       // Used for any precomputes
        public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour)
        {
+           Console.ForegroundColor = ConsoleColor.Red;
+           Console.WriteLine("Scannin board custom");
+           Console.ResetColor();
            board.ProcessMovesUpdate(testBoard , toMoveColour);
+            
        }
 
        public bool IsBlack(int colorCode)
