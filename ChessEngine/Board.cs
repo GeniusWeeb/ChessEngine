@@ -269,11 +269,11 @@ namespace ChessEngine
          Console.WriteLine("Black King" + GameStateManager.Instance.blackKingInCheck);
          Console.ResetColor();
      }
-
+    
      private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, ChessPiece p)
-     {
-         int oppCol = GameStateManager.Instance.GetOpponent(pColor);
-         int King = Piece.King | oppCol;
+     {      
+         int oppCol = GameStateManager.Instance.GetOpponent(pColor); // Opponent color
+         int King = Piece.King | oppCol; //Opponent king
 
        
          Console.WriteLine($"Checking if {oppCol} {King}  is  in check");
@@ -282,16 +282,16 @@ namespace ChessEngine
          b[newIndex] = p.GetPieceCode;
          Console.WriteLine("Oppoent col would be " + GameStateManager.Instance.GetOpponent(oppCol));
          GameStateManager.Instance.OppAllPiecesThatCanMove.Clear();
-         ChessEngineSystem.Instance.CustomScanBoardForMoves(b , GameStateManager.Instance.GetOpponent(oppCol));
+         ChessEngineSystem.Instance.CustomScanBoardForMoves(b , GameStateManager.Instance.GetOpponent(oppCol),"CUSTOM SCANNING IF OPP KING IN CHECK");
          foreach (var Pieces in GameStateManager.Instance.OppAllPiecesThatCanMove)
          {
              foreach (var movesIndex in Pieces.allPossibleMovesIndex)
              {
                  
-                 Console.WriteLine($"MOVES ARE {Pieces.GetPieceCode} To {movesIndex}");
+               //  Console.WriteLine($"MOVES ARE {Pieces.GetPieceCode} To {movesIndex}");
                  if (chessBoard[movesIndex] == King)
                  {
-                     Console.WriteLine("King is in check");
+                     Console.WriteLine($"{King}King is in check");
                      return true;
                  }
              }
@@ -300,8 +300,10 @@ namespace ChessEngine
          return false;
      }
      
+     //Check if my own king has been checked?
      public void KingBePreCheckTest(int[] board, int colCode)
      {
+         int count = 0;
          bool hasLegalMoves = false;
          int checkOpponentMoves = GameStateManager.Instance.GetOpponent(colCode);
 
@@ -329,7 +331,8 @@ namespace ChessEngine
                      {
                          if (b[OppmovIndex] == (Piece.King | GameStateManager.Instance.GetOpponent(checkOpponentMoves)))
                          {
-                             Console.WriteLine("King has been checked");
+                            
+                             Console.WriteLine($" {colCode}King has been checked");
                              movesToRemove.Add(moveIndex);
                          //    Console.WriteLine($"Removed index {moveIndex} for check safety");
                              break; // Break the inner loop once a move is removed
@@ -352,17 +355,22 @@ namespace ChessEngine
              
              
          }
-            Console.WriteLine("Final allowed move list");
+          
          
          foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
          {
              foreach (var mov in p.allPossibleMovesIndex)
              {
-                 Console.WriteLine($"piece {p.GetPieceCode} can move to" + mov);
+                 count += 1;
+                // Console.WriteLine($"piece {p.GetPieceCode} can move to" + mov);
              }
          }
-         
 
+         Console.ForegroundColor = ConsoleColor.Cyan;
+         Console.WriteLine("Final Filtered move list generated ");
+         Console.WriteLine($" -< King PreCheck Filtering  -  {count}  ->");
+         Console.ResetColor();
+         
          // if (!hasLegalMoves)
          // {
          //     Console.WriteLine($"Checkmate {GameStateManager.Instance.GetOpponent(colCode)} Wins");

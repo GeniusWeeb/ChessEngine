@@ -68,51 +68,70 @@ sealed class LegalMoves
     //going thru every  piece
     private ChessPiece GenerateMovesForPawn(int ind,int colCode, int[] board)
     {
-        
-        int index = ind;
-        int thisColorCode = colCode;
-        Pawn pawn = new Pawn(thisColorCode, ind);
+        try
+        {
 
-        int stepBasedOnColour = colCode == Piece.White ? pawn.pawnStep : -pawn.pawnStep;
-        var ApplyIndexBasedOnColor = colCode == Piece.White ? index + stepBasedOnColour : index +stepBasedOnColour;
 
-        if (ApplyIndexBasedOnColor is < 0 or > 63)
-           return null;
-        
-        //front move -> normal move
-        if (board[ApplyIndexBasedOnColor] == Piece.Empty)
-        {   
-            pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
+            int index = ind;
+            int thisColorCode = colCode;
+            Pawn pawn = new Pawn(thisColorCode, ind);
 
-           if (ChessEngineSystem.Instance.IsPawnDefIndex(colCode ,ind  ))
+            int stepBasedOnColour = colCode == Piece.White ? pawn.pawnStep : -pawn.pawnStep;
+            var ApplyIndexBasedOnColor = colCode == Piece.White ? index + stepBasedOnColour : index + stepBasedOnColour;
+
+            if (ApplyIndexBasedOnColor is < 0 or > 63)
+                return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
+
+            //front move -> normal move
+            if (board[ApplyIndexBasedOnColor] == Piece.Empty)
             {
-                if (ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64)
-                {   
-                  if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
-                  { 
-                      pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
-                  }
+                pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
+
+                if (ChessEngineSystem.Instance.IsPawnDefIndex(colCode, ind))
+                {
+                    if (ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64)
+                    {
+                        if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
+                        {
+                            pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
+                        }
+                    }
                 }
             }
+
+            int targetRow =
+                (ApplyIndexBasedOnColor) / 8; // check if all moves are in same row ,front and front sides (Diagonals)
+            //RIGHT MOVE
+            int rdIndex = ApplyIndexBasedOnColor + 1;
+
+            if (rdIndex is >= 0 and < 64)
+            {
+                int RDcolorCode = isBlack(board[rdIndex]) ? Piece.Black : Piece.White;
+                if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode && board[rdIndex] != Piece.Empty)
+                    pawn.AddAllPossibleMoves(rdIndex);
+            }
+
+
+            int ldIndex = ApplyIndexBasedOnColor - 1;
+            if (ldIndex is >= 0 and < 64)
+            {
+                int LDcolorCode = isBlack(board[ldIndex]) ? Piece.Black : Piece.White;
+                if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
+                    pawn.AddAllPossibleMoves(ldIndex);
+            }
+
+
+            PawnCheckEnPassant(pawn, index, colCode, board);
+
+
+            //Prevent looping all times
+            return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
         }
-
-        int targetRow = ( ApplyIndexBasedOnColor )/ 8; // check if all moves are in same row ,front and front sides (Diagonals)
-        //RIGHT MOVE
-        int rdIndex = ApplyIndexBasedOnColor + 1;
-     
-        int RDcolorCode = isBlack(board[rdIndex]) ? Piece.Black : Piece.White;
-        if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode &&  board[rdIndex] != Piece.Empty )    
-            pawn.AddAllPossibleMoves(rdIndex);
-
-        int ldIndex = ApplyIndexBasedOnColor - 1;
-        int LDcolorCode = isBlack(board[ldIndex]) ? Piece.Black : Piece.White;
-        if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
-            pawn.AddAllPossibleMoves(ldIndex);
-        PawnCheckEnPassant(pawn, index, colCode, board);
-        
-        
-        //Prevent looping all times
-        return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
     
 
@@ -266,7 +285,7 @@ sealed class LegalMoves
         {
             if (board[i] != Piece.Empty) break;
             //Scan for opponent moves - in Advance
-            ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck);
+            ChessEngineSystem.Instance.CustomScanBoardForMoves(board , turnToCheck , "Checking Castlin -> Legal moves -> 269");
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
@@ -283,7 +302,7 @@ sealed class LegalMoves
           
             if (board[i] != Piece.Empty) break;
             //Scan for opponent moves
-            ChessEngineSystem.Instance.CustomScanBoardForMoves( board , turnToCheck);
+            ChessEngineSystem.Instance.CustomScanBoardForMoves( board , turnToCheck , "Checking castling QueenSide -> LegalMoves -> 286");
             foreach (var piece in GameStateManager.Instance.OppAllPiecesThatCanMove )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i))

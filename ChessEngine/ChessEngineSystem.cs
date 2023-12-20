@@ -97,12 +97,20 @@ namespace ChessEngine
 
         private void BotMove(ref BotBrain brain)
         {
-            Console.WriteLine($"Bot {GameStateManager.Instance.playerToMove.ToString()}  is  gonna make the move , Waiting ...");
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("--------------------------------------------------------------------------------------");
+                Console.WriteLine($"Bot {GameStateManager.Instance.playerToMove.ToString()}  is  gonna make the move , Waiting ...");
+            Console.ResetColor();
             Thread.Sleep(botDecisionDelay);
             
             //main issue is here
             ScanBoardForMoves();
-            brain.Think();
+            UtilityWriteToConsoleWithColor("Scanning Finished  bot gonna think", ConsoleColor.Red);
+            
+            brain.Think();          
+            UtilityWriteToConsoleWithColor("Bots thinking finished", ConsoleColor.DarkGreen);
+
             CheckForGameModeAndPerform();
             
             //Fix this
@@ -125,7 +133,15 @@ namespace ChessEngine
             
         }
 
-     
+        public void UtilityWriteToConsoleWithColor(string content, ConsoleColor color = ConsoleColor.Red)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(content);
+            Console.ResetColor();
+        }
+
+
+
 
 
 
@@ -245,31 +261,30 @@ namespace ChessEngine
        {
             
            Console.ForegroundColor = ConsoleColor.Yellow;
-           Console.WriteLine("Scanning board");
+           Console.WriteLine(" Main Scanning board");
            Console.ResetColor();
            board.ProcessMovesUpdate();
            
           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
        }
-       public void ScanBoardForMoves(string botName)
-       {
-            
-           Console.ForegroundColor = ConsoleColor.Yellow;
-           Console.WriteLine($" {botName} is Scanning board");
-           Console.ResetColor();
-           board.ProcessMovesUpdate();
-           
-           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
-       }
-        
+   
        
        // Used for any precomputes
-       public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour)
-       {
+       public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour , string reason)
+       {    
            Console.ForegroundColor = ConsoleColor.Red;
-           Console.WriteLine("Scannin board custom");
+           Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
            Console.ResetColor();
-           board.ProcessMovesUpdate(testBoard , toMoveColour);
+           try
+           {
+               board.ProcessMovesUpdate(testBoard , toMoveColour);
+           }
+           catch (Exception e)
+           {
+               Console.WriteLine(e);
+               throw;
+           }
+           
             
        }
 
