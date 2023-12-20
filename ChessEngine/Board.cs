@@ -233,7 +233,11 @@ namespace ChessEngine
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {
-                  Console.WriteLine("Trying to promote");
+                  Console.WriteLine("Trying to promote , not right now");
+                  KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                  ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
+                  eng.ExecuteCommand(movePawn);
+                  
                   //What about Capture and promote?
               }            
                 else  {
@@ -242,7 +246,7 @@ namespace ChessEngine
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
                     eng.ExecuteCommand(movePawn);
                     }   
-                    //What about en Passant??
+                  
                      break; 
           case Piece.Rook:
                     KingCheckCalculation(pColor,oldIndex,newIndex,p);
@@ -371,14 +375,17 @@ namespace ChessEngine
          Console.WriteLine($" -< King PreCheck Filtering  -  {count}  ->");
          Console.ResetColor();
          
-         // if (!hasLegalMoves)
-         // {
-         //     Console.WriteLine($"Checkmate {GameStateManager.Instance.GetOpponent(colCode)} Wins");
-         // }
+         if (!hasLegalMoves)
+         {  
+             
+             ChessEngineSystem.Instance.UtilityWriteToConsoleWithColor($"CHECKMATE {GameStateManager.Instance.GetOpponent(colCode)} wins");
+             
+             
+            
+         }
      }
 
-     
-     //playerToMove = playerToMove
+   
    
 
 

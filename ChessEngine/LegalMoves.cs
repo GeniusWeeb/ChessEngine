@@ -68,10 +68,8 @@ sealed class LegalMoves
     //going thru every  piece
     private ChessPiece GenerateMovesForPawn(int ind,int colCode, int[] board)
     {
-        try
-        {
-
-
+       
+        
             int index = ind;
             int thisColorCode = colCode;
             Pawn pawn = new Pawn(thisColorCode, ind);
@@ -79,8 +77,8 @@ sealed class LegalMoves
             int stepBasedOnColour = colCode == Piece.White ? pawn.pawnStep : -pawn.pawnStep;
             var ApplyIndexBasedOnColor = colCode == Piece.White ? index + stepBasedOnColour : index + stepBasedOnColour;
 
-            if (ApplyIndexBasedOnColor is < 0 or > 63)
-                return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
+            if (ApplyIndexBasedOnColor is < 0 or > 63) return null;
+            
 
             //front move -> normal move
             if (board[ApplyIndexBasedOnColor] == Piece.Empty)
@@ -88,13 +86,13 @@ sealed class LegalMoves
                 pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
                 if (ChessEngineSystem.Instance.IsPawnDefIndex(colCode, ind))
-                {
-                    if (ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64)
+                {   
+                  
+                    if ((ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64 ) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
                     {
-                        if (board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
-                        {
+                       
                             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
-                        }
+                        
                     }
                 }
             }
@@ -126,12 +124,8 @@ sealed class LegalMoves
 
             //Prevent looping all times
             return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        
+       
     }
     
 

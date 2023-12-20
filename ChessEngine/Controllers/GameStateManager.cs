@@ -16,6 +16,9 @@ public class GameStateManager
     public List<ChessPiece> pieces = new List<ChessPiece>();
     public int? player1MoveCol;
     public int? player2MoveCol; // 
+    
+    
+    //Default player to move -> Make black to make black move first
     public int playerToMove =  Piece.White;
 
     public List<ChessPiece> OppAllPiecesThatCanMove = new List<ChessPiece>();

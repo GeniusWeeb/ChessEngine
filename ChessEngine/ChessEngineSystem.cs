@@ -267,6 +267,9 @@ namespace ChessEngine
            
           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
        }
+       
+       
+     
    
        
        // Used for any precomputes
@@ -341,6 +344,25 @@ namespace ChessEngine
             CheckForGameModeAndPerform();
 
         }
+        
+        
+        // private void UndoCommand(string data)
+        // {
+        //     if (moveHistory.Count == 0) return; // no  more moves to make
+        //     GameStateManager.Instance.UpdateTurns();
+        //     Console.ForegroundColor = ConsoleColor.Cyan;
+        //     Console.ResetColor();
+        //     ICommand lastMove = moveHistory.Pop();
+        //     lastMove.Undo();
+        //     Console.ForegroundColor = ConsoleColor.Red;
+        //     Console.WriteLine($"Received Undo Command showing board\n");
+        //     Console.ResetColor();
+        //     board.ShowBoard();
+        //     GameStateManager.Instance.ResetMoves();
+        //     ScanBoardForMoves();
+        //     CheckForGameModeAndPerform();
+        //
+        // }
 
         public void ReloadEngine()
         { 
