@@ -79,7 +79,14 @@ namespace ChessEngine
         Console.WriteLine("Invalid Move");
             return false;
      }
-    
+
+
+    public void MakeMoveTest(int oldIndex, int newIndex, ChessPiece p  )
+    {       
+        int piece = chessBoard[oldIndex];
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
+        ShowBoard();
+    }
 
     private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     

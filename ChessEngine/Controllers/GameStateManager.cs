@@ -12,6 +12,7 @@ public class GameStateManager
 
 
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
+    public List<ChessPiece> allPiecesThatCanMoveClone = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
     public List<ChessPiece> pieces = new List<ChessPiece>();
     public int? player1MoveCol;
@@ -68,6 +69,8 @@ public class GameStateManager
             this.currentGameMode = GameMode.PlayerVsBot;
         else if (gMode.Equals(GameMode.BotVsBot.ToString()))
             this.currentGameMode = GameMode.BotVsBot;
+        else if (gMode.Equals(GameMode.PerfTest.ToString()))
+            this.currentGameMode = GameMode.PerfTest;
        
         
         //ui side player
@@ -155,6 +158,7 @@ public enum GameMode
     PlayerVsPlayer ,
     PlayerVsBot ,
     BotVsBot,
+    PerfTest,
     None
 }
 

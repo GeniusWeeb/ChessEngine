@@ -23,6 +23,9 @@ namespace ChessEngine
         private bool startingNewBoard = true;
 
         private bool isUndoRequest;
+
+
+        private PerfTest test = new PerfTest();
         
         public ChessEngineSystem()
         {
@@ -91,6 +94,11 @@ namespace ChessEngine
                     break;
                 case GameMode.PlayerVsPlayer :
                     break;
+                
+                case GameMode.PerfTest:
+                    test.PerFMoveFinal();
+                    break;
+                    
             }
         }
 
@@ -264,8 +272,7 @@ namespace ChessEngine
            Console.WriteLine(" Main Scanning board");
            Console.ResetColor();
            board.ProcessMovesUpdate();
-           
-          GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
+           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
        }
        
        
