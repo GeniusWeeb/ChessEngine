@@ -116,7 +116,7 @@ public static  class FenMapper
         string algebraic_new = files[file_index_new].ToString() + ranks[rank_index_new - 1].ToString();
 
         string result = algebraic_old + algebraic_new;
-        Console.WriteLine(result);
+        //Console.WriteLine(result);
 
         return result;
     }

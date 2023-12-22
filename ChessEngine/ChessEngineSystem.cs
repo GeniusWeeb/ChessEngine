@@ -269,7 +269,7 @@ namespace ChessEngine
        {
             
            Console.ForegroundColor = ConsoleColor.Yellow;
-           Console.WriteLine(" Main Scanning board");
+         //  Console.WriteLine(" Main Scanning board");
            Console.ResetColor();
            board.ProcessMovesUpdate();
            GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
@@ -283,7 +283,7 @@ namespace ChessEngine
        public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour , string reason)
        {    
            Console.ForegroundColor = ConsoleColor.Red;
-           Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
+          // Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
            Console.ResetColor();
            try
            {
