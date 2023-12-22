@@ -6,16 +6,31 @@ namespace ChessEngine;
 public class PerfTest
 {
     private bool firstScan = true;
-    private int customDepth = 3;
+    private int customDepth = 2;
     private readonly int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
     public void PerFMoveFinal()
     {
+        
+        StockFishAnalysisResults.moveCellsList.Clear();
 
         finalpos = (int)MoveGen(customDepth);
         Console.WriteLine($"Amount of positions generated {finalpos}");
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write($"Captured Pieces are  {StockFishAnalysisResults.capturedPieceCount}");
+     
+        
+        
+        Console.ResetColor();
+        Console.WriteLine("Showing all moves");
+        foreach (var moveData in  StockFishAnalysisResults.moveCellsList)
+        {
+            Console.WriteLine($"{moveData.name} : {moveData.count}");
+        }
+        
     }
 
 
@@ -59,7 +74,11 @@ public class PerfTest
             {
                this. currentColor = ChessEngineSystem.Instance.GetColorCode(p.piece.GetPieceCode);
                 // Make the move
+                
+                
                 ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(p.oldIndex, p.newIndex, p.piece);
+                StockFishAnalysisResults.AddToResults( FenMapper.IndexToAlgebric(p.oldIndex, p.newIndex));
+
                 ChessEngineSystem.Instance.UpdateUIWithNewIndex(p.oldIndex, p.newIndex);
 
                 // Recursively explore moves at the next depth

@@ -84,7 +84,12 @@ namespace ChessEngine
     public void MakeMoveTest(int oldIndex, int newIndex, ChessPiece p  )
     {       
         int piece = chessBoard[oldIndex];
+
+        CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
+
+
         PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
+
         ShowBoard();
     }
 
@@ -97,22 +102,30 @@ namespace ChessEngine
         
         switch (pCode)
         {
-            case 0: 
+            case 0:
+               
                // Console.WriteLine("0 point for Empty");
                 break;
             case 1: 
+                StockFishAnalysisResults.capturedPieceCount += 1;
+
                // Console.WriteLine("1 point for Pawn");
                 break;
             case 2:
+                StockFishAnalysisResults.capturedPieceCount += 1;
                // Console.WriteLine("2 points for Rook");
                 break;
             case 3: 
+                StockFishAnalysisResults.capturedPieceCount += 1;
                // Console.WriteLine("3 points for Knight");
                 break;
             case 4: 
+                StockFishAnalysisResults.capturedPieceCount += 1;
+
                // Console.WriteLine("4 points for Bishop");
                 break;
             case 6:// Console.WriteLine("6 points for Queen");
+                StockFishAnalysisResults.capturedPieceCount += 1;
                 break;
             
             
