@@ -388,7 +388,7 @@ sealed class LegalMoves
             int myNewPosition = currentIndex;
             myNewPosition  = myNewPosition + stepsICanMove;
             
-            while (myNewPosition > 0 && myNewPosition < 64)
+            while (myNewPosition >=0 && myNewPosition < 64)
             {
                 switch (stepsDirAndMove)
                 {
