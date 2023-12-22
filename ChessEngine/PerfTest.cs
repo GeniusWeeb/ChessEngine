@@ -9,7 +9,7 @@ public class PerfTest
     private int customDepth = 3;
     private readonly int moveDelay = 0;
     private int finalpos = 0;
-
+    int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
     public void PerFMoveFinal()
     {
@@ -21,25 +21,25 @@ public class PerfTest
 
     private int MoveGen(int depth)
     {
+        
         if (depth == 0)
             return 1;
         int numOfPositions = 0;
 
         if (!firstScan  )
         {
-            if (GameStateManager.Instance.playerToMove == 16)
-            {
-                GameStateManager.Instance.UpdateTurns();
+            if (GameStateManager.Instance.playerToMove == currentColor)
+                    
+            { GameStateManager.Instance.UpdateTurns();
                 GameStateManager.Instance.allPiecesThatCanMove.Clear();
-                ChessEngineSystem.Instance.ScanBoardForMoves();
-            }
+                ChessEngineSystem.Instance.ScanBoardForMoves(); }
 
         }
 
         List<PieceThatCanMove> moveList = new List<PieceThatCanMove>();
 
         foreach (var pieces in GameStateManager.Instance.allPiecesThatCanMove)
-            {
+        {
                 foreach (var moves in pieces.allPossibleMovesIndex)
                 {
 
@@ -57,9 +57,7 @@ public class PerfTest
         {
             try
             {
-
-
-
+               this. currentColor = ChessEngineSystem.Instance.GetColorCode(p.piece.GetPieceCode);
                 // Make the move
                 ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(p.oldIndex, p.newIndex, p.piece);
                 ChessEngineSystem.Instance.UpdateUIWithNewIndex(p.oldIndex, p.newIndex);
@@ -71,7 +69,7 @@ public class PerfTest
                 // Undo the move (backtrack)
                 Thread.Sleep(moveDelay); // Optional delay for visualization purposes
 
-                if (ChessEngineSystem.Instance.moveHistory.Count != 0)
+                if (ChessEngineSystem.Instance.moveHistory.Count > 0)
                 {
                     ICommand command = ChessEngineSystem.Instance.moveHistory.Pop();
                     command.Undo();
