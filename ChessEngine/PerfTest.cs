@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using Utility;
 
@@ -6,10 +7,10 @@ namespace ChessEngine;
 
 public class PerfTest
 {
-   
+    private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 1;
-    private  int moveDelay = 500;
+    private readonly int customDepth = 4;
+    private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
@@ -21,6 +22,7 @@ public class PerfTest
         Console.WriteLine("First to move is " + GameStateManager.Instance.playerToMove);
         ChessEngineSystem.Instance.ScanBoardForMoves();
         
+        
         foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
@@ -30,6 +32,7 @@ public class PerfTest
 
         }
         
+        watch.Start();
         foreach (var move in tempList)
         {
             
@@ -42,7 +45,11 @@ public class PerfTest
                 
         }
         
-
+        watch.Stop();
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine($"Moves generated in  {(float)(watch.ElapsedMilliseconds)}");
+        Console.ResetColor();
+        
         Console.ForegroundColor = ConsoleColor.Yellow;
       
         foreach (var move in PerftList)
@@ -56,7 +63,7 @@ public class PerfTest
         Console.WriteLine($"enPassant count is {GameStateManager.Instance.enPassantMoves}");
         Console.WriteLine($"Castling count is {GameStateManager.Instance.castlingCount}");
         Console.ResetColor();
-
+        
     }
     
 

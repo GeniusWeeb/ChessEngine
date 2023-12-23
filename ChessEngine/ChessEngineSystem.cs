@@ -45,7 +45,7 @@ namespace ChessEngine
         
         }
 
-        public int[] MapFen() => FenMapper.MapFen(TestFen);
+        public int[] MapFen() => FenMapper.MapFen();
 
         public void SetCurrentTurnToMove(int turn)
         {

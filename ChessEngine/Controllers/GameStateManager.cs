@@ -15,9 +15,9 @@ public class GameStateManager
     public int enPassantMoves = 0;
     public int castlingCount = 0;
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
-    public List<ChessPiece> allPiecesThatCanMoveClone = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
-    public List<ChessPiece> pieces = new List<ChessPiece>();
+    private List<ChessPiece> BlackPieces = new List<ChessPiece>();
+    private List<ChessPiece> WhitePieces = new List<ChessPiece>();
     public int? player1MoveCol;
     public int? player2MoveCol; // 
     
@@ -140,7 +140,8 @@ public class GameStateManager
      
      allPiecesThatCanMove.Clear();
      OppAllPiecesThatCanMove.Clear();
-     pieces.Clear();
+     WhitePieces.Clear();
+     BlackPieces.Clear();
      player1MoveCol = null;
      player2MoveCol = null;
      playerToMove = Piece.White;
@@ -155,6 +156,7 @@ public class GameStateManager
      captureCount = 0;
      checkCount = 0;
      enPassantMoves = 0;
+     castlingCount = 0;
     }
 
 

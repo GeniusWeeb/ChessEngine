@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using Utility;
 
 namespace ChessEngine;
@@ -6,11 +7,13 @@ namespace ChessEngine;
 
 sealed class LegalMoves
 {
+    private Stopwatch watch = new Stopwatch();
     // need to run like a time check on how long this takes to run and-
     // further optimize it
     public void CheckForMoves(ref int[] board, int colorToMove, List<ChessPiece> myTurnList)
     {
-
+        
+        
         if (myTurnList.Count != 0) return; // it has already been worked on
         for (int i = 0; i < board.Length; i++)
         {
@@ -61,6 +64,7 @@ sealed class LegalMoves
             }
         }
 
+      
         //This wraps up all the moves, we need the FINISHED ALL PIECES THAT CAN MAKE MOVE
 
     }
