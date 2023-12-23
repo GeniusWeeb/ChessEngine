@@ -10,7 +10,9 @@ using Utility;
 namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
-    {       
+    {   
+        public bool useUI = true;
+        public string TestFen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -44,8 +46,13 @@ namespace ChessEngine
         }
 
         public int[] MapFen() => FenMapper.MapFen();
-       
-        
+
+        public void SetCurrentTurnToMove(int turn)
+        {
+            GameStateManager.Instance.playerToMove = turn;
+        }
+
+        public int GetPlayerToMove => GameStateManager.Instance.playerToMove;
         public void Init()
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -255,7 +262,8 @@ namespace ChessEngine
 
         public void SendDataToUI <T>(T data)
        {
-          
+           if(!useUI) return; 
+           
             string toSend = JsonConvert.SerializeObject(data);
             Connection.Instance.Send(toSend);
         }
@@ -269,7 +277,7 @@ namespace ChessEngine
        {
             
            Console.ForegroundColor = ConsoleColor.Yellow;
-           Console.WriteLine(" Main Scanning board");
+         //  Console.WriteLine(" Main Scanning board");
            Console.ResetColor();
            board.ProcessMovesUpdate();
            GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
@@ -283,7 +291,7 @@ namespace ChessEngine
        public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour , string reason)
        {    
            Console.ForegroundColor = ConsoleColor.Red;
-           Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
+          // Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
            Console.ResetColor();
            try
            {

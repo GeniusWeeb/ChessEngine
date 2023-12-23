@@ -17,6 +17,7 @@ public static  class FenMapper
     {
         int[] board = new int[64]; 
         string fen = notation.Split(" ")[0];
+        string turn = notation.Split(" ")[1];
         Console.WriteLine(fen);
         int rank = 7, file = 0;
         
@@ -45,6 +46,7 @@ public static  class FenMapper
             }
         }
         
+        GameStateManager.Instance.UpdateTurnFromFen(turn);
         return board;
     }
 
@@ -101,6 +103,25 @@ public static  class FenMapper
         return (oldIndex,newIndex);
     }
 
+
+    public static string IndexToAlgebric(int oldIndex, int newIndex)
+    {
+        string files = "abcdefgh";
+        string ranks = "12345678";
+
+        int file_index_old = (oldIndex % 8);
+        int rank_index_old = (oldIndex / 8) + 1;
+        string algebraic_old = files[file_index_old].ToString() + ranks[rank_index_old - 1].ToString();
+
+        int file_index_new = (newIndex % 8);
+        int rank_index_new = (newIndex / 8) + 1;
+        string algebraic_new = files[file_index_new].ToString() + ranks[rank_index_new - 1].ToString();
+
+        string result = algebraic_old + algebraic_new;
+        //Console.WriteLine(result);
+
+        return result;
+    }
 
 
 }
