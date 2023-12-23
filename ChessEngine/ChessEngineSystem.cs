@@ -11,8 +11,8 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {
-
-        public string TestFen = "rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq b3 0 1";
+        public bool useUI = false;
+        public string TestFen = "rnbqkbnr/1ppppppp/p7/8/1P6/8/P1PPPPPP/RNBQKBNR w KQkq - 0 2";
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -45,9 +45,14 @@ namespace ChessEngine
         
         }
 
-        public int[] MapFen() => FenMapper.MapFen(TestFen);
-       
-        
+        public int[] MapFen() => FenMapper.MapFen();
+
+        public void SetCurrentTurnToMove(int turn)
+        {
+            GameStateManager.Instance.playerToMove = turn;
+        }
+
+        public int GetPlayerToMove => GameStateManager.Instance.playerToMove;
         public void Init()
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -257,7 +262,8 @@ namespace ChessEngine
 
         public void SendDataToUI <T>(T data)
        {
-          
+           if(!useUI) return; 
+           
             string toSend = JsonConvert.SerializeObject(data);
             Connection.Instance.Send(toSend);
         }

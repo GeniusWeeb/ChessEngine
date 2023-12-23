@@ -86,8 +86,7 @@ namespace ChessEngine
         int piece = chessBoard[oldIndex];
 
         CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
-
-
+        GameStateManager.Instance.UpdateTurns();
         PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
 
         //ShowBoard();
@@ -190,13 +189,15 @@ namespace ChessEngine
 
      public bool CheckIfPawnDefaultIndex(int pColor , int index)
      {
-
-         foreach (var p in pawnDefaultIndex )
+         switch (index / 8)
          {
-             if (p.colorCode == pColor && p.indexCode == index)  // False if White piece at a Black piece default index
+             case 1 when pColor == Piece.White:
+             case 6 when pColor == Piece.Black:
                  return true;
+             
          }
-         return false; 
+
+         return false;
      }
 
         

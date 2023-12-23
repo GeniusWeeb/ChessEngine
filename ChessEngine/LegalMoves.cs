@@ -90,7 +90,6 @@ sealed class LegalMoves
                   
                     if ((ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64 ) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
                     {
-                       
                             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
                         
                     }

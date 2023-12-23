@@ -26,7 +26,8 @@
 
 
 public class MoveCommand : Command
-{   
+{
+   
    protected  int currentCell;
    protected int targetCell ;
 
@@ -43,7 +44,7 @@ public class MoveCommand : Command
             this.currentCell = currnt ;
             this.targetCell = target ;
             this.engine = eng;
-                   
+        
     }
 
 
@@ -71,6 +72,7 @@ public class MoveCommand : Command
          engine.GetBoardClass.chessBoard[targetCell] =  capturedPiece;
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
          this.capturedPiece = Piece.Empty;
+       
 
     }
 
@@ -78,7 +80,8 @@ public class MoveCommand : Command
 
     
 public class CastlingCommand : Command
-{   
+{
+    
     private int kingDefaultCell ;
     private int kingNewCell;
     private int RookDefaultCell;
@@ -98,6 +101,7 @@ public class CastlingCommand : Command
         this.kingNewCell= KingN ;
         this.color =  pColor;
         this.engine = eng ;
+      
     }
 
     public override void Execute()
@@ -147,7 +151,7 @@ public class CastlingCommand : Command
         engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
         engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
       
-        
+       
         Console.WriteLine("Castling Undo happening now");
            
     }
@@ -175,7 +179,8 @@ public class CastlingCommand : Command
 
 
 public class RookMoveCommand : Command
-{   
+{
+ 
     int currentCell ;
     int targetCell;
     
@@ -189,6 +194,8 @@ public class RookMoveCommand : Command
 
     bool WKingSideRook;
     bool WQueenSideRook;
+    
+    
 
 
     
@@ -201,6 +208,7 @@ public class RookMoveCommand : Command
         this.targetCell =  newCell;
         this.pColor = color;
         this.targetCheck = old % 8 ; //file 0 or 7
+      
     }
 
     public override void Execute()
@@ -256,6 +264,7 @@ public class RookMoveCommand : Command
     engine.UpdateUIWithNewIndex(targetCell, currentCell,capturedPiece );
     capturedPiece = Piece.Empty;
 
+
     }
 
     public override (int, int)? GetInfo()
@@ -272,6 +281,7 @@ public class kingMoveCommand : MoveCommand
     public kingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color) : base(currnt, target, eng)
     {
         pColor = color;
+        // = eng.Get//;
     }
 
     public override void Execute()
@@ -310,12 +320,14 @@ public class kingMoveCommand : MoveCommand
 
 }
     public class EnPassantCommand : MoveCommand
-    {
+    {   
+        
         private int capturedPawnIndex;
         
         public EnPassantCommand(int currnt, int target, ChessEngineSystem eng ,int capPawnIndex ) : base(currnt, target, eng)
         {
             capturedPawnIndex = capPawnIndex;
+            // = eng.Get//;
         }
 
 
@@ -338,6 +350,7 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
             engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece, capturedPawnIndex);
             this.capturedPiece = Piece.Empty;
+         
 
         }
     }    

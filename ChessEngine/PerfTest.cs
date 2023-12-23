@@ -1,122 +1,107 @@
 using System.Data;
+using System.Security.Cryptography;
 using Utility;
 
 namespace ChessEngine;
 
 public class PerfTest
 {
+   
     private bool firstScan = true;
-    private int customDepth = 2;
-    private readonly int moveDelay = 1000;
+    private readonly int customDepth = 5;
+    private  float moveDelay = 0f;
     private int finalpos = 0;
     int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
     private List<ShowMoveList> PerftList = new List<ShowMoveList>();
     public void PerFMoveFinal()
     {
-        Console.WriteLine($"current player to turn is {GameStateManager.Instance.playerToMove}"); 
+        int nodes = 0;
+        GameStateManager.Instance.allPiecesThatCanMove.Clear();
         ChessEngineSystem.Instance.ScanBoardForMoves();
-        finalpos = (int)MoveGen(customDepth);
-        // Console.ForegroundColor = ConsoleColor.Cyan;
-        // foreach (var move in PerftList)
-        // {
-        //     Console.WriteLine($"{move.moveName}:  {move.count}");
-        //     finalpos += move.count;
-        //
-        // }
-        Console.ResetColor();
-        Console.WriteLine($"Amount of positions generated {finalpos}");
-     
-            
-    }
-
-
-    private int MoveGen(int depth)
-    {           
-        int numOfPositions = 0;
-        int childCount = 0;
-        
-        if (depth == 0)
-            return 1;
-        
-
-        if (!firstScan  )
+        foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node
         {
-            if (GameStateManager.Instance.playerToMove == currentColor)
-                    
-            {   GameStateManager.Instance.UpdateTurns();
-                GameStateManager.Instance.allPiecesThatCanMove.Clear();
-                ChessEngineSystem.Instance.ScanBoardForMoves(); }
-
-        }
-
-        List<PieceThatCanMove> moveList = new List<PieceThatCanMove>();
-
-        foreach (var pieces in GameStateManager.Instance.allPiecesThatCanMove)
-        {
-                foreach (var moves in pieces.allPossibleMovesIndex)
-                {
-
-                    moveList.Add(new PieceThatCanMove(pieces, pieces.GetCurrentIndex, moves));
-                }
-        }
-
-        if (firstScan)
-        {
-            tempList = moveList;
-            firstScan = false;
-        }
-
-        
-        foreach (var p in moveList)
-        {
-            try
-            { 
-               this. currentColor = ChessEngineSystem.Instance.GetColorCode(p.piece.GetPieceCode);
-                // Make the move
-                ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(p.oldIndex, p.newIndex, p.piece);
-                ChessEngineSystem.Instance.UpdateUIWithNewIndex(p.oldIndex, p.newIndex);
-                // Recursively explore moves at the next depth
-                numOfPositions += MoveGen(depth - 1);
-
-                if (depth == customDepth)
-                {
-                    Console.WriteLine($"{FenMapper.IndexToAlgebric(p.oldIndex,p.newIndex)} {numOfPositions}");
-                    PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(p.oldIndex,p.newIndex), numOfPositions));     
-                    numOfPositions = 0;
-                }
-
-                // Undo the move (backtrack)
-                Thread.Sleep(moveDelay); // Optional delay for visualization purposes
-
-                if (ChessEngineSystem.Instance.moveHistory.Count > 0)
-                {
-                    ICommand command = ChessEngineSystem.Instance.moveHistory.Pop();
-                    command.Undo();
-                }
-                
-                // Console.WriteLine("----------------------------------------------------------------");
-                // Console.ForegroundColor = ConsoleColor.Red;
-                // Console.WriteLine("Showing board after undo");
-                // ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
-                // Console.ResetColor();
-                // Console.WriteLine("----------------------------------------------------------------");
-
-                //  Console.WriteLine($"Move count left  -> {ChessEngineSystem.Instance.moveHistory.Count}");
-
-
-            }
-            catch (Exception e)
+            foreach (var movesIndex in piece.allPossibleMovesIndex)
             {
-                Console.WriteLine(e);
-                throw;
+                tempList.Add(new PieceThatCanMove(piece , piece.GetCurrentIndex, movesIndex));
             }
-            
 
         }
         
-        return numOfPositions;
+        foreach (var move in tempList)
+        {
+            
+            ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(move.oldIndex, move.newIndex,move.piece);
+            ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.oldIndex, move.newIndex);
+            nodes =RunPerft(customDepth-1);
+            Thread.Sleep((int)(moveDelay));
+            Console.WriteLine($"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)}-" + nodes);
+            PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex),nodes));
+            UnMakeMove();
+                
+        }
+        
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        foreach (var move in PerftList)
+        {
+            finalpos += move.count;
+            Console.WriteLine($"{move.moveName}- {move.count}");
+        }
+        Console.WriteLine($"Total positions are {finalpos}");
+        Console.ResetColor();
+
     }
+    
+
+    private int RunPerft(int currentDepth )
+    {   
+       
+        int nodeCount = 0;
+        if (currentDepth == 0)
+        {   
+            return 1;
+        }
+     
+      
+        List<PieceThatCanMove> currentList = new List<PieceThatCanMove>();
+        GameStateManager.Instance.allPiecesThatCanMove.Clear();
+        ChessEngineSystem.Instance.ScanBoardForMoves();
+        foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node
+        {
+            foreach (var movesIndex in piece.allPossibleMovesIndex)
+            {
+                currentList.Add(new PieceThatCanMove(piece , piece.GetCurrentIndex, movesIndex));
+            }
+        }
+        foreach (var move in currentList)
+        {
+                
+            ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(move.oldIndex, move.newIndex,move.piece);
+            ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.oldIndex, move.newIndex);
+            nodeCount += RunPerft(currentDepth-1);
+            Thread.Sleep((int)(moveDelay));
+            UnMakeMove();
+          
+                
+        }
+        return nodeCount;
+
+    }
+
+
+    private void UnMakeMove()
+    {
+        Stack<ICommand> moveHistory = ChessEngineSystem.Instance.moveHistory;
+        if ( moveHistory.Count > 0)
+        {
+            ICommand lastMove = moveHistory.Pop();
+            lastMove.Undo();
+            GameStateManager.Instance.UpdateTurns();
+            
+        }
+    }
+
 }
 
 
