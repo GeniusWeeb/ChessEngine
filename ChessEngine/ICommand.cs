@@ -108,6 +108,7 @@ public class CastlingCommand : Command
     {
         switch(color)
         {
+          
             case  Piece.Black:  
                  if (kingNewCell > kingDefaultCell)  
                         PerformCastle(-1,63);
@@ -115,6 +116,7 @@ public class CastlingCommand : Command
                         PerformCastle(+1, 56);      
                      
          Console.WriteLine("Black Castling is confirmed");
+                 GameStateManager.Instance.castlingCount += 1;        
          GameStateManager.Instance.isBlackCastlingAvailable = false;
          engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
@@ -126,6 +128,7 @@ public class CastlingCommand : Command
                     PerformCastle(+1,0);      
                      
          Console.WriteLine("White Castling is confirmed");
+                 GameStateManager.Instance.castlingCount += 1; 
          GameStateManager.Instance.isWhiteCastlingAvailable = false; 
          engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;

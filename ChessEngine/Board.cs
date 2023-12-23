@@ -105,21 +105,29 @@ namespace ChessEngine
                
                // Console.WriteLine("0 point for Empty");
                 break;
-            case 1: 
-
+            case 1:
+                GameStateManager.Instance.captureCount += 1;
                // Console.WriteLine("1 point for Pawn");
                 break;
             case 2:
+                GameStateManager.Instance.captureCount += 1;
+
                // Console.WriteLine("2 points for Rook");
                 break;
             case 3: 
+                GameStateManager.Instance.captureCount += 1;
+
                // Console.WriteLine("3 points for Knight");
                 break;
             case 4: 
+                GameStateManager.Instance.captureCount += 1;
 
                // Console.WriteLine("4 points for Bishop");
                 break;
+            
             case 6:// Console.WriteLine("6 points for Queen");
+                GameStateManager.Instance.captureCount += 1;
+
                 break;
             
             
@@ -235,7 +243,7 @@ namespace ChessEngine
           case Piece.Pawn:
               if (newIndex == p.specialIndex)
               {
-                  Console.WriteLine("En Passant done !");
+                 
                   var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
@@ -243,7 +251,7 @@ namespace ChessEngine
                   KingCheckCalculation(pColor,oldIndex,newIndex,p);
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal);
                   eng.ExecuteCommand(enPassMoveCommand);
-                  
+                  GameStateManager.Instance.enPassantMoves += 1;
                   Console.WriteLine($"Executed En Passant at {cellFinal}");
                   //Execute command and keep track
               }
@@ -312,6 +320,7 @@ namespace ChessEngine
                  if (chessBoard[movesIndex] == King)
                  {
                      Console.WriteLine($"{King}King is in check");
+                     GameStateManager.Instance.checkCount += 1;
                      return true;
                  }
              }

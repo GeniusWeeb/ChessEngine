@@ -10,7 +10,10 @@ public class GameStateManager
     //default setting
     private GameMode currentGameMode;
 
-
+    public int captureCount = 0;
+    public int checkCount = 0;
+    public int enPassantMoves = 0;
+    public int castlingCount = 0;
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
     public List<ChessPiece> allPiecesThatCanMoveClone = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
@@ -149,6 +152,9 @@ public class GameStateManager
      blackQueenSideRookMoved = false;
      whiteKingSideRookMoved = false;
      whiteQueenSideRookMoved = false;
+     captureCount = 0;
+     checkCount = 0;
+     enPassantMoves = 0;
     }
 
 

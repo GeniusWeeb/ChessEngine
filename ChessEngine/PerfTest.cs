@@ -8,8 +8,8 @@ public class PerfTest
 {
    
     private bool firstScan = true;
-    private readonly int customDepth = 5;
-    private  float moveDelay = 0f;
+    private readonly int customDepth = 1;
+    private  int moveDelay = 500;
     private int finalpos = 0;
     int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
@@ -18,7 +18,9 @@ public class PerfTest
     {
         int nodes = 0;
         GameStateManager.Instance.allPiecesThatCanMove.Clear();
+        Console.WriteLine("First to move is " + GameStateManager.Instance.playerToMove);
         ChessEngineSystem.Instance.ScanBoardForMoves();
+        
         foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
@@ -35,7 +37,6 @@ public class PerfTest
             ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.oldIndex, move.newIndex);
             nodes =RunPerft(customDepth-1);
             Thread.Sleep((int)(moveDelay));
-            Console.WriteLine($"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)}-" + nodes);
             PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex),nodes));
             UnMakeMove();
                 
@@ -43,12 +44,17 @@ public class PerfTest
         
 
         Console.ForegroundColor = ConsoleColor.Yellow;
+      
         foreach (var move in PerftList)
         {
             finalpos += move.count;
             Console.WriteLine($"{move.moveName}- {move.count}");
         }
         Console.WriteLine($"Total positions are {finalpos}");
+        Console.WriteLine($"Captured pieces are {GameStateManager.Instance.captureCount}");
+        Console.WriteLine($"Check count is {GameStateManager.Instance.checkCount}");
+        Console.WriteLine($"enPassant count is {GameStateManager.Instance.enPassantMoves}");
+        Console.WriteLine($"Castling count is {GameStateManager.Instance.castlingCount}");
         Console.ResetColor();
 
     }

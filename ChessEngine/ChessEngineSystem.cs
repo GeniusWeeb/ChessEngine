@@ -10,9 +10,9 @@ using Utility;
 namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
-    {
-        public bool useUI = false;
-        public string TestFen = "rnbqkbnr/1ppppppp/p7/8/1P6/8/P1PPPPPP/RNBQKBNR w KQkq - 0 2";
+    {   
+        public bool useUI = true;
+        public string TestFen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -45,7 +45,7 @@ namespace ChessEngine
         
         }
 
-        public int[] MapFen() => FenMapper.MapFen();
+        public int[] MapFen() => FenMapper.MapFen(TestFen);
 
         public void SetCurrentTurnToMove(int turn)
         {
