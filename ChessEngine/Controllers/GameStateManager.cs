@@ -36,10 +36,14 @@ public class GameStateManager
     public bool whiteQueenSideRookMoved = false;
 
 
+    public void UpdateTurnFromFen(string t)
+    {
+        playerToMove = t == "w" ? Piece.White : Piece.Black;
+      
+    }
 
-    
-    
-    
+
+
     public static GameStateManager Instance { get; private set; }
     public int GetTurnToMove =>playerToMove;
 

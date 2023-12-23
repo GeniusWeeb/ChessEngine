@@ -10,7 +10,9 @@ using Utility;
 namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
-    {       
+    {
+
+        public string TestFen = "rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq b3 0 1";
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -43,7 +45,7 @@ namespace ChessEngine
         
         }
 
-        public int[] MapFen() => FenMapper.MapFen();
+        public int[] MapFen() => FenMapper.MapFen(TestFen);
        
         
         public void Init()

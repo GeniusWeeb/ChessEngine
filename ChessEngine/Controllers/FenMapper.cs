@@ -17,6 +17,7 @@ public static  class FenMapper
     {
         int[] board = new int[64]; 
         string fen = notation.Split(" ")[0];
+        string turn = notation.Split(" ")[1];
         Console.WriteLine(fen);
         int rank = 7, file = 0;
         
@@ -45,6 +46,7 @@ public static  class FenMapper
             }
         }
         
+        GameStateManager.Instance.UpdateTurnFromFen(turn);
         return board;
     }
 

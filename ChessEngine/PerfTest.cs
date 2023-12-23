@@ -6,32 +6,33 @@ namespace ChessEngine;
 public class PerfTest
 {
     private bool firstScan = true;
-    private int customDepth = 3;
-    private readonly int moveDelay = 0;
+    private int customDepth = 2;
+    private readonly int moveDelay = 1000;
     private int finalpos = 0;
     int currentColor;
     private List<PieceThatCanMove> tempList = new List<PieceThatCanMove>();
     private List<ShowMoveList> PerftList = new List<ShowMoveList>();
     public void PerFMoveFinal()
     {
+        Console.WriteLine($"current player to turn is {GameStateManager.Instance.playerToMove}"); 
+        ChessEngineSystem.Instance.ScanBoardForMoves();
         finalpos = (int)MoveGen(customDepth);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        foreach (var move in PerftList)
-        {
-            Console.WriteLine($"{move.moveName} -> {move.count}");
-            finalpos += move.count;
-
-        }
+        // Console.ForegroundColor = ConsoleColor.Cyan;
+        // foreach (var move in PerftList)
+        // {
+        //     Console.WriteLine($"{move.moveName}:  {move.count}");
+        //     finalpos += move.count;
+        //
+        // }
         Console.ResetColor();
-        
         Console.WriteLine($"Amount of positions generated {finalpos}");
      
-        
+            
     }
 
 
     private int MoveGen(int depth)
-    {       
+    {           
         int numOfPositions = 0;
         int childCount = 0;
         
@@ -43,7 +44,7 @@ public class PerfTest
         {
             if (GameStateManager.Instance.playerToMove == currentColor)
                     
-            { GameStateManager.Instance.UpdateTurns();
+            {   GameStateManager.Instance.UpdateTurns();
                 GameStateManager.Instance.allPiecesThatCanMove.Clear();
                 ChessEngineSystem.Instance.ScanBoardForMoves(); }
 
@@ -80,7 +81,7 @@ public class PerfTest
 
                 if (depth == customDepth)
                 {
-                  //  Console.WriteLine($"{FenMapper.IndexToAlgebric(p.oldIndex,p.newIndex)} {numOfPositions}");
+                    Console.WriteLine($"{FenMapper.IndexToAlgebric(p.oldIndex,p.newIndex)} {numOfPositions}");
                     PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(p.oldIndex,p.newIndex), numOfPositions));     
                     numOfPositions = 0;
                 }
@@ -93,9 +94,7 @@ public class PerfTest
                     ICommand command = ChessEngineSystem.Instance.moveHistory.Pop();
                     command.Undo();
                 }
-
-               
-
+                
                 // Console.WriteLine("----------------------------------------------------------------");
                 // Console.ForegroundColor = ConsoleColor.Red;
                 // Console.WriteLine("Showing board after undo");
@@ -115,13 +114,23 @@ public class PerfTest
             
 
         }
-
-            
-            
         
         return numOfPositions;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public struct PieceThatCanMove
 {
