@@ -16,8 +16,9 @@ public class GameStateManager
     public int castlingCount = 0;
     public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
     private LegalMoves moves = new LegalMoves();
-    private List<ChessPiece> BlackPieces = new List<ChessPiece>();
-    private List<ChessPiece> WhitePieces = new List<ChessPiece>();
+    
+    public List<int>blackPiecesIndexOnBoard = new List<int>(); //just index
+    public List<int>whitePiecesIndexOnBoard = new List<int>(); //just index -> parse this while scanning move and add to allPiecesThatCanMove
     public int? player1MoveCol;
     public int? player2MoveCol; // 
     
@@ -100,8 +101,14 @@ public class GameStateManager
         
  
     }
-    
-    
+
+    public void CleanSideList()
+    {
+        blackPiecesIndexOnBoard.Clear();
+        whitePiecesIndexOnBoard.Clear();
+    }
+
+
     //Overloading so that , even the Ai can scan the board at any time
     public void ProcessMoves(ref int[] board , int customToMove)
     {   
@@ -140,8 +147,8 @@ public class GameStateManager
      
      allPiecesThatCanMove.Clear();
      OppAllPiecesThatCanMove.Clear();
-     WhitePieces.Clear();
-     BlackPieces.Clear();
+     whitePiecesIndexOnBoard.Clear();
+     blackPiecesIndexOnBoard.Clear();
      player1MoveCol = null;
      player2MoveCol = null;
      playerToMove = Piece.White;

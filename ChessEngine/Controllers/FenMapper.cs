@@ -13,7 +13,7 @@ public static  class FenMapper
     
     //Fen start from top left to right
     //We mostly only need the TILL THE INITIAL SPACE for BOARD REPRESENTATION
-    public static int[] MapFen(string notation = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    public static int[] MapFen(string notation = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1")
     {
         int[] board = new int[64]; 
         string fen = notation.Split(" ")[0];

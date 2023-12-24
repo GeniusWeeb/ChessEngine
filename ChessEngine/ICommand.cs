@@ -14,7 +14,8 @@
     
     public abstract class Command : ICommand 
     {   
-        
+        protected List<int> blackPieceOnBoard = new List<int>();
+        protected List<int> whitePiecesOnBoard = new List<int>();
         public abstract void Execute();
         public abstract void Undo();
 
@@ -30,10 +31,9 @@ public class MoveCommand : Command
    
    protected  int currentCell;
    protected int targetCell ;
-
-  protected  int capturedPiece;
-
-    protected ChessEngineSystem engine ;
+   protected  int capturedPiece;
+   protected ChessEngineSystem engine ;
+  
 
 
     //promotion //en Passant
@@ -44,6 +44,10 @@ public class MoveCommand : Command
             this.currentCell = currnt ;
             this.targetCell = target ;
             this.engine = eng;
+            blackPieceOnBoard = GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+            whitePiecesOnBoard = GameStateManager.Instance.whitePiecesIndexOnBoard.ToList();
+            
+            
         
     }
 
@@ -51,10 +55,12 @@ public class MoveCommand : Command
     //Processed in Engine from UI or the board itself
     public override void Execute()
     {   
+        
         this.capturedPiece = engine.GetBoardClass.chessBoard[targetCell];
         engine.GetBoardClass.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
         engine.GetBoardClass.chessBoard[currentCell] =  Piece.Empty ;
-      
+       
+
     }
 
 
@@ -72,7 +78,13 @@ public class MoveCommand : Command
          engine.GetBoardClass.chessBoard[targetCell] =  capturedPiece;
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
          this.capturedPiece = Piece.Empty;
-       
+         
+        
+         GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
+         GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
+         
+         Console.WriteLine("Black pieces count cached is "+ blackPieceOnBoard.Count);
+
 
     }
 
@@ -89,6 +101,7 @@ public class CastlingCommand : Command
 
     private int color;
     private ChessEngineSystem engine ;
+   
 
     //When castling is  confirmed , not king or Rook move. Different for them.
     //when king moved -> castling is cancelled anyways .
@@ -101,6 +114,8 @@ public class CastlingCommand : Command
         this.kingNewCell= KingN ;
         this.color =  pColor;
         this.engine = eng ;
+        blackPieceOnBoard = GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+        whitePiecesOnBoard = GameStateManager.Instance.whitePiecesIndexOnBoard.ToList();
       
     }
 
@@ -151,10 +166,9 @@ public class CastlingCommand : Command
         engine.GetBoardClass.chessBoard[RookDefaultCell] = engine.GetBoardClass.chessBoard[RookNewCell];
         engine.GetBoardClass.chessBoard[kingNewCell] = Piece.Empty;
         engine.GetBoardClass.chessBoard[RookNewCell] = Piece.Empty;
-        engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
-        engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
-      
-       
+        GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
+        GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
+        
         Console.WriteLine("Castling Undo happening now");
            
     }
@@ -174,6 +188,10 @@ public class CastlingCommand : Command
             engine.GetBoardClass.chessBoard[rookCell] = Piece.Empty;
             RookNewCell = kingNewCell + step;
             this.RookDefaultCell = rookCell;
+            var side = GameStateManager.Instance.playerToMove == Piece.White
+                ? GameStateManager.Instance.whitePiecesIndexOnBoard
+                : GameStateManager.Instance.blackPiecesIndexOnBoard;
+            engine.GetBoardClass.UpdateSideIndex(RookDefaultCell, RookNewCell ,side  );
             Console.WriteLine($" CRook new cell is  {RookNewCell}");
           
     }
@@ -211,6 +229,8 @@ public class RookMoveCommand : Command
         this.targetCell =  newCell;
         this.pColor = color;
         this.targetCheck = old % 8 ; //file 0 or 7
+        blackPieceOnBoard = GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+        whitePiecesOnBoard = GameStateManager.Instance.whitePiecesIndexOnBoard.ToList();
       
     }
 
@@ -268,6 +288,8 @@ public class RookMoveCommand : Command
     capturedPiece = Piece.Empty;
 
 
+    GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
+    GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
     }
 
     public override (int, int)? GetInfo()
@@ -285,6 +307,8 @@ public class kingMoveCommand : MoveCommand
     {
         pColor = color;
         // = eng.Get//;
+        blackPieceOnBoard = GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+        whitePiecesOnBoard = GameStateManager.Instance.whitePiecesIndexOnBoard.ToList();
     }
 
     public override void Execute()
@@ -331,6 +355,8 @@ public class kingMoveCommand : MoveCommand
         {
             capturedPawnIndex = capPawnIndex;
             // = eng.Get//;
+            blackPieceOnBoard = GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+            whitePiecesOnBoard = GameStateManager.Instance.whitePiecesIndexOnBoard.ToList();
         }
 
 
@@ -340,7 +366,6 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
             engine.GetBoardClass.chessBoard[currentCell] =  Piece.Empty ;
             engine.GetBoardClass.chessBoard[capturedPawnIndex] =  Piece.Empty ; 
-            
             Console.WriteLine($"en Passant executed , caching the captured index -> {capturedPawnIndex}");
             engine.UpdateUIWithNewIndex(capturedPawnIndex);
           
@@ -351,6 +376,8 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
             engine.GetBoardClass.chessBoard[capturedPawnIndex] = capturedPiece;
             engine.GetBoardClass.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
+            GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
+            GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
             engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece, capturedPawnIndex);
             this.capturedPiece = Piece.Empty;
          
