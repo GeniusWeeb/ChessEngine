@@ -12,7 +12,8 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
+        public string TestFen = "r4rk1/1pp1qppp/p1np1n2/2b1p1Bb/2B1P3/P1NP1N2/1PP1QPPP/R4R1K w - - 2 11";
+       
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -45,7 +46,7 @@ namespace ChessEngine
         
         }
 
-        public int[] MapFen() => FenMapper.MapFen();
+        public int[] MapFen() => FenMapper.MapFen(TestFen);
 
         public void SetCurrentTurnToMove(int turn)
         {

@@ -44,6 +44,27 @@ public class GameStateManager
         playerToMove = t == "w" ? Piece.White : Piece.Black;
       
     }
+    
+    //k32 stands for KingSide castling for Black color , small k means black
+    //Q32 stands for queenside castling for White color
+    public void UpdateCastlingStateFromFen( bool K16 , bool Q16,bool k32 ,bool q32 )
+    {
+        whiteKingSideRookMoved = K16;
+        whiteQueenSideRookMoved = Q16;
+
+        blackKingSideRookMoved = k32;
+        blackQueenSideRookMoved = q32;
+
+    }
+    //Both castling unavailable
+    public void UpdateCastlingStateFromFen(bool WFalse , bool BFalse)
+    {
+        Console.WriteLine($"Castling allowed for white black? {WFalse}{BFalse}");
+       
+        isWhiteCastlingAvailable = WFalse;
+        isBlackCastlingAvailable = BFalse;
+
+    }
 
 
 

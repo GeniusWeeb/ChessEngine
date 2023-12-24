@@ -9,7 +9,7 @@ namespace Utility;
 public static  class FenMapper
 {
     private static string defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    private static string alteredFEn = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    
     
     //Fen start from top left to right
     //We mostly only need the TILL THE INITIAL SPACE for BOARD REPRESENTATION
@@ -18,6 +18,7 @@ public static  class FenMapper
         int[] board = new int[64]; 
         string fen = notation.Split(" ")[0];
         string turn = notation.Split(" ")[1];
+        string castlingData = notation.Split(" ")[2];
         Console.WriteLine(fen);
         int rank = 7, file = 0;
         
@@ -45,8 +46,49 @@ public static  class FenMapper
                 }
             }
         }
-        
+
+        bool WhiteCastling = true;
+        bool BlackCastling = true;
+        bool K16 = false, Q16 = false, k32 = false, q32 = false;
+        int sideCount = 0;
+
+        for (int i = 0; i < castlingData.Length; i++)
+        {   
+            Console.WriteLine("First index is " + castlingData[i]);
+            if (castlingData.Length == 1 && castlingData[i] == '-')
+            {
+                Console.WriteLine("Both are false");
+                WhiteCastling = false;
+                BlackCastling = false;
+                break;
+            }
+
+            if (castlingData[i] == '-' & i == 0)
+                WhiteCastling = false;
+            else if (castlingData[i] == '-' & i == 1)
+                BlackCastling = false;
+            else switch (castlingData[i])
+            {
+                case 'K':
+                    K16 = false;
+                    break;
+                case 'Q':
+                    Q16 = false;
+                    break;
+                case 'k':
+                    k32 = false;
+                    break;
+                case 'q':
+                    q32 = false;
+                    break;
+            }
+        }
+
+        GameStateManager.Instance.UpdateCastlingStateFromFen(WhiteCastling, BlackCastling);
+        GameStateManager.Instance.UpdateCastlingStateFromFen(K16,Q16, k32, q32);
         GameStateManager.Instance.UpdateTurnFromFen(turn);
+        
+            
         return board;
     }
 
