@@ -301,7 +301,10 @@ namespace ChessEngine
             //  Console.WriteLine(" Main Scanning board");
             Console.ResetColor();
             board.ProcessMovesUpdate();
-            GetBoardClass.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
+          //  GetBoardClass.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
+          
+          
+          //-> then we get filtered moves
         }
 
 
@@ -312,11 +315,11 @@ namespace ChessEngine
         public void CustomScanBoardForMoves(int[] testBoard, int toMoveColour, string reason)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            // Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
+            Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
             Console.ResetColor();
             try
             {
-                board.ProcessMovesUpdate(testBoard, toMoveColour);
+                board.ProcessMovesUpdate( toMoveColour);
             }
             catch (Exception e)
             {

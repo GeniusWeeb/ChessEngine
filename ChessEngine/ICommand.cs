@@ -168,6 +168,8 @@ public class CastlingCommand : Command
         engine.GetBoardClass.chessBoard[RookNewCell] = Piece.Empty;
         GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
         GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
+        engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
+        engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
         
         Console.WriteLine("Castling Undo happening now");
            

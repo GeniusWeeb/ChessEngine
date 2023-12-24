@@ -11,60 +11,77 @@ sealed class LegalMoves
     // need to run like a time check on how long this takes to run and-
     // further optimize it
     public void CheckForMoves(ref int[] board, int colorToMove, List<ChessPiece> myTurnList)
-    {
-        
+    {   
+        Console.WriteLine($"Scanning moves for {GameStateManager.Instance.playerToMove}");
+        //Console.WriteLine($"player to move is {GameStateManager.Instance.playerToMove}");
+        List<int> pieceList = new List<int>();
+        pieceList  =colorToMove == Piece.White ? GameStateManager.Instance.whitePiecesIndexOnBoard.ToList() : GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
+
+        foreach (var ind in pieceList)
+        {
+            Console.WriteLine("Piece index is " + ind);
+        }
         
         if (myTurnList.Count != 0) return; // it has already been worked on
-        for (int i = 0; i < board.Length; i++)
+        try
         {
-
-            if (board[i] == Piece.Empty)
-                continue;
-
-            int pieceCode = board[i] & Piece.CPiece;
-            int colorCode = GetColorCode(board[i]);
-            if (colorCode != colorToMove)
-                continue;
-
-            if (pieceCode == Piece.Pawn)
+            for (int i = 0; i < pieceList.Count; i++)
             {
-                ChessPiece p = GenerateMovesForPawn(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
+
+                // if (board[i] == Piece.Empty)
+                //     continue;
+
+                var mainIndex = pieceList[i];
+                int pieceCode = board[mainIndex] & Piece.CPiece;
+                int colorCode = GetColorCode(board[mainIndex]);
+                if (colorCode != colorToMove)
+                    continue;
+
+                if (pieceCode == Piece.Pawn)
+                {
+                    ChessPiece p = GenerateMovesForPawn(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+                }
+
+                if (pieceCode == Piece.Knight)
+                {
+                    ChessPiece p = GenerateMovesForKnight(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+                }
+
+                if (pieceCode == Piece.Queen)
+                {
+                    ChessPiece p = GenerateMovesForQueen(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+                }
+
+                if (pieceCode == Piece.Bishop)
+                {
+                    ChessPiece p = GenerateMovesForBishop(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+                }
+
+                if (pieceCode == Piece.Rook)
+                {
+                    ChessPiece p = GenerateMovesForRook(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+                }
+
+                if (pieceCode == Piece.King)
+                {
+                    ChessPiece p = GenerateMovesForKing(mainIndex, colorCode, board);
+                    if (p != null) myTurnList.Add(p);
+
+                }
             }
 
-            if (pieceCode == Piece.Knight)
-            {
-                ChessPiece p = GenerateMovesForKnight(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
-            }
-
-            if (pieceCode == Piece.Queen)
-            {
-                ChessPiece p = GenerateMovesForQueen(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
-            }
-
-            if (pieceCode == Piece.Bishop)
-            {
-                ChessPiece p = GenerateMovesForBishop(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
-            }
-
-            if (pieceCode == Piece.Rook)
-            {
-                ChessPiece p = GenerateMovesForRook(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
-            }
-
-            if (pieceCode == Piece.King)
-            {
-                ChessPiece p = GenerateMovesForKing(i, colorCode, board);
-                if (p != null) myTurnList.Add(p);
-
-            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
         }
 
-      
+
         //This wraps up all the moves, we need the FINISHED ALL PIECES THAT CAN MAKE MOVE
 
     }

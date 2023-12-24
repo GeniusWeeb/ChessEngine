@@ -97,15 +97,20 @@ namespace ChessEngine
      }
     
     public void MakeMoveTest(int oldIndex, int newIndex, ChessPiece p  )
-    {       
-        int piece = chessBoard[oldIndex];
-        var pCapCode = chessBoard[newIndex];
+    {     
+        var piece = chessBoard[oldIndex];
         int pColor = ChessEngineSystem.Instance.GetColorCode(p.GetPieceCode);
+
+        var pCapCode = chessBoard[newIndex];
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
+               
+        UpdateSideIndex(oldIndex, newIndex,pColor == Piece.White ? 
+            GameStateManager.Instance.whitePiecesIndexOnBoard
+            : GameStateManager.Instance.blackPiecesIndexOnBoard );
         CheckForBonusBasedOnPieceCapture(piece, pCapCode,newIndex);
         GameStateManager.Instance.UpdateTurns();
-        PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p);
 
-        //ShowBoard();
+        
     }
 
 
@@ -241,9 +246,9 @@ namespace ChessEngine
          GameStateManager.Instance.ProcessMoves(ref chessBoard);
      }
      
-     public void ProcessMovesUpdate(int[] customBoard , int turnToMove)
+     public void ProcessMovesUpdate( int turnToMove)
      {  
-         GameStateManager.Instance.ProcessMoves(ref customBoard , turnToMove);
+         GameStateManager.Instance.ProcessMoves(ref chessBoard , turnToMove);
      }
      
      
