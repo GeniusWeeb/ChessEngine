@@ -317,7 +317,7 @@ namespace ChessEngine
             Console.ResetColor();
             try
             {
-                board.ProcessMovesUpdate( toMoveColour);
+                board.ProcessMovesUpdate( ref testBoard ,toMoveColour);
             }
             catch (Exception e)
             {

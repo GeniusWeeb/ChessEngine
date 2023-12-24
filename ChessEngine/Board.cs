@@ -246,9 +246,9 @@ namespace ChessEngine
          GameStateManager.Instance.ProcessMoves(ref chessBoard);
      }
      
-     public void ProcessMovesUpdate( int turnToMove)
+     public void ProcessMovesUpdate(ref  int[] board,int turnToMove)
      {  
-         GameStateManager.Instance.ProcessMoves(ref chessBoard , turnToMove);
+         GameStateManager.Instance.ProcessMoves(ref board , turnToMove);
      }
      
      
