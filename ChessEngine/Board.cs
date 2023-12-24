@@ -378,7 +378,7 @@ namespace ChessEngine
          {
              foreach (var movesIndex in Pieces.allPossibleMovesIndex)
              {
-                 
+                 Console.WriteLine($"All my possible moves are {movesIndex}");
                //  Console.WriteLine($"MOVES ARE {Pieces.GetPieceCode} To {movesIndex}");
                  if (chessBoard[movesIndex] == King)
                  {
