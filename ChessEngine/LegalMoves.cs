@@ -12,14 +12,14 @@ sealed class LegalMoves
     // further optimize it
     public void CheckForMoves(ref int[] board, int colorToMove, List<ChessPiece> myTurnList)
     {   
-        Console.WriteLine($"Scanning moves for {GameStateManager.Instance.playerToMove}");
+        
         //Console.WriteLine($"player to move is {GameStateManager.Instance.playerToMove}");
         List<int> pieceList = new List<int>();
         pieceList  =colorToMove == Piece.White ? GameStateManager.Instance.whitePiecesIndexOnBoard.ToList() : GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
 
         foreach (var ind in pieceList)
         {
-            Console.WriteLine("Piece index is " + ind);
+           
         }
         
         if (myTurnList.Count != 0) return; // it has already been worked on
@@ -177,7 +177,7 @@ sealed class LegalMoves
            {
                int enPassantIndex = colCode == Piece.White ? cellFinal + 8 : cellFinal - 8;
                Console.WriteLine($"Found En Passant move for at {enPassantIndex} ");
-               
+               //TODO : WRONG !!!
                //we also need cellFinal
                pawn.specialIndex = enPassantIndex; //Success
                pawn.AddAllPossibleMoves(enPassantIndex);

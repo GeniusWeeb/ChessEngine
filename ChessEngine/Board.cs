@@ -367,7 +367,7 @@ namespace ChessEngine
          int King = Piece.King | oppCol; //Opponent king
 
        
-        // Console.WriteLine($"Checking if {oppCol} {King}  is  in check");
+        Console.WriteLine($"Checking if {oppCol} {King}  is  in check");
          int[] b =   (int[])chessBoard.Clone();
          b[oldIndex] = Piece.Empty;
          b[newIndex] = p.GetPieceCode;

@@ -301,9 +301,7 @@ namespace ChessEngine
             //  Console.WriteLine(" Main Scanning board");
             Console.ResetColor();
             board.ProcessMovesUpdate();
-          //  GetBoardClass.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
-          
-          
+           GetBoardClass.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
           //-> then we get filtered moves
         }
 
