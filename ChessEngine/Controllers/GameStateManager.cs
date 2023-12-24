@@ -102,13 +102,6 @@ public class GameStateManager
  
     }
 
-    public void CleanSideList()
-    {
-        blackPiecesIndexOnBoard.Clear();
-        whitePiecesIndexOnBoard.Clear();
-    }
-
-
     //Overloading so that , even the Ai can scan the board at any time
     public void ProcessMoves(ref int[] board , int customToMove)
     {   

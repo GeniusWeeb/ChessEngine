@@ -8,30 +8,23 @@ namespace ChessEngine;
 sealed class LegalMoves
 {
     private Stopwatch watch = new Stopwatch();
+
+
     // need to run like a time check on how long this takes to run and-
     // further optimize it
     public void CheckForMoves(ref int[] board, int colorToMove, List<ChessPiece> myTurnList)
-    {   
-        
-        //Console.WriteLine($"player to move is {GameStateManager.Instance.playerToMove}");
-        List<int> pieceList = new List<int>();
-        pieceList  =colorToMove == Piece.White ? GameStateManager.Instance.whitePiecesIndexOnBoard.ToList() : GameStateManager.Instance.blackPiecesIndexOnBoard.ToList();
-
-        foreach (var ind in pieceList)
-        {
-           
-        }
-        
-        if (myTurnList.Count != 0) return; // it has already been worked on
-        try
-        {
-            for (int i = 0; i < pieceList.Count; i++)
+    {
+        ChessEngineSystem.Instance.scanCount += 1;
+       Console.ResetColor();
+       
+       if(colorToMove == Piece.White)
+            for (int i = 0; i < GameStateManager.Instance.whitePiecesIndexOnBoard.Count; i++)
             {
 
                 // if (board[i] == Piece.Empty)
                 //     continue;
 
-                var mainIndex = pieceList[i];
+                var mainIndex = GameStateManager.Instance.whitePiecesIndexOnBoard[i];
                 int pieceCode = board[mainIndex] & Piece.CPiece;
                 int colorCode = GetColorCode(board[mainIndex]);
                 if (colorCode != colorToMove)
@@ -74,14 +67,54 @@ sealed class LegalMoves
 
                 }
             }
+        else
+           for (int i = 0; i < GameStateManager.Instance.blackPiecesIndexOnBoard.Count; i++)
+           {
+               var mainIndex = GameStateManager.Instance.blackPiecesIndexOnBoard[i];
+               int pieceCode = board[mainIndex] & Piece.CPiece;
+               int colorCode = GetColorCode(board[mainIndex]);
+               if (colorCode != colorToMove)
+                   continue;
 
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+               if (pieceCode == Piece.Pawn)
+               {
+                   ChessPiece p = GenerateMovesForPawn(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+               }
 
+               if (pieceCode == Piece.Knight)
+               {
+                   ChessPiece p = GenerateMovesForKnight(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+               }
 
+               if (pieceCode == Piece.Queen)
+               {
+                   ChessPiece p = GenerateMovesForQueen(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+               }
+
+               if (pieceCode == Piece.Bishop)
+               {
+                   ChessPiece p = GenerateMovesForBishop(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+               }
+
+               if (pieceCode == Piece.Rook)
+               {
+                   ChessPiece p = GenerateMovesForRook(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+               }
+
+               if (pieceCode == Piece.King)
+               {
+                   ChessPiece p = GenerateMovesForKing(mainIndex, colorCode, board);
+                   if (p != null) myTurnList.Add(p);
+
+               }
+           }
+       
+       
         //This wraps up all the moves, we need the FINISHED ALL PIECES THAT CAN MAKE MOVE
 
     }
@@ -176,7 +209,7 @@ sealed class LegalMoves
            if (Math.Abs(cellFinal % 8 - index % 8) == 1 && (cellFinal / 8 == index /8))
            {
                int enPassantIndex = colCode == Piece.White ? cellFinal + 8 : cellFinal - 8;
-               Console.WriteLine($"Found En Passant move for at {enPassantIndex} ");
+               Console.WriteLine($"Ep {enPassantIndex} ");
                //TODO : WRONG !!!
                //we also need cellFinal
                pawn.specialIndex = enPassantIndex; //Success

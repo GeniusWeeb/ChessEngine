@@ -83,7 +83,7 @@ public class MoveCommand : Command
          GameStateManager.Instance.blackPiecesIndexOnBoard = blackPieceOnBoard.ToList();
          GameStateManager.Instance.whitePiecesIndexOnBoard = whitePiecesOnBoard.ToList();
          
-         Console.WriteLine("Black pieces count cached is "+ blackPieceOnBoard.Count);
+       //  Console.WriteLine("Black pieces count cached is "+ blackPieceOnBoard.Count);
 
 
     }

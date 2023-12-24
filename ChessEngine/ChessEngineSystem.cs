@@ -11,7 +11,8 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {
-        public bool useUI = true;
+        public int scanCount = 0; 
+        public bool useUI = false;
         public string TestFen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
@@ -296,12 +297,11 @@ namespace ChessEngine
         //Main Scan
         public void ScanBoardForMoves()
         {
-
             Console.ForegroundColor = ConsoleColor.Yellow;
-            //  Console.WriteLine(" Main Scanning board");
+             // Console.WriteLine(" Main Scanning board");
             Console.ResetColor();
             board.ProcessMovesUpdate();
-           GetBoardClass.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
+            board.KingBePreCheckTest(board.chessBoard, GameStateManager.Instance.playerToMove);
           //-> then we get filtered moves
         }
 
@@ -313,7 +313,7 @@ namespace ChessEngine
         public void CustomScanBoardForMoves(int[] testBoard, int toMoveColour, string reason)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-          //  Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
+           // Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
             Console.ResetColor();
             try
             {
@@ -376,6 +376,7 @@ namespace ChessEngine
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Received Undo Command showing board\n");
             Console.ResetColor();
+            Console.WriteLine($"turn to move is {GameStateManager.Instance.playerToMove}");
             board.ShowBoard();
             GameStateManager.Instance.ResetMoves();
             ScanBoardForMoves();
