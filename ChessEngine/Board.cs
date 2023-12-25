@@ -136,27 +136,31 @@ namespace ChessEngine
                 break;
             case 1:
                 GameStateManager.Instance.captureCount += 1;
-                Console.WriteLine($"Captured {pCode} ");
+                Console.WriteLine($"Captured Pawn {pCode} ");
                // Console.WriteLine("1 point for Pawn");
                 break;
             case 2:
                 GameStateManager.Instance.captureCount += 1;
 
                // Console.WriteLine("2 points for Rook");
+                Console.WriteLine($"Captured  Rook {pCode} ");
                 break;
             case 3: 
                 GameStateManager.Instance.captureCount += 1;
+                Console.WriteLine($"Captured knight  {pCode} ");
 
                // Console.WriteLine("3 points for Knight");
                 break;
             case 4: 
                 GameStateManager.Instance.captureCount += 1;
+                Console.WriteLine($"Captured Bishop {pCode} ");
 
                // Console.WriteLine("4 points for Bishop");
                 break;
             
             case 6:// Console.WriteLine("6 points for Queen");
                 GameStateManager.Instance.captureCount += 1;
+                Console.WriteLine($"Captured Queen{pCode} ");
 
                 break;
             
