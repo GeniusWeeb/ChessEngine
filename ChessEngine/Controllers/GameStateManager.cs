@@ -10,6 +10,7 @@ public class GameStateManager
     //default setting
     private GameMode currentGameMode;
 
+    public int promotionCount = 0;
     public int captureCount = 0;
     public int checkCount = 0;
     public int enPassantMoves = 0;

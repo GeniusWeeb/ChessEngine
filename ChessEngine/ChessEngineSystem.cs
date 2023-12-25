@@ -12,8 +12,8 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "r4rk1/1pp1qppp/p1np1n2/2b1p1Bb/2B1P3/P1NP1N2/1PP1QPPP/R4R1K w - - 2 11";
-       
+
+        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();
@@ -281,7 +281,7 @@ namespace ChessEngine
          //  Console.WriteLine(" Main Scanning board");
            Console.ResetColor();
            board.ProcessMovesUpdate();
-           GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
+          GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
        }
        
        

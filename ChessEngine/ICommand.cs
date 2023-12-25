@@ -27,11 +27,20 @@
 
 public class MoveCommand : Command
 {
+
+    protected bool isBlackCastlingAvail;
+    protected bool isWhiteCastlingAvail;
+    protected bool isWhiteKingInCheck;
+    protected bool isBlackKingInCheck;
+    protected bool isBlackKingSideCastlingNotAvail;
+    protected bool isBlackQueenSideCastlingNotAvail;
+    protected bool isWhiteKingSideCastlingNotAvail;
+    protected bool isWhiteQueenSideCastlingNotAvail;
    
    protected  int currentCell;
    protected int targetCell ;
 
-  protected  int capturedPiece;
+   protected  int capturedPiece;
 
     protected ChessEngineSystem engine ;
 
@@ -44,7 +53,16 @@ public class MoveCommand : Command
             this.currentCell = currnt ;
             this.targetCell = target ;
             this.engine = eng;
-        
+            isBlackCastlingAvail = GameStateManager.Instance.isBlackCastlingAvailable;
+            isWhiteCastlingAvail = GameStateManager.Instance.isWhiteCastlingAvailable;
+            isWhiteKingInCheck  = GameStateManager.Instance.whiteKingInCheck;
+            isBlackKingInCheck = GameStateManager.Instance.blackKingInCheck;
+            isBlackKingSideCastlingNotAvail = GameStateManager.Instance.blackKingSideRookMoved;
+            isBlackQueenSideCastlingNotAvail = GameStateManager.Instance.blackQueenSideRookMoved;
+            isWhiteKingSideCastlingNotAvail = GameStateManager.Instance.whiteKingSideRookMoved;
+            isWhiteQueenSideCastlingNotAvail = GameStateManager.Instance.whiteQueenSideRookMoved;
+
+
     }
 
 
@@ -72,7 +90,15 @@ public class MoveCommand : Command
          engine.GetBoardClass.chessBoard[targetCell] =  capturedPiece;
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
          this.capturedPiece = Piece.Empty;
-       
+         GameStateManager.Instance.isBlackCastlingAvailable = isBlackCastlingAvail;
+         GameStateManager.Instance.isWhiteCastlingAvailable = isWhiteCastlingAvail ;
+          GameStateManager.Instance.whiteKingInCheck = isWhiteKingInCheck;
+          GameStateManager.Instance.blackKingInCheck = isBlackKingInCheck;
+          GameStateManager.Instance.blackKingSideRookMoved = isBlackKingSideCastlingNotAvail  ;
+          GameStateManager.Instance.blackQueenSideRookMoved = isBlackQueenSideCastlingNotAvail  ;
+          GameStateManager.Instance.whiteKingSideRookMoved = isWhiteKingSideCastlingNotAvail  ;
+          GameStateManager.Instance.whiteQueenSideRookMoved = isWhiteQueenSideCastlingNotAvail;
+
 
     }
 
@@ -89,6 +115,16 @@ public class CastlingCommand : Command
 
     private int color;
     private ChessEngineSystem engine ;
+    
+    protected bool isBlackCastlingAvail;
+    protected bool isWhiteCastlingAvail;
+    protected bool isWhiteKingInCheck;
+    protected bool isBlackKingInCheck;
+    protected bool isBlackKingSideCastlingNotAvail;
+    protected bool isBlackQueenSideCastlingNotAvail;
+    protected bool isWhiteKingSideCastlingNotAvail;
+    protected bool isWhiteQueenSideCastlingNotAvail;
+    
 
     //When castling is  confirmed , not king or Rook move. Different for them.
     //when king moved -> castling is cancelled anyways .
@@ -101,6 +137,14 @@ public class CastlingCommand : Command
         this.kingNewCell= KingN ;
         this.color =  pColor;
         this.engine = eng ;
+        isBlackCastlingAvail = GameStateManager.Instance.isBlackCastlingAvailable;
+        isWhiteCastlingAvail = GameStateManager.Instance.isWhiteCastlingAvailable;
+        isWhiteKingInCheck  = GameStateManager.Instance.whiteKingInCheck;
+        isBlackKingInCheck = GameStateManager.Instance.blackKingInCheck;
+        isBlackKingSideCastlingNotAvail = GameStateManager.Instance.blackKingSideRookMoved;
+        isBlackQueenSideCastlingNotAvail = GameStateManager.Instance.blackQueenSideRookMoved;
+        isWhiteKingSideCastlingNotAvail = GameStateManager.Instance.whiteKingSideRookMoved;
+        isWhiteQueenSideCastlingNotAvail = GameStateManager.Instance.whiteQueenSideRookMoved;
       
     }
 
@@ -117,7 +161,7 @@ public class CastlingCommand : Command
                      
          Console.WriteLine("Black Castling is confirmed");
                  GameStateManager.Instance.castlingCount += 1;        
-         GameStateManager.Instance.isBlackCastlingAvailable = false;
+         isBlackCastlingAvail =  GameStateManager.Instance.isBlackCastlingAvailable = false;
          engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
@@ -127,9 +171,9 @@ public class CastlingCommand : Command
                  else 
                     PerformCastle(+1,0);      
                      
-         Console.WriteLine("White Castling is confirmed");
+         Console.WriteLine("White Castling is confirmed"); 
                  GameStateManager.Instance.castlingCount += 1; 
-         GameStateManager.Instance.isWhiteCastlingAvailable = false; 
+        isWhiteCastlingAvail = GameStateManager.Instance.isWhiteCastlingAvailable = false; 
          engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
@@ -153,7 +197,14 @@ public class CastlingCommand : Command
         engine.GetBoardClass.chessBoard[RookNewCell] = Piece.Empty;
         engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
         engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
-      
+        GameStateManager.Instance.isBlackCastlingAvailable = isBlackCastlingAvail;
+        GameStateManager.Instance.isWhiteCastlingAvailable = isWhiteCastlingAvail ;
+        GameStateManager.Instance.whiteKingInCheck = isWhiteKingInCheck;
+        GameStateManager.Instance.blackKingInCheck = isBlackKingInCheck;
+        GameStateManager.Instance.blackKingSideRookMoved = isBlackKingSideCastlingNotAvail  ;
+        GameStateManager.Instance.blackQueenSideRookMoved = isBlackQueenSideCastlingNotAvail  ;
+        GameStateManager.Instance.whiteKingSideRookMoved = isWhiteKingSideCastlingNotAvail  ;
+        GameStateManager.Instance.whiteQueenSideRookMoved = isWhiteQueenSideCastlingNotAvail;
        
         Console.WriteLine("Castling Undo happening now");
            
@@ -198,6 +249,12 @@ public class RookMoveCommand : Command
     bool WKingSideRook;
     bool WQueenSideRook;
     
+    protected bool isBlackCastlingAvail;
+    protected bool isWhiteCastlingAvail;
+    protected bool isWhiteKingInCheck;
+    protected bool isBlackKingInCheck;
+    
+    
     
 
 
@@ -211,6 +268,11 @@ public class RookMoveCommand : Command
         this.targetCell =  newCell;
         this.pColor = color;
         this.targetCheck = old % 8 ; //file 0 or 7
+        isBlackCastlingAvail = GameStateManager.Instance.isBlackCastlingAvailable;
+        isWhiteCastlingAvail = GameStateManager.Instance.isWhiteCastlingAvailable;
+        isWhiteKingInCheck  = GameStateManager.Instance.whiteKingInCheck;
+        isBlackKingInCheck = GameStateManager.Instance.blackKingInCheck;
+        
       
     }
 
@@ -266,6 +328,10 @@ public class RookMoveCommand : Command
 
     engine.UpdateUIWithNewIndex(targetCell, currentCell,capturedPiece );
     capturedPiece = Piece.Empty;
+    GameStateManager.Instance.isBlackCastlingAvailable = isBlackCastlingAvail;
+    GameStateManager.Instance.isWhiteCastlingAvailable = isWhiteCastlingAvail ;
+    GameStateManager.Instance.whiteKingInCheck = isWhiteKingInCheck;
+    GameStateManager.Instance.blackKingInCheck = isBlackKingInCheck;
 
 
     }
@@ -279,8 +345,7 @@ public class RookMoveCommand : Command
 public class kingMoveCommand : MoveCommand
 {   
     int pColor;
-    bool isWhiteCastling = true ;
-    bool isBlackCastling = true;
+   
     public kingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color) : base(currnt, target, eng)
     {
         pColor = color;
@@ -293,11 +358,11 @@ public class kingMoveCommand : MoveCommand
         {
             case Piece.White:
                 if(GameStateManager.Instance.isWhiteCastlingAvailable)
-                    isWhiteCastling = GameStateManager.Instance.isWhiteCastlingAvailable = false;
+                    isWhiteCastlingAvail = GameStateManager.Instance.isWhiteCastlingAvailable = false;
                 break;
             case Piece.Black:
                  if(GameStateManager.Instance.isBlackCastlingAvailable)    
-                   isBlackCastling = GameStateManager.Instance.isBlackCastlingAvailable = false;
+                   isBlackCastlingAvail = GameStateManager.Instance.isBlackCastlingAvailable = false;
                 break;    
         }
 
@@ -309,11 +374,11 @@ public class kingMoveCommand : MoveCommand
     {
         switch(pColor){
             case Piece.White:
-                if(!isWhiteCastling)
+                if(!isWhiteCastlingAvail)
                     GameStateManager.Instance.isWhiteCastlingAvailable= true;
                 break;
             case Piece.Black:
-                if(!isBlackCastling)
+                if(!isBlackCastlingAvail)
                     GameStateManager.Instance.isBlackCastlingAvailable = true;
                     break;    
         }
@@ -322,6 +387,7 @@ public class kingMoveCommand : MoveCommand
     }
 
 }
+    
     public class EnPassantCommand : MoveCommand
     {   
         
@@ -353,7 +419,61 @@ public class kingMoveCommand : MoveCommand
             engine.GetBoardClass.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
             engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece, capturedPawnIndex);
             this.capturedPiece = Piece.Empty;
+            GameStateManager.Instance.isBlackCastlingAvailable = isBlackCastlingAvail;
+            GameStateManager.Instance.isWhiteCastlingAvailable = isWhiteCastlingAvail ;
+            GameStateManager.Instance.whiteKingInCheck = isWhiteKingInCheck;
+            GameStateManager.Instance.blackKingInCheck = isBlackKingInCheck;
+            GameStateManager.Instance.blackKingSideRookMoved = isBlackKingSideCastlingNotAvail  ;
+            GameStateManager.Instance.blackQueenSideRookMoved = isBlackQueenSideCastlingNotAvail  ;
+            GameStateManager.Instance.whiteKingSideRookMoved = isWhiteKingSideCastlingNotAvail  ;
+            GameStateManager.Instance.whiteQueenSideRookMoved = isWhiteQueenSideCastlingNotAvail;
          
 
         }
-    }    
+    }
+    public class PromotionCommand : MoveCommand
+    {
+        public int promotedToPiece = -1;
+        private ChessPiece piece;
+        public PromotionCommand(int currnt, int target, int PromoPiece, ChessPiece p,ChessEngineSystem eng) : base(currnt, target, eng)
+        {
+            this.promotedToPiece = PromoPiece;
+            capturedPiece = engine.GetBoardClass.chessBoard[targetCell];
+            piece = p;
+            var pwn = (Pawn)piece;
+            pwn.pormotionStatus = true;
+            
+        }
+
+        public override void Execute()
+        {
+            Console.WriteLine($"Promoted to {promotedToPiece}" );
+            
+            engine.GetBoardClass.chessBoard[targetCell] = promotedToPiece;
+            engine.GetBoardClass.chessBoard[currentCell] = Piece.Empty;
+          //  engine.GetBoardClass.ShowBoard();
+            engine.UpdateUIWithNewIndex(targetCell , currentCell , promotedToPiece);
+
+        }
+
+        public override void Undo()
+        {
+            engine.GetBoardClass.chessBoard[currentCell] = piece.GetPieceCode;
+            engine.GetBoardClass.chessBoard[targetCell] = capturedPiece;
+            promotedToPiece = -1;
+           // engine.UpdateUIWithNewIndex(targetCell ,  );
+            var pwn = (Pawn)piece;
+          //  pwn.promotionPieces.Push(promotedToPiece);
+            pwn.pormotionStatus = false;
+            //Update in UI as well
+          //  engine.GetBoardClass.ShowBoard();
+          GameStateManager.Instance.isBlackCastlingAvailable = isBlackCastlingAvail;
+          GameStateManager.Instance.isWhiteCastlingAvailable = isWhiteCastlingAvail ;
+          GameStateManager.Instance.whiteKingInCheck = isWhiteKingInCheck;
+          GameStateManager.Instance.blackKingInCheck = isBlackKingInCheck;
+          GameStateManager.Instance.blackKingSideRookMoved = isBlackKingSideCastlingNotAvail  ;
+          GameStateManager.Instance.blackQueenSideRookMoved = isBlackQueenSideCastlingNotAvail  ;
+          GameStateManager.Instance.whiteKingSideRookMoved = isWhiteKingSideCastlingNotAvail  ;
+          GameStateManager.Instance.whiteQueenSideRookMoved = isWhiteQueenSideCastlingNotAvail;
+        }
+    }

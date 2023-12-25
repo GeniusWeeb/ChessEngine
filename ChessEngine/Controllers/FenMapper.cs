@@ -46,9 +46,7 @@ public static  class FenMapper
                 }
             }
         }
-
-        bool WhiteCastling = true;
-        bool BlackCastling = true;
+        
         bool K16 = false, Q16 = false, k32 = false, q32 = false;
         int sideCount = 0;
 
@@ -58,15 +56,13 @@ public static  class FenMapper
             if (castlingData.Length == 1 && castlingData[i] == '-')
             {
                 Console.WriteLine("Both are false");
-                WhiteCastling = false;
-                BlackCastling = false;
-                break;
+                K16 = false;
+                Q16 = false;
+                k32 = false;
+                q32 = false;
+             
             }
-
-            if (castlingData[i] == '-' & i == 0)
-                WhiteCastling = false;
-            else if (castlingData[i] == '-' & i == 1)
-                BlackCastling = false;
+            
             else switch (castlingData[i])
             {
                 case 'K':
@@ -84,7 +80,7 @@ public static  class FenMapper
             }
         }
 
-        GameStateManager.Instance.UpdateCastlingStateFromFen(WhiteCastling, BlackCastling);
+      
         GameStateManager.Instance.UpdateCastlingStateFromFen(K16,Q16, k32, q32);
         GameStateManager.Instance.UpdateTurnFromFen(turn);
         

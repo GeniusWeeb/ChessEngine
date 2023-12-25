@@ -1,5 +1,6 @@
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Utility;
 
 namespace ChessEngine;
@@ -222,10 +223,24 @@ sealed class LegalMoves
         King king = new King(myColCode, index);
         int movesLength = king.kingCanMoveTo.Length;
         for (int i = 0; i < movesLength; i++)
-        {   
-            if( king.kingCanMoveTo[i] <= 0 || king.kingCanMoveTo[i] > 63)
+        { 
+            if (king.kingCanMoveTo[i] < 0 || king.kingCanMoveTo[i] > 63)
+            {   
+               
                 continue;
+            }
             
+            if (king.GetCurrentIndex % 8 == 7 &&  king.kingCanMoveTo[i] % 8 == 0)
+            {
+                continue;
+            }
+
+            if (king.GetCurrentIndex % 8 == 0 &&  king.kingCanMoveTo[i] % 8 == 7)
+            {   
+                continue;
+            }
+
+
             int otherPColorCode = GetColorCode(board[king.kingCanMoveTo[i]]);
             bool isSameColor = IsSameColorAsMe(myColCode, otherPColorCode);
     
@@ -381,6 +396,7 @@ sealed class LegalMoves
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+                
             }
             
         }
@@ -457,16 +473,20 @@ sealed class LegalMoves
 public class Pawn : ChessPiece
 {   
     public  readonly int pawnStep = 8;
+    public bool pormotionStatus = false;
+    
     public Pawn(int colorCode, int index)
     {   
         this.pieceCode =  Piece.Pawn | ( IsBlack(colorCode) ? Piece.Black : Piece.White);
         this.currentIndex = index;
+      
     }
 
     public List<int> enPassantMoveList;
 
 }
 
+[SuppressMessage("ReSharper.DPA", "DPA0000: DPA issues")]
 public class Knight : ChessPiece {
     
     public int[] knightCanMoveTo = new int[8]
@@ -586,4 +606,6 @@ public enum PieceMovementDirection
 {
     Up  = 8,Down = -8  , Right =1  , Left = -1, RightDiag= 9 , LeftDiag = 7, RightBotDiag = -7 ,LeftBotDiag = -9
 }
+
+
 
