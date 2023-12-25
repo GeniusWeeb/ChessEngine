@@ -255,7 +255,7 @@ namespace ChessEngine
           case Piece.Bishop:
           case Piece.Knight:
 
-              KingCheckCalculation(pColor,oldIndex,newIndex,p);
+              KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance);
               eng.ExecuteCommand(justMove);
               break;
@@ -267,7 +267,7 @@ namespace ChessEngine
                         eng.ExecuteCommand(kingCastlingCommand); 
                     }
                 else{ 
-                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor);   
                     eng.ExecuteCommand(moveKing);  
                 }
@@ -280,7 +280,7 @@ namespace ChessEngine
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
-                  KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                  KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal);
                   eng.ExecuteCommand(enPassMoveCommand);
                   GameStateManager.Instance.enPassantMoves += 1;
@@ -291,18 +291,18 @@ namespace ChessEngine
               {
                    
                   Console.WriteLine($"Trying to promote , not right now -< {newIndex}");
-                  KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                 
                   GameStateManager.Instance.promotionCount += 1;
                
               }            
                 else  {
                   
-                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance);
                     eng.ExecuteCommand(movePawn);
                     } break; 
           case Piece.Rook:
-                    KingCheckCalculation(pColor,oldIndex,newIndex,p);
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor);
                     eng.ExecuteCommand(moveRook);
             break;
@@ -312,9 +312,9 @@ namespace ChessEngine
      }
 
      //Opposite king
-     private void KingCheckCalculation(int pColor, int oldIndex, int newIndex , ChessPiece p)
+     public void KingCheckCalculation(int pColor, int oldIndex, int newIndex ,int pCode)
      {
-         if (!IsOppKingInCheck(pColor, oldIndex, newIndex, p)) return; //Help us build on Undo
+         if (!IsOppKingInCheck(pColor, oldIndex, newIndex, pColor | pCode)) return; //Help us build on Undo
          if (GameStateManager.Instance.whiteKingInCheck == false && pColor == Piece.Black)
          {
              GameStateManager.Instance.whiteKingInCheck = true;
@@ -334,16 +334,18 @@ namespace ChessEngine
          Console.ResetColor();
      }
     
-     private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, ChessPiece p)
+     private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, int pCode)
      {      
+         Console.WriteLine("This piece code is" + pCode);
          int oppCol = GameStateManager.Instance.GetOpponent(pColor); // Opponent color
          int King = Piece.King | oppCol; //Opponent king
+         
                            
                                   
                                    // Console.WriteLine($"Checking if {oppCol} {King}  is  in check");
                                     int[] b =   (int[])chessBoard.Clone();
                                     b[oldIndex] = Piece.Empty;
-                                    b[newIndex] = p.GetPieceCode;
+                                    b[newIndex] = pCode;
                                    // Console.WriteLine("Oppoent col would be " + GameStateManager.Instance.GetOpponent(oppCol));
                                     GameStateManager.Instance.OppAllPiecesThatCanMove.Clear();
                                     ChessEngineSystem.Instance.CustomScanBoardForMoves(b , GameStateManager.Instance.GetOpponent(oppCol),"CUSTOM SCANNING IF OPP KING IN CHECK");

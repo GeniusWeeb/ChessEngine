@@ -13,7 +13,7 @@ namespace ChessEngine
     {   
         public bool useUI = true;
 
-        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ";       
+        public string TestFen = "rnbq1kr1/pp1Pbppp/2p5/8/2B5/2N5/PPP1NnPP/R1BQK2R w KQ - 3 9";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board? board = new Board();
         private BotBrain? bot1 = new BotBrain();

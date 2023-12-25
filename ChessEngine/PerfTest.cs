@@ -9,7 +9,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 3;
+    private readonly int customDepth = 2;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -53,6 +53,7 @@ public class PerfTest
                  int knight = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop() | pColor; 
                  ICommand promote1 = new PromotionCommand(move.oldIndex , move.newIndex, knight ,move.piece,ChessEngineSystem.Instance);
                  ChessEngineSystem.Instance.ExecuteCommand(promote1);
+                 ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  knight);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
                  
                  promCount += RunPerft(customDepth - 1);
@@ -67,6 +68,7 @@ public class PerfTest
                  Console.WriteLine($"Promoting rook {rook}");
                  ICommand promote2 = new PromotionCommand(move.oldIndex , move.newIndex, rook ,move.piece,ChessEngineSystem.Instance);
                  ChessEngineSystem.Instance.ExecuteCommand(promote2);
+                 ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  rook);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
                  promCount += RunPerft(customDepth - 1);
                  Thread.Sleep((int)(moveDelay));
@@ -79,6 +81,7 @@ public class PerfTest
                  int bishop = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop()| pColor;
                  ICommand promote3 = new PromotionCommand(move.oldIndex , move.newIndex, bishop ,move.piece,ChessEngineSystem.Instance);
                  ChessEngineSystem.Instance.ExecuteCommand(promote3);
+                 ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  bishop);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
                  promCount += RunPerft(customDepth - 1);
                  Thread.Sleep((int)(moveDelay));
@@ -91,6 +94,8 @@ public class PerfTest
                  int queen = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop()| pColor;
                  ICommand promote4 = new PromotionCommand(move.oldIndex , move.newIndex, queen ,move.piece,ChessEngineSystem.Instance);
                  ChessEngineSystem.Instance.ExecuteCommand(promote4);
+                 ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  queen);
+
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
                  promCount += RunPerft(customDepth - 1);
                  Thread.Sleep((int)(moveDelay));
