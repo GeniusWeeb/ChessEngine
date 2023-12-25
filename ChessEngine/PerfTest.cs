@@ -10,7 +10,7 @@ public class PerfTest
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
     private readonly int customDepth = 2;
-    private  int moveDelay = 0;
+    private  int moveDelay = 60;
     private int finalpos = 0;
     int currentColor;
     int promCount = 0;
@@ -19,13 +19,13 @@ public class PerfTest
     public void PerFMoveFinal()
     {
         int nodes = 0;
-       
-        GameStateManager.Instance.allPiecesThatCanMove.Clear();
+        HashSet<ChessPiece> startNodePieces = new HashSet<ChessPiece>();
         Console.WriteLine("First to move is " + GameStateManager.Instance.playerToMove);
-        ChessEngineSystem.Instance.ScanBoardForMoves();
+        int playeMoveColor = GameStateManager.Instance.playerToMove;
+        startNodePieces =  ChessEngineSystem.Instance.GenerateMoves(ChessEngineSystem.Instance.GetBoardClass.chessBoard,playeMoveColor );
+        int[] b = (int[])ChessEngineSystem.Instance.GetBoardClass.chessBoard.Clone();
         
-        
-        foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node
+        foreach (var piece in startNodePieces) //Root node
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
             {
@@ -38,8 +38,7 @@ public class PerfTest
         foreach (var move in tempList)
             
         {   
-           
-            ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(move.oldIndex, move.newIndex,move.piece);
+            ChessEngineSystem.Instance.GetBoardClass.MakeMoveClone( b ,move.oldIndex, move.newIndex,move.piece);
             ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.oldIndex, move.newIndex);
             
              if (IsPawnPromotion(move.newIndex , move.piece.GetPieceCode))
@@ -47,62 +46,59 @@ public class PerfTest
                  ChessEngineSystem.Instance.GetBoardClass.AddPromotionPieces();
                  Console.WriteLine("Found pawn for promotion");
                  int pColor = ChessEngineSystem.Instance.GetColorCode(move.piece.GetPieceCode);
-                
-               
-                
                  int knight = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop() | pColor; 
-                 ICommand promote1 = new PromotionCommand(move.oldIndex , move.newIndex, knight ,move.piece,ChessEngineSystem.Instance);
+                 ICommand promote1 = new PromotionCommand(move.oldIndex , move.newIndex, knight ,move.piece,ChessEngineSystem.Instance ,  b);
                  ChessEngineSystem.Instance.ExecuteCommand(promote1);
                  ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  knight);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
                  
-                 promCount += RunPerft(customDepth - 1);
+                 promCount += RunPerft(customDepth - 1 ,  b);
                  Thread.Sleep((int)(moveDelay));
                  Console.WriteLine(
                      $"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex) + GetPromotedPieceCode(knight)}" + promCount); 
                  PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)+ GetPromotedPieceCode(knight),promCount));
-                 UnMakeMove();
+               //  UnMakeMove();
                 
                  promCount = 0;
                  int rook = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop() | pColor;
                  Console.WriteLine($"Promoting rook {rook}");
-                 ICommand promote2 = new PromotionCommand(move.oldIndex , move.newIndex, rook ,move.piece,ChessEngineSystem.Instance);
+                 ICommand promote2 = new PromotionCommand(move.oldIndex , move.newIndex, rook ,move.piece,ChessEngineSystem.Instance,  b);
                  ChessEngineSystem.Instance.ExecuteCommand(promote2);
                  ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  rook);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
-                 promCount += RunPerft(customDepth - 1);
+                 promCount += RunPerft(customDepth - 1,  b);
                  Thread.Sleep((int)(moveDelay));
                  Console.WriteLine(
                      $"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex) + GetPromotedPieceCode(rook)}" + promCount);
                  PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)+GetPromotedPieceCode(rook),promCount));
-                 UnMakeMove();
+               //  UnMakeMove();
             
                  promCount = 0;
                  int bishop = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop()| pColor;
-                 ICommand promote3 = new PromotionCommand(move.oldIndex , move.newIndex, bishop ,move.piece,ChessEngineSystem.Instance);
+                 ICommand promote3 = new PromotionCommand(move.oldIndex , move.newIndex, bishop ,move.piece,ChessEngineSystem.Instance,  b);
                  ChessEngineSystem.Instance.ExecuteCommand(promote3);
                  ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  bishop);
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
-                 promCount += RunPerft(customDepth - 1);
+                 promCount += RunPerft(customDepth - 1 ,  b);
                  Thread.Sleep((int)(moveDelay));
                  Console.WriteLine(
                      $"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex) + GetPromotedPieceCode(bishop)}" + promCount);
                  PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)+GetPromotedPieceCode(bishop),promCount));
-                 UnMakeMove();
+              //   UnMakeMove();
 
                  promCount = 0;
                  int queen = ChessEngineSystem.Instance.GetBoardClass.promotionPieces.Pop()| pColor;
-                 ICommand promote4 = new PromotionCommand(move.oldIndex , move.newIndex, queen ,move.piece,ChessEngineSystem.Instance);
+                 ICommand promote4 = new PromotionCommand(move.oldIndex , move.newIndex, queen ,move.piece,ChessEngineSystem.Instance,  b);
                  ChessEngineSystem.Instance.ExecuteCommand(promote4);
                  ChessEngineSystem.Instance.GetBoardClass.KingCheckCalculation(pColor,move.oldIndex, move.newIndex,  queen);
 
                  ChessEngineSystem.Instance.GetBoardClass.ShowBoard();
-                 promCount += RunPerft(customDepth - 1);
+                 promCount += RunPerft(customDepth - 1,  b);
                  Thread.Sleep((int)(moveDelay));
                  Console.WriteLine(
                      $"{FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex) + GetPromotedPieceCode(queen)}" + promCount);
                  PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex)+GetPromotedPieceCode(queen),promCount));
-                 UnMakeMove();
+              //   UnMakeMove();
 
 
                  foreach (var pr in ChessEngineSystem.Instance.GetBoardClass.promotionPieces)
@@ -112,10 +108,10 @@ public class PerfTest
                
 
              }else {
-                 nodes = RunPerft(customDepth - 1);
+                 nodes += RunPerft(customDepth - 1 ,  b);
                  Thread.Sleep((int)(moveDelay));
                  PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.oldIndex, move.newIndex), nodes));
-                 UnMakeMove();
+             //    UnMakeMove();
              }  
              
              
@@ -181,7 +177,7 @@ public class PerfTest
     }
 
 
-    private int RunPerft(int currentDepth )
+    private int RunPerft(int currentDepth ,  int[] board)
     {   
        
         int nodeCount = 0;
@@ -189,12 +185,11 @@ public class PerfTest
         {   
             return 1;
         }
-     
-      
+        
         List<PieceThatCanMove> currentList = new List<PieceThatCanMove>();
-        GameStateManager.Instance.allPiecesThatCanMove.Clear();
-        ChessEngineSystem.Instance.ScanBoardForMoves();
-        foreach (var piece in GameStateManager.Instance.allPiecesThatCanMove) //Root node2
+        HashSet<ChessPiece> possibleMoveList = new HashSet<ChessPiece>();
+        possibleMoveList = ChessEngineSystem.Instance.GenerateMoves(board , GameStateManager.Instance.playerToMove);
+        foreach (var piece in possibleMoveList ) //Root node2
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
             {
@@ -204,11 +199,11 @@ public class PerfTest
         foreach (var move in currentList)
         {
                 
-            ChessEngineSystem.Instance.GetBoardClass.MakeMoveTest(move.oldIndex, move.newIndex,move.piece);
+            ChessEngineSystem.Instance.GetBoardClass.MakeMoveClone( board,move.oldIndex, move.newIndex,move.piece);
             ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.oldIndex, move.newIndex);
-            nodeCount += RunPerft(currentDepth-1);
+            nodeCount += RunPerft(currentDepth-1,  board);
             Thread.Sleep((int)(moveDelay));
-            UnMakeMove();
+            //UnMakeMove();
             
         }
         return nodeCount;

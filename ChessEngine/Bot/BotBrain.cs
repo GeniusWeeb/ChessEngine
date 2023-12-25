@@ -31,14 +31,14 @@ public class BotBrain
 
 
         if (GameStateManager.Instance.allPiecesThatCanMove.Count == 0)  ChessEngineSystem.Instance.UtilityWriteToConsoleWithColor("I lost }", ConsoleColor.Yellow);
-        else if (GameStateManager.Instance.allPiecesThatCanMove.Count ==1) ChosenPieceMoves(GameStateManager.Instance.allPiecesThatCanMove[0]);
+        else if (GameStateManager.Instance.allPiecesThatCanMove.Count ==1) ChosenPieceMoves(GameStateManager.Instance.allPiecesThatCanMove.ToList()[0]);
           else if (GameStateManager.Instance.allPiecesThatCanMove.Count > 1)
         {
             int randomPieceIndex =
                 random.Next(0,
                     GameStateManager.Instance.allPiecesThatCanMove.Count); // //Whole List contains more than 1 Piece
 
-            ChosenPiece = GameStateManager.Instance.allPiecesThatCanMove[randomPieceIndex];
+            ChosenPiece = GameStateManager.Instance.allPiecesThatCanMove.ToList()[randomPieceIndex];
             ChosenPieceMoves(ChosenPiece);
         }
 
