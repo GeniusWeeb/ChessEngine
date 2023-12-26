@@ -371,10 +371,11 @@ namespace ChessEngine
          //legal moves -> filter -> send a new hashset
          int myKing = Piece.King | forThisPlayer;
          List<ChessPiece>  legalPieceMoves = new List<ChessPiece>();
+         List<int> movesToRemove = new List<int>();
          Board boardCopy = new Board(board, "filterFinalMovesClone");
-         foreach (ChessPiece piece in myLegalMoves )
+         foreach (ChessPiece piece in myLegalMoves.ToList() )
          {
-             foreach (int  moveIndex in piece.allPossibleMovesIndex )
+             foreach (int  moveIndex in piece.allPossibleMovesIndex.ToList() )
              {
                  boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
                  boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
@@ -389,12 +390,15 @@ namespace ChessEngine
                             myKing) // Found my king on a deep check // Deep check here // Pinned in some way
                         {
                             Console.WriteLine("King CHECKED REMOVING");
+                            movesToRemove.Add(canMoveToIndex);
                         }
                     }
                 }
-                
-                  //this piece is allowed
-                 // legalPieceMoves.Add(piece); 
+             }
+
+             foreach (var index in piece.allPossibleMovesIndex)
+             {
+                 
              }
          }
 
