@@ -12,9 +12,9 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "rnbq1kr1/pp1Pbppp/2p5/8/2B5/2N5/PPP1NnPP/R1BQK2R w KQ - 3 9";       
+        public string TestFen = "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 1 1";       
         public static ChessEngineSystem Instance { get; private set; }
-        private Board? board = new Board();
+        private Board board;
         private BotBrain? bot1 = new BotBrain();
         private BotBrain? bot2 = new BotBrain();
         private readonly int boardSetupDelay = 50;
@@ -36,17 +36,23 @@ namespace ChessEngine
             Event.GetCellsForThisIndex += SendUICellIndicatorData;
             Event.undoMove  += UndoCommand;
             Event.ClientConncted += SetupDefaultBoard;
+           
         }
         static ChessEngineSystem()
         {
             Instance = new ChessEngineSystem();
+            
         
         }
         
       
+        public void UpdateTurnFromFen(string t)
+        {
+            board.SetTurn(t == "w" ? Turn.White : Turn.Black);
 
+        }
 
-        public int[] MapFen() => FenMapper.MapFen();
+        public int[] MapFen() => FenMapper.MapFen(TestFen);
 
         public void SetCurrentTurnToMove(int turn)
         {
@@ -60,6 +66,7 @@ namespace ChessEngine
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
             Connection.Instance.Init(); 
             Console.ResetColor();
+            board = new Board();
         }
         
         
@@ -137,12 +144,9 @@ namespace ChessEngine
                 string validationData = ProcessMoveInEngine(data) ? "true" : "false";
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, GameStateManager.Instance.GetTurnToMove.ToString());
                 SendDataToUI(finalData);
-                
-                if(GameStateManager.Instance.GetCurrentGameMode != GameMode.BotVsBot)
-                    board.GenerateMoves( (int)board.GetCurrentTurn, board);
-                
+            
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
-                CheckForGameModeAndPerform();
+                //CheckForGameModeAndPerform();
 
             
         }
@@ -208,14 +212,17 @@ namespace ChessEngine
         {   
             
             GameStateManager.Instance.SetCurrentGameModeAndTurn(gameMode);
+         
             if (newServerInstance)
-            {
+            {  
+                board.chessBoard = MapFen();
                 board.SetupDefaultBoard(gameMode);
                 newServerInstance = false; 
             }
             else
             {
                 ReloadEngine();
+                board.chessBoard = MapFen();
                 board.SetupDefaultBoard(gameMode);
             }
             
@@ -319,7 +326,7 @@ namespace ChessEngine
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Received Undo Command showing board\n");
             Console.ResetColor();
-            board.ShowBoard(board.chessBoard);
+            board.ShowBoard();
             GameStateManager.Instance.ResetMoves();
             board.GenerateMoves( (int)board.GetCurrentTurn, board);
             CheckForGameModeAndPerform();

@@ -35,11 +35,7 @@ public class GameStateManager
     public bool whiteQueenSideRookMoved = false;
 
 
-    public void UpdateTurnFromFen(string t)
-    {
-        playerToMove = t == "w" ? Piece.White : Piece.Black;
-      
-    }
+    
     
     //k32 stands for KingSide castling for Black color , small k means black
     //Q32 stands for queenside castling for White color

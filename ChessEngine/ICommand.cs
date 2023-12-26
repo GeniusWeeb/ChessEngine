@@ -53,9 +53,13 @@ public class MoveCommand : Command
     //Processed in Engine from UI or the board itself
     public override void Execute()
     {   
-        this.capturedPiece = engine.GetBoardClass.chessBoard[targetCell];
-        currentBoard.chessBoard[targetCell] = engine.GetBoardClass.chessBoard[currentCell];
+        
+        this.capturedPiece =currentBoard.chessBoard[targetCell];
+        currentBoard.chessBoard[targetCell] = currentBoard.chessBoard[currentCell];
         currentBoard.chessBoard[currentCell] =  Piece.Empty ;
+        currentBoard.ShowBoard();
+        
+        Console.WriteLine("Move added to board");
       
     }
 
@@ -268,7 +272,7 @@ public class RookMoveCommand : Command
                 break;    
         }
 
-        currentBoard.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
+        currentBoard.chessBoard[currentCell] = currentBoard.chessBoard[targetCell];
         currentBoard.chessBoard[targetCell] = capturedPiece;
    
 
@@ -358,7 +362,7 @@ public class kingMoveCommand : MoveCommand
 
         public override void Undo()
         {
-            currentBoard.chessBoard[currentCell] = engine.GetBoardClass.chessBoard[targetCell];
+            currentBoard.chessBoard[currentCell] = currentBoard.chessBoard[targetCell];
             currentBoard.chessBoard[capturedPawnIndex] = capturedPiece;
             currentBoard.chessBoard[targetCell] = Piece.Empty; //only because it is En Passant.
             engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece, capturedPawnIndex);

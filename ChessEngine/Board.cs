@@ -11,30 +11,56 @@ namespace ChessEngine
  public class Board : IDisposable
  {
 
-     public int[] chessBoard = new int[64];
+     public int[] chessBoard;
      private Turn currentTurn = Turn.White;
+     
+     LegalMoves moves = new LegalMoves();
      Stopwatch watch = new Stopwatch();
 
-     public Turn GetCurrentTurn => currentTurn;
-    
-     
+     public int GetCurrentTurn => (int)currentTurn;
+
+     public void SetTurn(Turn turn) => currentTurn = turn;
+     public Board(Board other, string type="main")
+     {
+         chessBoard =  new int[64];
+         for (int i = 0; i < 64; i++)
+         {
+             chessBoard[i] = other.chessBoard[i];
+         }
+
+         currentTurn = other.currentTurn;
+         moves = new LegalMoves();
+         watch = new Stopwatch();
+
+         Console.ForegroundColor = ConsoleColor.Green;
+             Console.WriteLine($" {type} Board created ! ");
+         Console.ResetColor();
+         
+     }
      public Board()
      {
+         
          Console.ForegroundColor = ConsoleColor.Green;
-         Console.WriteLine("Board is Initialised!");
+         Console.WriteLine($"  Board created ! ");
          Console.ResetColor();
          
      }
      
      //HAPPENS AT THE TIME OF NEW BOARD -> COULD BE USED FOR A FORCE RESET 
     public  void SetupDefaultBoard(string gameMode)
-     {
+    {
+       
          Console.WriteLine("Trying to setup Default board");
-         chessBoard = ChessEngineSystem.Instance.MapFen();//Board is ready at this point -> parsed from fen
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          ChessEngineSystem.Instance.SendDataToUI(finalData);
+
+         Console.ForegroundColor = ConsoleColor.Yellow;
+             ShowBoard();
+         Console.ResetColor();
+         
          GenerateMoves( (int)currentTurn , this);
+         
 
      }
     
@@ -42,9 +68,9 @@ namespace ChessEngine
     public List<ChessPiece> GenerateMoves( int forThisColor , Board board)
     {
         //legal and maybe Pseudo Legal
-        LegalMoves moves = new LegalMoves();
+       
         List<ChessPiece>justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
-        return GetOnlyLegalMoves(justAllMoves, board , forThisColor);
+        return  GetOnlyLegalMoves(justAllMoves, board , forThisColor);
     } 
     
   
@@ -134,14 +160,14 @@ namespace ChessEngine
         promotionPieces.Push(Piece.Rook);
         promotionPieces.Push(Piece.Knight);
     }
-    public void MakeMoveClone( Board board ,int oldIndex, int newIndex, ChessPiece p  )
+    public void MakeMoveClone(Move move )
     {
-        int piece = board.chessBoard[oldIndex];
-       // CheckForBonusBasedOnPieceCapture(piece,board[newIndex]);
-        UpdateTurns();
-        PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p , board);
+        int piece =chessBoard[move.from];
+        CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
+        UpdateTurns(); 
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p, this);
         Console.ForegroundColor = ConsoleColor.Cyan;
-             Console.WriteLine($"---------->{p.GetPieceCode} moved from {FenMapper.IndexToAlgebric(oldIndex,newIndex )}<<<<<<<<<<<<<<<");
+             Console.WriteLine($"---------->{move.p.GetPieceCode} moved from {FenMapper.IndexToAlgebric(move.from,move.to )}<<<<<<<<<<<<<<<");
         Console.ResetColor();
 
         //ShowBoard();
@@ -195,7 +221,7 @@ namespace ChessEngine
     }
 
     
-    public  void ShowBoard(int[] boardToShow)
+    public  void ShowBoard()
      {
          Console.ForegroundColor = ConsoleColor.Green;
 
@@ -204,7 +230,7 @@ namespace ChessEngine
              
              for (int j = 0; j < 8; j++)
              {
-                 Console.Write($"{boardToShow[8 * i + j], -3} ");
+                 Console.Write($"{chessBoard[8 * i + j], -3} ");
                 
              }
              Console.WriteLine();
@@ -310,7 +336,10 @@ namespace ChessEngine
          GameStateManager.Instance.checkCount++;
          Console.WriteLine($"{pColor}King has been checked ");
      }
-    
+
+
+
+     public int getOpponent => (int)currentTurn == Piece.White ? Piece.Black : Piece.White;
      private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, int pCode)
      {      
          Console.WriteLine("This piece code is" + pCode);
@@ -342,7 +371,7 @@ namespace ChessEngine
          //legal moves -> filter -> send a new hashset
          int myKing = Piece.King | forThisPlayer;
          List<ChessPiece>  legalPieceMoves = new List<ChessPiece>();
-         Board boardCopy = board;
+         Board boardCopy = new Board(board, "filterFinalMovesClone");
          foreach (ChessPiece piece in myLegalMoves )
          {
              foreach (int  moveIndex in piece.allPossibleMovesIndex )
@@ -350,19 +379,22 @@ namespace ChessEngine
                  boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
                  boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
                      
-                     List<ChessPiece> oppsMovesList =  GenerateMoveSimple(boardCopy, GameStateManager.Instance.GetOpponent(forThisPlayer), true);
+                     List<ChessPiece> oppsMovesList =  GenerateMoveSimple(boardCopy,boardCopy.getOpponent, true);
 
                 foreach (ChessPiece oppPiece in oppsMovesList )
                 {
                     foreach (int canMoveToIndex in oppPiece.allPossibleMovesIndex )
                     {
-                        if (boardCopy.chessBoard[canMoveToIndex] == myKing)  // Found my king on a deep check // Deep check here // Pinned in some way
-                            break;
+                        if (boardCopy.chessBoard[canMoveToIndex] ==
+                            myKing) // Found my king on a deep check // Deep check here // Pinned in some way
+                        {
+                            Console.WriteLine("King CHECKED REMOVING");
+                        }
                     }
                 }
                 
                   //this piece is allowed
-                  legalPieceMoves.Add(piece); 
+                 // legalPieceMoves.Add(piece); 
              }
          }
 
@@ -376,6 +408,21 @@ namespace ChessEngine
      
 
 
+ }
+
+
+ public class Move
+ {
+     public ChessPiece p; 
+     public int from;
+     public int to;
+
+     public Move(int fromIndex, int toIndex, ChessPiece piece)
+     {
+         from = fromIndex;
+         to = toIndex;
+         p = piece;
+     }
  }
 
 
