@@ -23,7 +23,7 @@ namespace ChessEngine
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
         private bool isUndoRequest;
-        private LegalMoves moves = new LegalMoves();
+       
 
 
         private PerfTest test = new PerfTest();
@@ -43,17 +43,7 @@ namespace ChessEngine
         
         }
         
-        public HashSet<ChessPiece> GenerateMoves(int[] b , int forThisColor )
-        {
-            //legal and maybe Pseudo Legal
-            HashSet<ChessPiece>justAllMoves = moves.GenerateLegalMoves(b, forThisColor , false );
-            return board.GetOnlyLegalMoves(justAllMoves, b , forThisColor);
-        }
-
-        public HashSet<ChessPiece> GenerateMoveSimple(int[] b, int forThisColor , bool isCustom)
-        {
-            return moves.GenerateLegalMoves(b, forThisColor , isCustom);
-        }
+      
 
 
         public int[] MapFen() => FenMapper.MapFen();
@@ -90,7 +80,7 @@ namespace ChessEngine
                     {   
                         Console.WriteLine("Bot is gonna make the move");
                         bot1.Think();
-                        GenerateMoves(board.chessBoard, GameStateManager.Instance.playerToMove);
+                        board.GenerateMoves( (int)board.GetCurrentTurn, board);
                     }
                     break;
                 
@@ -131,7 +121,7 @@ namespace ChessEngine
             Thread.Sleep(botDecisionDelay);
             
             //main issue is here
-            GenerateMoves(board.chessBoard,GameStateManager.Instance.playerToMove);
+            board.GenerateMoves( (int)board.GetCurrentTurn, board);
             UtilityWriteToConsoleWithColor("Scanning Finished  bot gonna think", ConsoleColor.Red);
             brain.Think();          
             UtilityWriteToConsoleWithColor("Bots thinking finished", ConsoleColor.DarkGreen);
@@ -149,7 +139,7 @@ namespace ChessEngine
                 SendDataToUI(finalData);
                 
                 if(GameStateManager.Instance.GetCurrentGameMode != GameMode.BotVsBot)
-                    GenerateMoves(board.chessBoard,GameStateManager.Instance.playerToMove);
+                    board.GenerateMoves( (int)board.GetCurrentTurn, board);
                 
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
                 CheckForGameModeAndPerform();
@@ -215,7 +205,9 @@ namespace ChessEngine
 
 
         private void SetupDefaultBoard(string gameMode)
-        {
+        {   
+            
+            GameStateManager.Instance.SetCurrentGameModeAndTurn(gameMode);
             if (newServerInstance)
             {
                 board.SetupDefaultBoard(gameMode);
@@ -226,6 +218,8 @@ namespace ChessEngine
                 ReloadEngine();
                 board.SetupDefaultBoard(gameMode);
             }
+            
+            CheckForGameModeAndPerform();
         }
 
         //BASICALLY , JUST DO POST FORMAT FOR MOVES CASTLING, PROMOTION ETC
@@ -306,8 +300,12 @@ namespace ChessEngine
             
        }
 
+       public void UpdateBoard(Board newBoard)
+       {
+           board = newBoard;
+       }
 
-        /// <summary>
+       /// <summary>
         /// Event for Ui for Undo just a simple event
         /// </summary>
        private void UndoCommand(string data)
@@ -321,9 +319,9 @@ namespace ChessEngine
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Received Undo Command showing board\n");
             Console.ResetColor();
-            board.ShowBoard();
+            board.ShowBoard(board.chessBoard);
             GameStateManager.Instance.ResetMoves();
-            GenerateMoves(board.chessBoard , GameStateManager.Instance.playerToMove);
+            board.GenerateMoves( (int)board.GetCurrentTurn, board);
             CheckForGameModeAndPerform();
 
         }

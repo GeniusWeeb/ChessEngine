@@ -11,12 +11,13 @@ sealed class LegalMoves
     private Stopwatch watch = new Stopwatch();
     // need to run like a time check on how long this takes to run and-
     // further optimize it
-    public HashSet<ChessPiece>? GenerateLegalMoves(int[] board, int colorToMove , bool isCustom)
+    public List<ChessPiece>? GenerateLegalMoves(Board b, int colorToMove , bool isCustom)
     {
+        int len = b.chessBoard.Length;
+        var board = b.chessBoard;
 
-
-        HashSet<ChessPiece> moveList = new HashSet<ChessPiece>(); // it has already been worked on
-        for (int i = 0; i < board.Length; i++)
+        List<ChessPiece> moveList = new List<ChessPiece>(); // it has already been worked on
+        for (int i = 0; i < len; i++)
         {
             if (board[i] == Piece.Empty)
                 continue;
@@ -30,37 +31,37 @@ sealed class LegalMoves
             {
                 case Piece.Pawn:
                 {
-                    ChessPiece p = GenerateMovesForPawn(i, colorCode, board);
+                    ChessPiece p = GenerateMovesForPawn(i, colorCode, b);
                     if (p != null) moveList.Add(p);
                     break;
                 }
                 case Piece.Knight:
                 {
-                    ChessPiece p = GenerateMovesForKnight(i, colorCode, board);
+                    ChessPiece p = GenerateMovesForKnight(i, colorCode, b);
                     if (p != null) moveList.Add(p);
                     break;
                 }
                 case Piece.Queen:
                 {
-                    ChessPiece p = GenerateMovesForQueen(i, colorCode, board);
+                    ChessPiece p = GenerateMovesForQueen(i, colorCode, b);
                     if (p != null) moveList.Add(p);
                     break;
                 }
                 case Piece.Bishop:
                 {
-                    ChessPiece p = GenerateMovesForBishop(i, colorCode, board);
+                    ChessPiece p = GenerateMovesForBishop(i, colorCode, b);
                     if (p != null) moveList.Add(p);
                     break;
                 }
                 case Piece.Rook:
                 {
-                    ChessPiece p = GenerateMovesForRook(i, colorCode, board);
+                    ChessPiece p = GenerateMovesForRook(i, colorCode, b);
                     if (p != null) moveList.Add(p);
                     break;
                 }
                 case Piece.King:
                 {
-                    ChessPiece p = GenerateMovesForKing(i, colorCode, board , isCustom);
+                    ChessPiece p = GenerateMovesForKing(i, colorCode, b , isCustom);
                     if (p != null) moveList.Add(p);
                     break;
                 }
@@ -73,7 +74,7 @@ sealed class LegalMoves
     }
 
     //going thru every  piece
-    private ChessPiece GenerateMovesForPawn(int ind,int colCode, int[] board)
+    private ChessPiece GenerateMovesForPawn(int ind,int colCode, Board board)
     {
             int index = ind;
             int thisColorCode = colCode;
@@ -86,14 +87,14 @@ sealed class LegalMoves
             
 
             //front move -> normal move
-            if (board[ApplyIndexBasedOnColor] == Piece.Empty)
+            if ( board.chessBoard[ApplyIndexBasedOnColor] == Piece.Empty)
             {
                 pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor);
 
                 if (ChessEngineSystem.Instance.IsPawnDefIndex(colCode, ind))
                 {   
                   
-                    if ((ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64 ) && board[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
+                    if ((ApplyIndexBasedOnColor + stepBasedOnColour is >= 0 and < 64 ) && board.chessBoard[ApplyIndexBasedOnColor + stepBasedOnColour] == Piece.Empty)
                     {
                             pawn.AddAllPossibleMoves(ApplyIndexBasedOnColor + stepBasedOnColour);
                         
@@ -108,8 +109,8 @@ sealed class LegalMoves
 
             if (rdIndex is >= 0 and < 64)
             {
-                int RDcolorCode = isBlack(board[rdIndex]) ? Piece.Black : Piece.White;
-                if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode && board[rdIndex] != Piece.Empty)
+                int RDcolorCode = isBlack(board.chessBoard[rdIndex]) ? Piece.Black : Piece.White;
+                if (rdIndex / 8 == targetRow && thisColorCode != RDcolorCode && board.chessBoard[rdIndex] != Piece.Empty)
                     pawn.AddAllPossibleMoves(rdIndex);
             }
 
@@ -117,13 +118,13 @@ sealed class LegalMoves
             int ldIndex = ApplyIndexBasedOnColor - 1;
             if (ldIndex is >= 0 and < 64)
             {
-                int LDcolorCode = isBlack(board[ldIndex]) ? Piece.Black : Piece.White;
-                if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board[ldIndex] != Piece.Empty)
+                int LDcolorCode = isBlack(board.chessBoard[ldIndex]) ? Piece.Black : Piece.White;
+                if (ldIndex / 8 == targetRow && thisColorCode != LDcolorCode && board.chessBoard[ldIndex] != Piece.Empty)
                     pawn.AddAllPossibleMoves(ldIndex);
             }
 
 
-            PawnCheckEnPassant(pawn, index, colCode, board);
+            PawnCheckEnPassant(pawn, index, colCode, board.chessBoard);
 
 
             //Prevent looping all times
@@ -165,7 +166,7 @@ sealed class LegalMoves
 //SEPERATE EN PASSANT LIST FOR UNDOING AND A SPECIAL ORDER , track of en passant index
     }
 
-    private ChessPiece GenerateMovesForKnight(int ind, int thisColCode, int[] board)
+    private ChessPiece GenerateMovesForKnight(int ind, int thisColCode, Board board)
     {
         int index = ind;
         int myColCode = thisColCode;
@@ -176,11 +177,11 @@ sealed class LegalMoves
             if( knight.knightCanMoveTo[i] <= 0 || knight.knightCanMoveTo[i] > 63)
                 continue;
             
-            int otherPColorCode = GetColorCode(board[knight.knightCanMoveTo[i]]);
+            int otherPColorCode = GetColorCode(board.chessBoard[knight.knightCanMoveTo[i]]);
             bool isSameColor = IsSameColorAsMe(myColCode, otherPColorCode);
                
     
-            if (board[knight.knightCanMoveTo[i]] == Piece.Empty)
+            if (board.chessBoard[knight.knightCanMoveTo[i]] == Piece.Empty)
             {
                 
                 int newPos =knight.knightCanMoveTo[i];
@@ -209,39 +210,39 @@ sealed class LegalMoves
         return knight.getAllPossibleMovesCount > 0 ? knight : null;
     }
     
-    private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, int[] board)
+    private ChessPiece GenerateMovesForQueen(int ind, int thisColCode, Board board)
     {
         int currentIndex = ind;
         int myColorCode = thisColCode;
-        int[] chessBoard = board;
+        int[] chessBoard = board.chessBoard;
         Queen queen = new Queen(myColorCode, currentIndex);
         
         GenerateAllMoves(currentIndex , myColorCode ,queen,chessBoard);
         return queen.getAllPossibleMovesCount > 0 ? queen : null;
     }
     
-    private ChessPiece GenerateMovesForBishop(int ind, int thisColCode,int[] board)
+    private ChessPiece GenerateMovesForBishop(int ind, int thisColCode,Board board)
     {    int currentIndex = ind;
         int myColorCode = thisColCode;
-        int[] chessBoard = board;
+        int[] chessBoard = board.chessBoard;
         Bishop bishop = new Bishop(myColorCode, currentIndex);
         
         GenerateAllMoves(currentIndex, myColorCode, bishop, chessBoard);
         return bishop.getAllPossibleMovesCount>0? bishop: null;
     }
     
-    private ChessPiece GenerateMovesForRook(int ind, int thisColCode,int[] board)
+    private ChessPiece GenerateMovesForRook(int ind, int thisColCode,Board board)
     {   
         int currentIndex = ind;
         int myColorCode = thisColCode;
-        int[] chessBoard = board;
+        int[] chessBoard = board.chessBoard;
         Rook rook = new Rook(myColorCode, currentIndex);
         
         GenerateAllMoves(currentIndex , myColorCode , rook, chessBoard);
         return rook.getAllPossibleMovesCount>0? rook: null;
     }
 
-    private ChessPiece GenerateMovesForKing(int ind, int thisColCode, int[] board , bool isCustom)
+    private ChessPiece GenerateMovesForKing(int ind, int thisColCode, Board board , bool isCustom)
     {
         int index = ind;
         int myColCode = thisColCode;
@@ -266,10 +267,10 @@ sealed class LegalMoves
             }
 
 
-            int otherPColorCode = GetColorCode(board[king.kingCanMoveTo[i]]);
+            int otherPColorCode = GetColorCode(board.chessBoard[king.kingCanMoveTo[i]]);
             bool isSameColor = IsSameColorAsMe(myColCode, otherPColorCode);
     
-            if (board[king.kingCanMoveTo[i]] == Piece.Empty)
+            if (board.chessBoard[king.kingCanMoveTo[i]] == Piece.Empty)
             {
                 king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
                 
@@ -297,7 +298,7 @@ sealed class LegalMoves
 
                 if (!GameStateManager.Instance.blackQueenSideRookMoved)
                 {
-                    CastlingKingQueenSideCompute(index, ref board, king, -2, -1, Piece.White);
+                    CastlingKingQueenSideCompute(index,  board, king, -2, -1, Piece.White);
                 }
 
                 break;
@@ -312,7 +313,7 @@ sealed class LegalMoves
 
                 if (!GameStateManager.Instance.whiteQueenSideRookMoved)
                 {
-                    CastlingKingQueenSideCompute(index,ref  board, king, -2, -1, Piece.Black);
+                    CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.Black);
                 }
 
                 break;
@@ -322,13 +323,13 @@ sealed class LegalMoves
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
 
-    private void  CastlingKingSideCompute(int index,int[] board , ChessPiece king , int maxStep ,int minStep, int turnToCheck )
+    private void  CastlingKingSideCompute(int index,Board board , ChessPiece king , int maxStep ,int minStep, int turnToCheck )
     {
         for (int i =index +minStep; i <=  index + maxStep; i++)
         {
-            if (board[i] != Piece.Empty) break;
+            if (board.chessBoard[i] != Piece.Empty) break;
             //Scan for opponent moves - in Advance
-            var oppMoveList =  ChessEngineSystem.Instance.GenerateMoveSimple(board , turnToCheck , true);
+            var oppMoveList =  board. GenerateMoveSimple(board , turnToCheck , true);
             foreach (var piece in oppMoveList )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
@@ -337,14 +338,14 @@ sealed class LegalMoves
             }
         }
     }
-    private void  CastlingKingQueenSideCompute(int index,ref int[] board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
+    private void  CastlingKingQueenSideCompute(int index,Board board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
     {
         for (int i =index +minStep; i >=  index + maxStep; i--)
         {
           
-            if (board[i] != Piece.Empty) break;
+            if (board.chessBoard[i] != Piece.Empty) break;
             //Scan for opponent moves - in Advance
-            var oppMoveList =  ChessEngineSystem.Instance.GenerateMoveSimple(board , turnToCheck , true);
+            var oppMoveList = board.GenerateMoveSimple(board , turnToCheck , true);
             foreach (var piece in oppMoveList )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
