@@ -282,7 +282,7 @@ sealed class LegalMoves
 
         if (index is < 0 or >= 64) return king.getAllPossibleMovesCount > 0 ? king : null;
 
-        if (isCustom) return king.getAllPossibleMovesCount > 0 ? king : null; // since castling cant result in our getting checked
+      //  if (isCustom) return king.getAllPossibleMovesCount > 0 ? king : null; // since castling cant result in our getting checked
         
         
         //revamp this please !!

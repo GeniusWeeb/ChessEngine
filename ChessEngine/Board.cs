@@ -396,16 +396,13 @@ namespace ChessEngine
                 }
              }
 
-             foreach (var index in piece.allPossibleMovesIndex)
+             foreach (var movesTo in movesToRemove)
              {
-                 
+                 piece.allPossibleMovesIndex.Remove(movesTo);
              }
          }
 
-         if(legalPieceMoves.Count == 0)
-         {
-             Console.WriteLine($"CHECKMATE, {GameStateManager.Instance.GetOpponent(forThisPlayer)}WINS !");
-         }
+       
 
          return legalPieceMoves;
      }
