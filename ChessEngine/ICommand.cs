@@ -57,9 +57,7 @@ public class MoveCommand : Command
         this.capturedPiece =currentBoard.chessBoard[targetCell];
         currentBoard.chessBoard[targetCell] = currentBoard.chessBoard[currentCell];
         currentBoard.chessBoard[currentCell] =  Piece.Empty ;
-        currentBoard.ShowBoard();
-        
-        Console.WriteLine("Move added to board");
+      
       
     }
 
@@ -301,19 +299,19 @@ public class kingMoveCommand : MoveCommand
 
     public override void Execute()
     {
-        currentBoard.ShowBoard();
-        Console.WriteLine($"King moved from {currentCell} to {targetCell}");
-        switch(pColor)
-        {
-            case Piece.White:
-                if(GameStateManager.Instance.isWhiteCastlingAvailable)
-                   Console.WriteLine("White King castle");
-                break;
-            case Piece.Black:
-                 if(GameStateManager.Instance.isBlackCastlingAvailable)    
-                  Console.WriteLine("Black king castle");
-                break;    
-        }
+       
+      
+        // switch(pColor)
+        // {
+        //     case Piece.White:
+        //         if(GameStateManager.Instance.isWhiteCastlingAvailable)
+        //            Console.WriteLine("White King castle");
+        //         break;
+        //     case Piece.Black:
+        //          if(GameStateManager.Instance.isBlackCastlingAvailable)    
+        //           Console.WriteLine("Black king castle");
+        //         break;    
+        // }
 
       base.Execute();
 

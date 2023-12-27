@@ -155,7 +155,7 @@ sealed class LegalMoves
            if (Math.Abs(cellFinal % 8 - index % 8) == 1 && (cellFinal / 8 == index /8))
            {
                int enPassantIndex = colCode == Piece.White ? cellFinal + 8 : cellFinal - 8;
-               Console.WriteLine($"Found En Passant move for at {enPassantIndex} ");
+        //       Console.WriteLine($"Found En Passant move for at {enPassantIndex} ");
                
                //we also need cellFinal
                pawn.specialIndex = enPassantIndex; //Success
@@ -329,7 +329,7 @@ sealed class LegalMoves
         {
             if (board.chessBoard[i] != Piece.Empty) break;
             
-            Console.WriteLine($"checking castling for {board.GetCurrentTurn}");
+          
             var oppMoveList =  board. GenerateMoves(turnToCheck , board, true);
             foreach (var piece in oppMoveList )
             {
@@ -348,7 +348,7 @@ sealed class LegalMoves
             
             if(board.chessBoard[i] != index+ maxStep-1)
                 continue;
-            Console.WriteLine($"checking castling for {board.GetCurrentTurn}");
+         
             //Scan for opponent moves - in Advance
             var oppMoveList = board.GenerateMoves( turnToCheck , board , true );
             foreach (var piece in oppMoveList )

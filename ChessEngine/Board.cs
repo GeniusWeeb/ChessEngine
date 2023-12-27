@@ -32,10 +32,6 @@ namespace ChessEngine
          moves = new LegalMoves();
          watch = new Stopwatch();
 
-         Console.ForegroundColor = ConsoleColor.Green;
-             Console.WriteLine($" {type} Board created ! ");
-         Console.ResetColor();
-         
      }
      public Board()
      {
@@ -172,9 +168,9 @@ namespace ChessEngine
         CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
         UpdateTurns(); 
         PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p, this);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-             Console.WriteLine($"---------->{move.p.GetPieceCode} moved from {FenMapper.IndexToAlgebric(move.from,move.to )}<<<<<<<<<<<<<<<");
-        Console.ResetColor();
+        // Console.ForegroundColor = ConsoleColor.Cyan;
+        //      Console.WriteLine($"---------->{move.p.GetPieceCode} moved from {FenMapper.IndexToAlgebric(move.from,move.to )}<<<<<<<<<<<<<<<");
+        // Console.ResetColor();
 
         //ShowBoard();
     }
@@ -183,7 +179,7 @@ namespace ChessEngine
     
     {
         int pCode =newIndex & Piece.CPiece;
-        Console.WriteLine($"{pCode} is that got captured" + pCode);
+    
        // Console.WriteLine("Chessboard Index" + newIndex);
         
         switch (pCode)
@@ -194,31 +190,31 @@ namespace ChessEngine
                 break;
             case 1:
                 GameStateManager.Instance.captureCount += 1;
-                Console.WriteLine($"Captured Pawn {pCode} ");
+             
                // Console.WriteLine("1 point for Pawn");
                 break;
             case 2:
                 GameStateManager.Instance.captureCount += 1;
 
                // Console.WriteLine("2 points for Rook");
-                Console.WriteLine($"Captured  Rook {pCode} ");
+              
                 break;
             case 3: 
                 GameStateManager.Instance.captureCount += 1;
-                Console.WriteLine($"Captured knight  {pCode} ");
+              
 
                // Console.WriteLine("3 points for Knight");
                 break;
             case 4: 
                 GameStateManager.Instance.captureCount += 1;
-                Console.WriteLine($"Captured Bishop {pCode} ");
+              
 
                // Console.WriteLine("4 points for Bishop");
                 break;
             
             case 6:// Console.WriteLine("6 points for Queen");
                 GameStateManager.Instance.captureCount += 1;
-                Console.WriteLine($"Captured Queen{pCode} ");
+            
 
                 break;
             
@@ -227,7 +223,7 @@ namespace ChessEngine
     }
 
     
-    public  void ShowBoard()
+    public void ShowBoard()
      {
          Console.ForegroundColor = ConsoleColor.Green;
 
@@ -343,7 +339,7 @@ namespace ChessEngine
          if (!IsOppKingInCheck(pColor, oldIndex, newIndex, pColor | pCode)) return; //Help us build on Undo
 
          GameStateManager.Instance.checkCount++;
-         Console.WriteLine($"{pColor}King has been checked ");
+         //Console.WriteLine($"{pColor}King has been checked ");
      }
 
 //after my move
@@ -351,7 +347,7 @@ namespace ChessEngine
      public int getOpponent => (int)currentTurn == Piece.White ? Piece.Black : Piece.White;
      private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, int pCode)
      {      
-         Console.WriteLine("This piece code is" + pCode);
+       
          int oppCol = GameStateManager.Instance.GetOpponent(pColor); // Opponent color
          int King = Piece.King | oppCol; //Opponent king
          List<ChessPiece> oppPieceList = new List<ChessPiece>();
@@ -403,7 +399,7 @@ namespace ChessEngine
                              if (boardCopy.chessBoard[canMoveToIndex] ==
                                  myKing) // Found my king on a deep check // Deep check here // Pinned in some way
                              {
-                                 Console.WriteLine($"King CHECKED REMOVING for {piece.GetPieceCode} at {moveIndex}");
+                                 //Console.WriteLine($"King CHECKED REMOVING for {piece.GetPieceCode} at {moveIndex}");
                                  movesToRemove.Add(moveIndex);
                                  break;
                              }
