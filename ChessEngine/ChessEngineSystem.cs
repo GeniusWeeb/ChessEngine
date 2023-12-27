@@ -12,7 +12,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "rnbqkbnr/ppppppp1/8/7p/7P/8/PPPPPPP1/RNBQKBNR w KQkq h6 0 2";       
+        public string TestFen = "rnbqkbnr/1pppppp1/p7/7p/Q6P/2P5/PP1PPPP1/RNB1KBNR w KQkq - 1 3";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
         private BotBrain? bot1 = new BotBrain();
@@ -87,7 +87,7 @@ namespace ChessEngine
                     {   
                         Console.WriteLine("Bot is gonna make the move");
                         bot1.Think();
-                        board.GenerateMoves( (int)board.GetCurrentTurn, board);
+                        board.GenerateMoves( (int)board.GetCurrentTurn, board,false);
                     }
                     break;
                 
@@ -108,6 +108,7 @@ namespace ChessEngine
                     
                     break;
                 case GameMode.PlayerVsPlayer :
+                    board.GenerateMoves(board.GetCurrentTurn, board, true);
                     break;
                 
                 case GameMode.PerfTest:
@@ -128,7 +129,7 @@ namespace ChessEngine
             Thread.Sleep(botDecisionDelay);
             
             //main issue is here
-            board.GenerateMoves( (int)board.GetCurrentTurn, board);
+            board.GenerateMoves( (int)board.GetCurrentTurn, board , false);
             UtilityWriteToConsoleWithColor("Scanning Finished  bot gonna think", ConsoleColor.Red);
             brain.Think();          
             UtilityWriteToConsoleWithColor("Bots thinking finished", ConsoleColor.DarkGreen);
@@ -328,7 +329,7 @@ namespace ChessEngine
             Console.ResetColor();
             board.ShowBoard();
             GameStateManager.Instance.ResetMoves();
-            board.GenerateMoves( (int)board.GetCurrentTurn, board);
+            board.GenerateMoves( (int)board.GetCurrentTurn, board, false);
             CheckForGameModeAndPerform();
 
         }

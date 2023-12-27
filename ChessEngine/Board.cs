@@ -56,36 +56,40 @@ namespace ChessEngine
          ChessEngineSystem.Instance.SendDataToUI(finalData);
 
          Console.ForegroundColor = ConsoleColor.Yellow;
-             ShowBoard();
+         ShowBoard();
          Console.ResetColor();
          
-         GenerateMoves( (int)currentTurn , this);
+    //     GenerateMoves( (int)currentTurn , this , false);
          
 
      }
     
+    //If a method deosnt send depth , means its a firdst time search , 
     
-    public List<ChessPiece> GenerateMoves( int forThisColor , Board board)
+    public List<ChessPiece> GenerateMoves( int forThisColor , Board board ,bool justGen )
     {
-        //legal and maybe Pseudo Legal
-       
-        List<ChessPiece>justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
-        return justAllMoves;
-        return  GetOnlyLegalMoves(justAllMoves, board , forThisColor);
+        if (justGen)
+        {
+            List<ChessPiece> justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+            return justAllMoves;
+
+        }
+        else
+        {   //else get legal moves as well
+            List<ChessPiece> justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+            return GetOnlyLegalMoves(justAllMoves, board, forThisColor);
+        }
+
+
+        
+        
     } 
     
-  
-
-    public List<ChessPiece> GenerateMoveSimple(Board board, int forThisColor , bool isCustom)
-    {
-      
-        return moves.GenerateLegalMoves(board, forThisColor , isCustom);
-    }
     
     
     public bool MakeMove( int oldIndex, int newIndex)
     {
-        
+        Console.WriteLine("Checking UI ");
         var piece = chessBoard[oldIndex];
         
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
@@ -95,7 +99,7 @@ namespace ChessEngine
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
-                
+                Console.WriteLine("Found move");
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
                 PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p ,  this);
                 //ShowBoard();
@@ -341,7 +345,7 @@ namespace ChessEngine
          Console.WriteLine($"{pColor}King has been checked ");
      }
 
-
+//after my move
 
      public int getOpponent => (int)currentTurn == Piece.White ? Piece.Black : Piece.White;
      private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, int pCode)
@@ -354,7 +358,7 @@ namespace ChessEngine
          Board board_cpy = this;
          board_cpy.chessBoard[oldIndex] = Piece.Empty;
          board_cpy.chessBoard[newIndex] = pCode;
-         oppPieceList =  GenerateMoves(pColor,  board_cpy );
+         oppPieceList =  GenerateMoves(pColor, board_cpy , true );
          foreach (var piece in oppPieceList)
          {
              foreach (var movesIndex in piece.allPossibleMovesIndex)
@@ -368,50 +372,57 @@ namespace ChessEngine
 
          return false;
      }
-     
-     public List<ChessPiece> GetOnlyLegalMoves(List<ChessPiece> myLegalMoves,Board board , int forThisPlayer ) // sameSideColor
-     {  
-         
-         //legal moves -> filter -> send a new hashset
-         int myKing = Piece.King | forThisPlayer;
-         List<int> movesToRemove = new List<int>();
-         Board boardCopy = new Board(board, "filterFinalMovesClone");
-         foreach (ChessPiece piece in myLegalMoves.ToList() )
+
+     public List<ChessPiece> GetOnlyLegalMoves(List<ChessPiece> myLegalMoves, Board board, int forThisPlayer) // sameSideColor
+     {
+         //2- 1 => depth
+         try
          {
-             foreach (int  moveIndex in piece.allPossibleMovesIndex.ToList() )
+             //legal moves -> filter -> send a new hashset
+             int myKing = Piece.King | forThisPlayer;
+             List<int> movesToRemove = new List<int>();
+             Board boardCopy = new Board(board, "filterFinalMovesClone");
+             foreach (ChessPiece piece in myLegalMoves.ToList())
              {
-                 boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
-                 boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
-                     
-                     List<ChessPiece> oppsMovesList =  GenerateMoveSimple(boardCopy,boardCopy.getOpponent, true);
+                 foreach (int moveIndex in piece.allPossibleMovesIndex.ToList())
+                 {
+                     boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
+                     boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
 
-                foreach (ChessPiece oppPiece in oppsMovesList )
-                {
-                    foreach (int canMoveToIndex in oppPiece.allPossibleMovesIndex )
-                    {
-                        if (boardCopy.chessBoard[canMoveToIndex] ==
-                            myKing) // Found my king on a deep check // Deep check here // Pinned in some way
-                        {
-                            Console.WriteLine("King CHECKED REMOVING");
-                            movesToRemove.Add(canMoveToIndex);
-                            break;
-                        }
-                    }
-                }
-             }
+                     //For opponent and get their ONLY LEGAL MOVES //1st case -> dep 1
+                     List<ChessPiece> oppsMovesList = GenerateMoves( boardCopy.getOpponent , boardCopy , true); //2 -> 
 
-             foreach (var movesTo in movesToRemove)
-             {
-                 piece.allPossibleMovesIndex.Remove(movesTo);
+                     foreach (ChessPiece oppPiece in oppsMovesList)
+                     {
+                         foreach (int canMoveToIndex in oppPiece.allPossibleMovesIndex)
+                         {
+                             if (boardCopy.chessBoard[canMoveToIndex] ==
+                                 myKing) // Found my king on a deep check // Deep check here // Pinned in some way
+                             {
+                                 Console.WriteLine("King CHECKED REMOVING");
+                                 movesToRemove.Add(canMoveToIndex);
+                                 break;
+                             }
+                         }
+                     }
+                 }
+
+                 foreach (var movesTo in movesToRemove)
+                 {
+                     piece.allPossibleMovesIndex.Remove(movesTo);
+                 }
              }
+             
+             return myLegalMoves;
+
+
          }
-
-       
-
-         return myLegalMoves;
+         catch (Exception e)
+         {
+             Console.WriteLine(e);
+             throw;
+         }
      }
-     
-
 
  }
 

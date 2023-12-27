@@ -9,7 +9,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 2;
+    private readonly int customDepth = 1;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -22,7 +22,7 @@ public class PerfTest
         int nodes = 0;
         List<ChessPiece> startNodePieces = new List<ChessPiece>();
         Board board = ChessEngineSystem.Instance.GetBoardClass;
-        startNodePieces =board.GenerateMoves(board.GetCurrentTurn ,board );
+        startNodePieces =board.GenerateMoves(board.GetCurrentTurn ,board , false );
         
         
         foreach (var piece in startNodePieces) //Root node
@@ -124,7 +124,7 @@ public class PerfTest
         
         List<Move> currentList = new List<Move>();
         List<ChessPiece> possibleMoveList = new List<ChessPiece>();
-        possibleMoveList =  board.GenerateMoves( (int)board.GetCurrentTurn, board);
+        possibleMoveList =  board.GenerateMoves( (int)board.GetCurrentTurn, board , false);
         foreach (var piece in possibleMoveList ) //Root node2
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)

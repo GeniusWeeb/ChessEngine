@@ -328,8 +328,9 @@ sealed class LegalMoves
         for (int i =index +minStep; i <=  index + maxStep; i++)
         {
             if (board.chessBoard[i] != Piece.Empty) break;
-            //Scan for opponent moves - in Advance
-            var oppMoveList =  board. GenerateMoveSimple(board , turnToCheck , true);
+            
+            Console.WriteLine($"checking castling for {board.GetCurrentTurn}");
+            var oppMoveList =  board. GenerateMoves(turnToCheck , board, true);
             foreach (var piece in oppMoveList )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
@@ -340,12 +341,16 @@ sealed class LegalMoves
     }
     private void  CastlingKingQueenSideCompute(int index,Board board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
     {
-        for (int i =index +minStep; i >=  index + maxStep; i--)
+        for (int i =index +minStep; i >=  index + maxStep-1; i--)
         {
           
             if (board.chessBoard[i] != Piece.Empty) break;
+            
+            if(board.chessBoard[i] != index+ maxStep-1)
+                continue;
+            Console.WriteLine($"checking castling for {board.GetCurrentTurn}");
             //Scan for opponent moves - in Advance
-            var oppMoveList = board.GenerateMoveSimple(board , turnToCheck , true);
+            var oppMoveList = board.GenerateMoves( turnToCheck , board , true );
             foreach (var piece in oppMoveList )
             {
                 if (piece.GetAllMovesForThisPiece.Contains(i)) return;
