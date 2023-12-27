@@ -278,24 +278,39 @@ sealed class LegalMoves
             else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
         }
         
-
+        //for castling infinite looping -> only check for moves
+        if(isCustom)  return king.getAllPossibleMovesCount > 0 ? king : null;
+        
         switch (myColCode)
         {
             case Piece.White:
-                if (board.castleRight.whiteKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.Black); 
+                
+                if(board.chessBoard[7]!= (myColCode | Piece.Rook ))
+                    board.castleRight.whiteKingSideCastling = false;
+                if(board.chessBoard[0]!= (myColCode | Piece.Rook ))
+                    board.castleRight.whiteQueenSideCastling = false;
+               
+                if(board.castleRight.whiteKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.Black);
                 if(board.castleRight.whiteQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.Black); 
                 break;
             case Piece.Black:
+                if(board.chessBoard[63]!= (myColCode | Piece.Rook ))
+                    board.castleRight.blackKingSideCastling = false;
+                if(board.chessBoard[56]!= (myColCode | Piece.Rook ))
+                    board.castleRight.blackQueenSideCastling = false;
                 if (board.castleRight.blackKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.White); 
                 if(board.castleRight.blackQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.White); 
                 break;
         }
+       
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
 
+    
     private void  CastlingKingSideCompute(int currentKingIndex,Board board , ChessPiece king , int maxStep ,int minStep, int OppColor )
     {
         
+       
         //min step = +1 for king side and max step = +2
         //min step = -1 for queen side and max step = -2
         List<int> castlingIndexList = new List<int>()
@@ -310,7 +325,7 @@ sealed class LegalMoves
                 return;
         }
         
-        var oppMoveList =   board. GenerateMoves(OppColor , board, true);
+        var oppMoveList =   board. GenerateMoves(OppColor , board, true, true);
         foreach (var piece in oppMoveList)
         {
             if(piece.allPossibleMovesIndex.Contains(currentKingIndex))
@@ -332,6 +347,7 @@ sealed class LegalMoves
     }
     private void  CastlingQueenSideCompute(int currentKingIndex,Board board , ChessPiece king , int maxStep ,int minStep , int OppColor )
     {
+      
         List<int> castlingIndexList = new List<int>()
         {
             currentKingIndex+minStep,
@@ -344,7 +360,7 @@ sealed class LegalMoves
                 return;
         }
         
-        var oppMoveList =   board. GenerateMoves(OppColor , board, true);
+        var oppMoveList =   board. GenerateMoves(OppColor , board, true, true);
         foreach (var piece in oppMoveList)
         {
             if(piece.allPossibleMovesIndex.Contains(currentKingIndex))

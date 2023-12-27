@@ -67,16 +67,16 @@ public static  class FenMapper
             else switch (castlingData[i])
             {
                 case 'K':
-                    K16 = false;
+                    K16 = true;
                     break;
                 case 'Q':
-                    Q16 = false;
+                    Q16 = true;
                     break;
                 case 'k':
-                    k32 = false;
+                    k32 = true;
                     break;
                 case 'q':
-                    q32 = false;
+                    q32 = true;
                     break;
             }
         }

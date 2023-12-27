@@ -12,7 +12,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";       
+        public string TestFen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
         private BotBrain? bot1 = new BotBrain();

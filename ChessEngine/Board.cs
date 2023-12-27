@@ -16,10 +16,11 @@ namespace ChessEngine
      public CastlingRights castleRight = new CastlingRights(true, true, true, true); //get from fen
      public readonly List<int> promoteToPieces = new List<int>()
      {
-         Piece.Queen,
+         
          Piece.Bishop,
          Piece.Knight,
-         Piece.Rook
+         Piece.Rook,
+         Piece.Queen,
      };
      
      LegalMoves moves = new LegalMoves();
@@ -82,18 +83,18 @@ namespace ChessEngine
     
     //If a method deosnt send depth , means its a firdst time search , 
     
-    public List<ChessPiece> GenerateMoves( int forThisColor , Board board ,bool justGen )
+    public List<ChessPiece> GenerateMoves( int forThisColor , Board board ,bool justGen , bool isCustom = false)
     {
         if (justGen)
         {   List<ChessPiece> justAllMoves= new List<ChessPiece>();
-            justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+            justAllMoves = moves.GenerateLegalMoves(board, forThisColor , isCustom );
             return justAllMoves;
 
         }
         else
         {   //else get legal moves as well
             List<ChessPiece> justAllMoves = new List<ChessPiece>();
-            justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+            justAllMoves = moves.GenerateLegalMoves(board, forThisColor ,isCustom );
             return GetOnlyLegalMoves(justAllMoves, board, forThisColor);
         }
 
