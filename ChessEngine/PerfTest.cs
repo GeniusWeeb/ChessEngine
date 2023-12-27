@@ -16,7 +16,7 @@ public class PerfTest
     int promCount = 0;
     private List<Move> moveList = new List<Move>();
     private List<ShowMoveList> PerftList = new List<ShowMoveList>();
-    private int count;
+  
     public void PerFMoveFinal()
     {
         int nodes = 0;
@@ -24,31 +24,28 @@ public class PerfTest
         Board board = ChessEngineSystem.Instance.GetBoardClass;
         startNodePieces =board.GenerateMoves(board.GetCurrentTurn ,board , false );
         
-        
         foreach (var piece in startNodePieces) //Root node
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
             {
                 moveList.Add(new Move( piece.GetCurrentIndex, movesIndex,  piece));
-                //Console.WriteLine($"Move piece {piece.GetPieceCode} goes from {piece.GetCurrentIndex} to {movesIndex}");
             }
 
         }
         
-     
         watch.Start();
         foreach (Move move in moveList)
         {
-            count++;
-                //    ChessEngineSystem.Instance.UtilityWriteToConsoleWithColor(" ---------------------------Main board Move is  ---------------------------" );
-            Board board_cpy = new Board(board,"clone");
-            board_cpy.MakeMoveClone(move);
-            ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.from, move.to ,board_cpy.chessBoard[move.to] );
-            
-            nodes += RunPerft(customDepth - 1 , board_cpy);
-            PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to), nodes));
-            nodes = 0;
-
+            if(IsPawnPromotion(move.to, move.p.GetPieceCode))
+                DoPromotion(customDepth,move,board);
+            else
+            { 
+                Board board_cpy = new Board(board,"clone");
+                board_cpy.MakeMoveClone(move);
+                nodes += RunPerft(customDepth - 1 , board_cpy);
+                PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to), nodes));
+                nodes = 0;
+            }
         }
         
         watch.Stop();
@@ -66,7 +63,7 @@ public class PerfTest
                         finalpos += move.count;
                         Console.WriteLine($"{move.moveName}- {move.count}");
                     }
-                        Console.WriteLine($"Total positions are {finalpos}");
+                    Console.WriteLine($"Total positions are {finalpos}");
                         Console.WriteLine($"Captured pieces are {GameStateManager.Instance.captureCount}");
                         Console.WriteLine($"Check count is {GameStateManager.Instance.checkCount}");
                         Console.WriteLine($"enPassant count is {GameStateManager.Instance.enPassantMoves}"); 
@@ -79,9 +76,13 @@ public class PerfTest
 
     bool IsPawnPromotion(int newIndex , int pieceCode)
     {
-        Console.WriteLine("Code is "+  pieceCode + "for new index " + newIndex);
         int pCode = pieceCode & Piece.CPiece;
-        if ((newIndex / 8 == 7 || newIndex / 8 == 0) && pCode == Piece.Pawn)
+        if (pCode != Piece.Pawn)
+            return false;
+        
+        Console.WriteLine("Code is "+  pieceCode + "for new index " + newIndex);
+      
+        if ((newIndex / 8 == 7 || newIndex / 8 == 0) )
         {
             Console.WriteLine("returning true");
             return true;
@@ -136,7 +137,6 @@ public class PerfTest
 
             Board board_cpy =  new Board(board , $"clone at  {currentDepth}");
             board_cpy.MakeMoveClone(move);
-           // ChessEngineSystem.Instance.UtilityWriteToConsoleWithColor(" ---------------------------child leaves  ---------------------------" );
             nodeCount += RunPerft(currentDepth-1,  board_cpy);
             Thread.Sleep((int)(moveDelay));
             //UnMakeMove();
@@ -144,6 +144,28 @@ public class PerfTest
         }
         return nodeCount;
 
+    }
+
+
+    private void DoPromotion(int customDepth,Move move,Board board)
+    {
+
+        int pCol = ChessEngineSystem.Instance.GetColorCode(move.p.GetPieceCode);
+        
+        foreach (int piece in board.promoteToPieces)
+        {
+            int promCount = 0;
+            int promoP = piece | pCol;
+            Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
+            board_cpy.MakeMoveClone(move);
+            ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance,
+                board_cpy);
+            ChessEngineSystem.Instance.ExecuteCommand(promote);
+            board_cpy.KingCheckCalculation(pCol ,move.from,move.to, move.p.GetPieceCode);
+
+            promCount+= RunPerft(customDepth - 1, board_cpy);
+            PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to)+ GetPromotedPieceCode(promoP),promCount));
+        }
     }
 
 

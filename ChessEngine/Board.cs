@@ -14,6 +14,13 @@ namespace ChessEngine
      public int[] chessBoard;
      private Turn currentTurn = Turn.White;
      public CastlingRights castleRight = new CastlingRights(true, true, true, true); //get from fen
+     public readonly List<int> promoteToPieces = new List<int>()
+     {
+         Piece.Queen,
+         Piece.Bishop,
+         Piece.Knight,
+         Piece.Rook
+     };
      
      LegalMoves moves = new LegalMoves();
      Stopwatch watch = new Stopwatch();
@@ -34,6 +41,15 @@ namespace ChessEngine
          currentTurn = other.currentTurn;
          moves = new LegalMoves();
          watch = new Stopwatch();
+         castleRight = new CastlingRights(true, true, true, true); //get from fen
+         promoteToPieces = new List<int>()
+         {
+             Piece.Queen,
+             Piece.Bishop,
+             Piece.Knight,
+             Piece.Rook
+         };
+
 
      }
      public Board()
