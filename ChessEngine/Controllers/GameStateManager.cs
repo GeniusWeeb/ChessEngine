@@ -23,17 +23,7 @@ public class GameStateManager
     
     //Default player to move -> Make black to make black move first
     public int playerToMove =  Piece.White;
-    public bool whiteKingInCheck = false;
-    public bool blackKingInCheck = false;
-    public bool isBlackCastlingAvailable = true;
-    public bool isWhiteCastlingAvailable = true;
     
-   
-    public bool blackKingSideRookMoved = false;
-    public bool blackQueenSideRookMoved = false;
-    public bool whiteKingSideRookMoved = false;
-    public bool whiteQueenSideRookMoved = false;
-
 
     
     
@@ -41,11 +31,11 @@ public class GameStateManager
     //Q32 stands for queenside castling for White color
     public void UpdateCastlingStateFromFen( bool K16 , bool Q16,bool k32 ,bool q32 )
     {
-        whiteKingSideRookMoved = K16;
-        whiteQueenSideRookMoved = Q16;
-
-        blackKingSideRookMoved = k32;
-        blackQueenSideRookMoved = q32;
+        // whiteKingSideRookMoved = K16;
+        // whiteQueenSideRookMoved = Q16;
+        //
+        // blackKingSideRookMoved = k32;
+        // blackQueenSideRookMoved = q32;
 
     }
     //Both castling unavailable
@@ -53,8 +43,8 @@ public class GameStateManager
     {
         Console.WriteLine($"Castling allowed for white black? {WFalse}{BFalse}");
        
-        isWhiteCastlingAvailable = WFalse;
-        isBlackCastlingAvailable = BFalse;
+        // isWhiteCastlingAvailable = WFalse;
+        // isBlackCastlingAvailable = BFalse;
 
     }
 
@@ -122,14 +112,6 @@ public class GameStateManager
      player1MoveCol = null;
      player2MoveCol = null;
      playerToMove = Piece.White;
-     whiteKingInCheck = false;
-     blackKingInCheck = false;
-     isBlackCastlingAvailable = true;
-     isWhiteCastlingAvailable = true;
-     blackKingSideRookMoved = false;
-     blackQueenSideRookMoved = false;
-     whiteKingSideRookMoved = false;
-     whiteQueenSideRookMoved = false;
      captureCount = 0;
      checkCount = 0;
      enPassantMoves = 0;

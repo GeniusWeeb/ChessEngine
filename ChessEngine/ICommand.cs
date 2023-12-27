@@ -87,7 +87,7 @@ public class MoveCommand : Command
     
 public class CastlingCommand : Command
 {
-
+    private Board savedBoard;
     private Board currentBoard;
     private int kingDefaultCell ;
     private int kingNewCell;
@@ -106,6 +106,8 @@ public class CastlingCommand : Command
 
     public  CastlingCommand ( ChessEngineSystem eng, int KingD , int KingN , int pColor ,  Board  board)
     {
+      
+        this.savedBoard = new Board(board);
         this.currentBoard = board;
         this.kingDefaultCell = KingD ;
         this.kingNewCell= KingN ;
@@ -116,18 +118,20 @@ public class CastlingCommand : Command
 
     public override void Execute()
     {
+
+        GameStateManager.Instance.castlingCount++;
         switch(color)
         {
-          
-            case  Piece.Black:  
-                 if (kingNewCell > kingDefaultCell)  
-                        PerformCastle(-1,63);
-                 else 
-                        PerformCastle(+1, 56);      
-                     
-         Console.WriteLine("Black Castling is confirmed");
-                 GameStateManager.Instance.castlingCount += 1;        
-       
+            case  Piece.Black:
+                if (kingNewCell > kingDefaultCell)
+                {   
+                    PerformCastle(-1,63 );
+                }
+                else 
+                    PerformCastle(+1, 56 );
+
+                currentBoard.castleRight.blackKingSideCastling = false;       
+                currentBoard.castleRight.blackQueenSideCastling = false;       
          engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
@@ -137,10 +141,11 @@ public class CastlingCommand : Command
                  else 
                     PerformCastle(+1,0);      
                      
-         Console.WriteLine("White Castling is confirmed"); 
-                 GameStateManager.Instance.castlingCount += 1; 
+                 currentBoard.castleRight.blackKingSideCastling = false;       
+                 currentBoard.castleRight.blackQueenSideCastling = false;   
+               
        
-         engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
+        // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
     }
@@ -148,15 +153,7 @@ public class CastlingCommand : Command
 
     public override void Undo()
     {
-        switch(color)
-        {
-            case Piece.Black:
-            GameStateManager.Instance.isBlackCastlingAvailable = true;
-            break;
-            case Piece.White:
-            GameStateManager.Instance.isWhiteCastlingAvailable = true;
-            break;
-        }
+        engine.UpdateBoard(savedBoard);
         currentBoard.chessBoard[kingDefaultCell]  =   currentBoard.chessBoard[kingNewCell];
         currentBoard.chessBoard[RookDefaultCell] =   currentBoard.chessBoard[RookNewCell];
         currentBoard.chessBoard[kingNewCell] = Piece.Empty;
@@ -164,7 +161,7 @@ public class CastlingCommand : Command
         engine.UpdateUIWithNewIndex(kingNewCell, kingDefaultCell);
         engine.UpdateUIWithNewIndex(RookNewCell, RookDefaultCell);
         Console.WriteLine("Castling Undo happening now");
-        engine.UpdateBoard(currentBoard);
+     
            
     }
 
@@ -219,57 +216,36 @@ public class RookMoveCommand : Command
         this.targetCell =  newCell;
         this.pColor = color;
         this.targetCheck = old % 8 ; //file 0 or 7
-       
-        
-      
     }
 
     public override void Execute()
     {   
-
-      capturedPiece =   currentBoard.chessBoard[targetCell];   
-      currentBoard.chessBoard[targetCell] =   currentBoard.chessBoard[currentCell];
-      currentBoard.chessBoard[currentCell] = Piece.Empty;
         
-      if(!GameStateManager.Instance.isWhiteCastlingAvailable && !GameStateManager.Instance.isBlackCastlingAvailable)
-        return;
-
        switch(pColor)
        {
         case Piece.White:
-            if(targetCheck == 7 && !GameStateManager.Instance.whiteKingSideRookMoved)
-                this.WKingSideRook=  GameStateManager.Instance.whiteKingSideRookMoved = true ;
-            else if( targetCheck == 0 && !GameStateManager.Instance.whiteQueenSideRookMoved)
-                this. WQueenSideRook= GameStateManager.Instance.whiteQueenSideRookMoved = true;    
-        break;
+            if (targetCheck % 8 == 0)
+                currentBoard.castleRight.whiteQueenSideCastling = false;
+            else
+                currentBoard.castleRight.whiteKingSideCastling = false;
+            break;   
+         
         case Piece.Black:
-            if(targetCheck == 7 && !GameStateManager.Instance.blackKingSideRookMoved)
-               this.BkingSideRook = GameStateManager.Instance.blackKingSideRookMoved = true;
-            else  if( targetCheck == 0 && !GameStateManager.Instance.blackQueenSideRookMoved)
-               this.BQueenSideRook = GameStateManager.Instance.blackQueenSideRookMoved = true;    
-           
-        break;
+            if (targetCheck % 8 == 0)
+                currentBoard.castleRight.blackQueenSideCastling = false;
+            else
+                currentBoard.castleRight.blackKingSideCastling = false;
+            break;
        }
+       
+       capturedPiece =   currentBoard.chessBoard[targetCell];   
+       currentBoard.chessBoard[targetCell] =   currentBoard.chessBoard[currentCell];
+       currentBoard.chessBoard[currentCell] = Piece.Empty;
     }
 
     public override void Undo()
     {
-        switch(pColor)
-        {
-            case Piece.White:
-                if(targetCheck == 7 && WKingSideRook)
-                    GameStateManager.Instance.whiteKingSideRookMoved = false;
-                else if (targetCheck == 0 && WQueenSideRook)
-                    GameStateManager.Instance.whiteQueenSideRookMoved = false;    
-                break;
-            case Piece.Black:
-                if(targetCheck == 7 && BkingSideRook)
-                    GameStateManager.Instance.blackKingSideRookMoved = false;
-                else if (targetCheck == 0 && BQueenSideRook)
-                    GameStateManager.Instance.blackQueenSideRookMoved = false;    
-                break;    
-        }
-
+        
         currentBoard.chessBoard[currentCell] = currentBoard.chessBoard[targetCell];
         currentBoard.chessBoard[targetCell] = capturedPiece;
    
@@ -294,41 +270,30 @@ public class kingMoveCommand : MoveCommand
     public kingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board) : base(currnt, target, eng, board)
     {
         pColor = color;
-        // = eng.Get//;
+        
     }
 
     public override void Execute()
     {
-       
-      
-        // switch(pColor)
-        // {
-        //     case Piece.White:
-        //         if(GameStateManager.Instance.isWhiteCastlingAvailable)
-        //            Console.WriteLine("White King castle");
-        //         break;
-        //     case Piece.Black:
-        //          if(GameStateManager.Instance.isBlackCastlingAvailable)    
-        //           Console.WriteLine("Black king castle");
-        //         break;    
-        // }
+        base.Execute();
+        switch(pColor)
+        {
+            case Piece.White:
+                currentBoard.castleRight.whiteKingSideCastling = false;
+                currentBoard.castleRight.whiteQueenSideCastling = false;
+                break;
+            case Piece.Black:
+                currentBoard.castleRight.blackKingSideCastling = false;
+                currentBoard.castleRight.blackQueenSideCastling = false;
+                break;    
+        }
 
-      base.Execute();
+     
 
     }
 
     public override void Undo()
     {
-        switch(pColor){
-            case Piece.White:
-                //if(!isWhiteCastlingAvail)
-                  //  GameStateManager.Instance.isWhiteCastlingAvailable= true;
-                break;
-            case Piece.Black:
-                // if(!isBlackCastlingAvail)
-                //     GameStateManager.Instance.isBlackCastlingAvailable = true;
-                    break;    
-        }
         base.Undo();
         
 

@@ -11,8 +11,8 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {   
-        public bool useUI = false;
-        public string TestFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";       
+        public bool useUI = true;
+        public string TestFen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
         private BotBrain? bot1 = new BotBrain();
@@ -51,6 +51,19 @@ namespace ChessEngine
             board.SetTurn(t == "w" ? Turn.White : Turn.Black);
 
         }
+
+        public void UpdateCastlingRightsFromFen(bool WK16, bool WQ16, bool Bk32, bool Bq32 )
+        {
+            board.castleRight.whiteKingSideCastling = WK16;
+            board.castleRight.whiteQueenSideCastling = WQ16;
+            
+            
+            //black
+            
+            board.castleRight.blackKingSideCastling = Bk32;
+            board.castleRight.blackQueenSideCastling = Bq32;
+        }
+        
 
         public int[] MapFen() => FenMapper.MapFen(TestFen);
 

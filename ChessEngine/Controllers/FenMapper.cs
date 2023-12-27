@@ -80,10 +80,9 @@ public static  class FenMapper
                     break;
             }
         }
-
-      
-       // GameStateManager.Instance.UpdateCastlingStateFromFen(K16,Q16, k32, q32);
+        
         ChessEngineSystem.Instance.UpdateTurnFromFen(turn);
+        ChessEngineSystem.Instance.UpdateCastlingRightsFromFen(K16,Q16,k32,q32);
         
             
         return board;

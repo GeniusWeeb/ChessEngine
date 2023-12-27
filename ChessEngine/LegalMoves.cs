@@ -277,87 +277,91 @@ sealed class LegalMoves
             }
             else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
         }
-        // here we can generate castling content
-        //
-
-        if (index is < 0 or >= 64) return king.getAllPossibleMovesCount > 0 ? king : null;
-
-      //  if (isCustom) return king.getAllPossibleMovesCount > 0 ? king : null; // since castling cant result in our getting checked
         
-        
-        //revamp this please !!
-        switch (thisColCode)
+
+        switch (myColCode)
         {
-            case Piece.Black when GameStateManager.Instance.isBlackCastlingAvailable &&
-                                  !GameStateManager.Instance.blackKingInCheck:
-            {
-                if (!GameStateManager.Instance.blackKingSideRookMoved)
-                {
-                    CastlingKingSideCompute(index, board, king, +2, +1, Piece.White);
-                }
-
-                if (!GameStateManager.Instance.blackQueenSideRookMoved)
-                {
-                    CastlingKingQueenSideCompute(index,  board, king, -2, -1, Piece.White);
-                }
-
+            case Piece.White:
+                if (board.castleRight.whiteKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.Black); 
+                if(board.castleRight.whiteQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.Black); 
                 break;
-            }
-            case Piece.White when GameStateManager.Instance.isWhiteCastlingAvailable &&
-                                  !GameStateManager.Instance.whiteKingInCheck:
-            {
-                if (!GameStateManager.Instance.whiteKingSideRookMoved)
-                {
-                    CastlingKingSideCompute(index, board, king, +2, +1, Piece.Black);
-                }
-
-                if (!GameStateManager.Instance.whiteQueenSideRookMoved)
-                {
-                    CastlingKingQueenSideCompute(index, board, king, -2, -1, Piece.Black);
-                }
-
+            case Piece.Black:
+                if (board.castleRight.blackKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.White); 
+                if(board.castleRight.blackQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.White); 
                 break;
-            }
         }
-
         return king.getAllPossibleMovesCount > 0 ? king : null;
     }
 
-    private void  CastlingKingSideCompute(int index,Board board , ChessPiece king , int maxStep ,int minStep, int turnToCheck )
+    private void  CastlingKingSideCompute(int currentKingIndex,Board board , ChessPiece king , int maxStep ,int minStep, int OppColor )
     {
-        for (int i =index +minStep; i <=  index + maxStep; i++)
+        
+        //min step = +1 for king side and max step = +2
+        //min step = -1 for queen side and max step = -2
+        List<int> castlingIndexList = new List<int>()
         {
-            if (board.chessBoard[i] != Piece.Empty) break;
-            
-          
-            var oppMoveList =  board. GenerateMoves(turnToCheck , board, true);
-            foreach (var piece in oppMoveList )
+            currentKingIndex+minStep,
+            currentKingIndex+maxStep
+        };
+
+        foreach (int indexForCastling in castlingIndexList)
+        {
+            if (board.chessBoard[indexForCastling] != Piece.Empty)
+                return;
+        }
+        
+        var oppMoveList =   board. GenerateMoves(OppColor , board, true);
+        foreach (var piece in oppMoveList)
+        {
+            if(piece.allPossibleMovesIndex.Contains(currentKingIndex))
+                return;
+        }
+
+
+        foreach (var p in oppMoveList )
+        {
+            foreach (var moveIndex in p.allPossibleMovesIndex )
             {
-                if (piece.GetAllMovesForThisPiece.Contains(i)) return;
-                king.AddAllPossibleMoves(i);
-                
+                if (moveIndex == currentKingIndex + minStep || moveIndex == currentKingIndex + maxStep)
+                    return;
             }
         }
+        
+        king.AddAllPossibleMoves(currentKingIndex+maxStep);
+        
     }
-    private void  CastlingKingQueenSideCompute(int index,Board board , ChessPiece king , int maxStep ,int minStep , int turnToCheck )
+    private void  CastlingQueenSideCompute(int currentKingIndex,Board board , ChessPiece king , int maxStep ,int minStep , int OppColor )
     {
-        for (int i =index +minStep; i >=  index + maxStep-1; i--)
+        List<int> castlingIndexList = new List<int>()
         {
-          
-            if (board.chessBoard[i] != Piece.Empty) break;
-            
-            if(board.chessBoard[i] != index+ maxStep-1)
-                continue;
-         
-            //Scan for opponent moves - in Advance
-            var oppMoveList = board.GenerateMoves( turnToCheck , board , true );
-            foreach (var piece in oppMoveList )
+            currentKingIndex+minStep,
+            currentKingIndex+maxStep
+        };
+
+        foreach (int indexForCastling in castlingIndexList)
+        {
+            if (board.chessBoard[indexForCastling] != Piece.Empty)
+                return;
+        }
+        
+        var oppMoveList =   board. GenerateMoves(OppColor , board, true);
+        foreach (var piece in oppMoveList)
+        {
+            if(piece.allPossibleMovesIndex.Contains(currentKingIndex))
+                return;
+        }
+
+
+        foreach (var p in oppMoveList )
+        {
+            foreach (var moveIndex in p.allPossibleMovesIndex )
             {
-                if (piece.GetAllMovesForThisPiece.Contains(i)) return;
-                king.AddAllPossibleMoves(i);
-                
+                if (moveIndex == currentKingIndex + minStep || moveIndex == currentKingIndex + maxStep)
+                    return;
             }
         }
+        
+        king.AddAllPossibleMoves(currentKingIndex+maxStep);
     }
 
     #region MovementLogic For Queen , Rook , Bishop 

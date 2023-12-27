@@ -13,9 +13,12 @@ namespace ChessEngine
 
      public int[] chessBoard;
      private Turn currentTurn = Turn.White;
+     public CastlingRights castleRight = new CastlingRights(true, true, true, true); //get from fen
      
      LegalMoves moves = new LegalMoves();
      Stopwatch watch = new Stopwatch();
+     
+     
 
      public int GetCurrentTurn => (int)currentTurn;
 
@@ -35,6 +38,7 @@ namespace ChessEngine
      }
      public Board()
      {
+         
          
          Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine($"  Board created ! ");
@@ -81,8 +85,6 @@ namespace ChessEngine
         
         
     } 
-    
-    
     
     public bool MakeMove( int oldIndex, int newIndex)
     {
@@ -168,14 +170,9 @@ namespace ChessEngine
         CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
         UpdateTurns(); 
         PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p, this);
-        // Console.ForegroundColor = ConsoleColor.Cyan;
-        //      Console.WriteLine($"---------->{move.p.GetPieceCode} moved from {FenMapper.IndexToAlgebric(move.from,move.to )}<<<<<<<<<<<<<<<");
-        // Console.ResetColor();
-
-        //ShowBoard();
     }
 
-    private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
+    private int CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     
     {
         int pCode =newIndex & Piece.CPiece;
@@ -220,6 +217,8 @@ namespace ChessEngine
             
             
         }
+
+        return 0;
     }
 
     
@@ -264,7 +263,7 @@ namespace ChessEngine
      //Check for check on opponent king here
      private void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece,  ChessPiece p , Board board)
      {
-            
+            //Means this move has been confirmed
          int pCode = piece & Piece.CPiece;
          int pColor = ChessEngineSystem.Instance.IsBlack(piece) ? Piece.Black : Piece.White;
          
@@ -280,14 +279,15 @@ namespace ChessEngine
               KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               break;
           case Piece.King:
-
+                //Castling
                 if (MathF.Abs(newIndex - oldIndex) == 2)
                     {   //if castling
                         ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , board);
                         eng.ExecuteCommand(kingCastlingCommand); 
-                        KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-                    }
-                else{ 
+                        KingCheckCalculation(pColor,oldIndex,newIndex,pCode); }
+                else
+                { 
+                    //Normal move
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  board);   
                     eng.ExecuteCommand(moveKing);  
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
@@ -448,6 +448,30 @@ namespace ChessEngine
      White =16 ,
      Black = 32 
     
+ }
+
+
+ public class CastlingRights
+ {
+     
+         public bool whiteKingSideCastling;
+         public bool whiteQueenSideCastling;
+         
+         
+         public bool blackKingSideCastling;
+         public bool blackQueenSideCastling;
+
+
+         public CastlingRights(bool whiteKingSide , bool whiteQueenSide , bool blackKingSide ,bool blackQueenSide)
+         {
+
+             this.whiteKingSideCastling = whiteKingSide;
+             this.whiteQueenSideCastling = whiteQueenSide;
+             this.blackKingSideCastling = blackKingSide;
+             this.blackQueenSideCastling = blackQueenSide;
+             
+         }
+
  }
 
 
