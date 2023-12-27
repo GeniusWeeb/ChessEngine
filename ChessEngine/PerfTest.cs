@@ -9,7 +9,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 1;
+    private readonly int customDepth = 2;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -44,7 +44,9 @@ public class PerfTest
             board.ShowBoard();
             Board board_cpy = new Board(board,"clone");
             board_cpy.MakeMoveClone(move);
-            nodes += RunPerft(customDepth - 1 , ref board_cpy);
+            ChessEngineSystem.Instance.UpdateUIWithNewIndex(move.from, move.to ,board_cpy.chessBoard[move.to] );
+            
+            nodes += RunPerft(customDepth - 1 , board_cpy);
             Console.WriteLine($"Total nodes here  {FenMapper.IndexToAlgebric(move.from, move.to)}-> {nodes}");
             PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to), nodes));
             nodes = 0;
@@ -110,7 +112,7 @@ public class PerfTest
     }
 
 
-    private int RunPerft(int currentDepth , ref Board board)
+    private int RunPerft(int currentDepth ,  Board board)
     {  
         
         if (currentDepth == 0)
@@ -137,7 +139,7 @@ public class PerfTest
             Board board_cpy =  new Board(board , $"clone at  {currentDepth}");
             board_cpy.MakeMoveClone(move);
             ChessEngineSystem.Instance.UtilityWriteToConsoleWithColor(" ---------------------------child leaves  ---------------------------" );
-            nodeCount += RunPerft(currentDepth-1, ref board_cpy);
+            nodeCount += RunPerft(currentDepth-1,  board_cpy);
             Thread.Sleep((int)(moveDelay));
             //UnMakeMove();
             

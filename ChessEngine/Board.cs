@@ -70,6 +70,7 @@ namespace ChessEngine
         //legal and maybe Pseudo Legal
        
         List<ChessPiece>justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+        return justAllMoves;
         return  GetOnlyLegalMoves(justAllMoves, board , forThisColor);
     } 
     
@@ -77,7 +78,7 @@ namespace ChessEngine
 
     public List<ChessPiece> GenerateMoveSimple(Board board, int forThisColor , bool isCustom)
     {
-        LegalMoves moves = new LegalMoves();
+      
         return moves.GenerateLegalMoves(board, forThisColor , isCustom);
     }
     
@@ -273,9 +274,9 @@ namespace ChessEngine
           case Piece.Bishop:
           case Piece.Knight:
 
-              KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , board);
               eng.ExecuteCommand(justMove);
+              KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               break;
           case Piece.King:
 
@@ -283,10 +284,11 @@ namespace ChessEngine
                     {   //if castling
                         ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , board);
                         eng.ExecuteCommand(kingCastlingCommand); 
+                        KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     }
                 else{ 
-                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  board);   
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     eng.ExecuteCommand(moveKing);  
                 }
                     break;
@@ -298,10 +300,10 @@ namespace ChessEngine
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
-                  KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  board);
                   eng.ExecuteCommand(enPassMoveCommand);
                   GameStateManager.Instance.enPassantMoves += 1;
+                  KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                   Console.WriteLine($"Executed En Passant at {cellFinal}");
                   //Execute command and keep track
               }
@@ -315,14 +317,16 @@ namespace ChessEngine
               }            
                 else  {
                   
-                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
+                  
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  board);
                     eng.ExecuteCommand(movePawn);
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     } break; 
           case Piece.Rook:
-                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
+                   
                     ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  board);
                     eng.ExecuteCommand(moveRook);
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
             break;
         }
         
@@ -370,7 +374,6 @@ namespace ChessEngine
          
          //legal moves -> filter -> send a new hashset
          int myKing = Piece.King | forThisPlayer;
-         List<ChessPiece>  legalPieceMoves = new List<ChessPiece>();
          List<int> movesToRemove = new List<int>();
          Board boardCopy = new Board(board, "filterFinalMovesClone");
          foreach (ChessPiece piece in myLegalMoves.ToList() )
@@ -391,6 +394,7 @@ namespace ChessEngine
                         {
                             Console.WriteLine("King CHECKED REMOVING");
                             movesToRemove.Add(canMoveToIndex);
+                            break;
                         }
                     }
                 }
@@ -404,7 +408,7 @@ namespace ChessEngine
 
        
 
-         return legalPieceMoves;
+         return myLegalMoves;
      }
      
 
