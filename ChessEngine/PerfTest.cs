@@ -30,6 +30,7 @@ public class PerfTest
             foreach (var movesIndex in piece.allPossibleMovesIndex)
             {
                 moveList.Add(new Move( piece.GetCurrentIndex, movesIndex,  piece));
+                Console.WriteLine($"Move piece {piece.GetPieceCode} goes from {piece.GetCurrentIndex} to {movesIndex}");
             }
 
         }

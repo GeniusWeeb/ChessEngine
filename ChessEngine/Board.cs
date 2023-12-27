@@ -183,7 +183,7 @@ namespace ChessEngine
     
     {
         int pCode =newIndex & Piece.CPiece;
-        Console.WriteLine("PCode is that got captured" + pCode);
+        Console.WriteLine($"{pCode} is that got captured" + pCode);
        // Console.WriteLine("Chessboard Index" + newIndex);
         
         switch (pCode)
@@ -384,7 +384,7 @@ namespace ChessEngine
              List<int> movesToRemove = new List<int>();
            
              foreach (ChessPiece piece in myLegalMoves.ToList())
-             {
+             {  
                  foreach (int moveIndex in piece.allPossibleMovesIndex.ToList())
                  {   
                      Board boardCopy = new Board(board, "filterFinalMovesClone");

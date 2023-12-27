@@ -301,6 +301,8 @@ public class kingMoveCommand : MoveCommand
 
     public override void Execute()
     {
+        currentBoard.ShowBoard();
+        Console.WriteLine($"King moved from {currentCell} to {targetCell}");
         switch(pColor)
         {
             case Piece.White:
