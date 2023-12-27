@@ -69,14 +69,15 @@ namespace ChessEngine
     public List<ChessPiece> GenerateMoves( int forThisColor , Board board ,bool justGen )
     {
         if (justGen)
-        {
-            List<ChessPiece> justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+        {   List<ChessPiece> justAllMoves= new List<ChessPiece>();
+            justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
             return justAllMoves;
 
         }
         else
         {   //else get legal moves as well
-            List<ChessPiece> justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
+            List<ChessPiece> justAllMoves = new List<ChessPiece>();
+            justAllMoves = moves.GenerateLegalMoves(board, forThisColor , false );
             return GetOnlyLegalMoves(justAllMoves, board, forThisColor);
         }
 
@@ -381,16 +382,18 @@ namespace ChessEngine
              //legal moves -> filter -> send a new hashset
              int myKing = Piece.King | forThisPlayer;
              List<int> movesToRemove = new List<int>();
-             Board boardCopy = new Board(board, "filterFinalMovesClone");
+           
              foreach (ChessPiece piece in myLegalMoves.ToList())
              {
                  foreach (int moveIndex in piece.allPossibleMovesIndex.ToList())
-                 {
+                 {   
+                     Board boardCopy = new Board(board, "filterFinalMovesClone");
                      boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
                      boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
 
                      //For opponent and get their ONLY LEGAL MOVES //1st case -> dep 1
-                     List<ChessPiece> oppsMovesList = GenerateMoves( boardCopy.getOpponent , boardCopy , true); //2 -> 
+                     List<ChessPiece> oppsMovesList = new List<ChessPiece>();
+                     oppsMovesList  = GenerateMoves( boardCopy.getOpponent , boardCopy , true); //2 -> 
 
                      foreach (ChessPiece oppPiece in oppsMovesList)
                      {
@@ -400,7 +403,7 @@ namespace ChessEngine
                                  myKing) // Found my king on a deep check // Deep check here // Pinned in some way
                              {
                                  Console.WriteLine("King CHECKED REMOVING");
-                                 movesToRemove.Add(canMoveToIndex);
+                                 movesToRemove.Add(moveIndex);
                                  break;
                              }
                          }
