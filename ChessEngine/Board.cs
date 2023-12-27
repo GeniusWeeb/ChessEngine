@@ -293,8 +293,8 @@ namespace ChessEngine
                     }
                 else{ 
                     ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  board);   
-                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     eng.ExecuteCommand(moveKing);  
+                    KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                 }
                     break;
           case Piece.Pawn:
@@ -381,10 +381,11 @@ namespace ChessEngine
          {
              //legal moves -> filter -> send a new hashset
              int myKing = Piece.King | forThisPlayer;
-             List<int> movesToRemove = new List<int>();
+           
            
              foreach (ChessPiece piece in myLegalMoves.ToList())
              {  
+                 List<int> movesToRemove = new List<int>();
                  foreach (int moveIndex in piece.allPossibleMovesIndex.ToList())
                  {   
                      Board boardCopy = new Board(board, "filterFinalMovesClone");
@@ -402,7 +403,7 @@ namespace ChessEngine
                              if (boardCopy.chessBoard[canMoveToIndex] ==
                                  myKing) // Found my king on a deep check // Deep check here // Pinned in some way
                              {
-                                 Console.WriteLine("King CHECKED REMOVING");
+                                 Console.WriteLine($"King CHECKED REMOVING for {piece.GetPieceCode} at {moveIndex}");
                                  movesToRemove.Add(moveIndex);
                                  break;
                              }

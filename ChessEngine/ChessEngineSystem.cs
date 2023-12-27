@@ -11,7 +11,7 @@ namespace ChessEngine
 {
     public class ChessEngineSystem : IDisposable
     {   
-        public bool useUI = true;
+        public bool useUI = false;
         public string TestFen = "rnbqkbnr/1ppp1pp1/p7/4p2p/Q6P/N1P5/PP1PPPP1/R1B1KBNR b KQkq - 1 4";       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
