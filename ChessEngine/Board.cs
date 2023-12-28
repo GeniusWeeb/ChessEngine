@@ -13,6 +13,8 @@ namespace ChessEngine
 
      public int[] chessBoard;
      private Turn currentTurn = Turn.White;
+     public bool isEnPassantAvaialble;
+     public int enPassantSquare;
      public CastlingRights castleRight = new CastlingRights(true, true, true, true); //get from fen
      public readonly List<int> promoteToPieces = new List<int>()
      {
@@ -42,7 +44,7 @@ namespace ChessEngine
          currentTurn = other.currentTurn;
          moves = new LegalMoves();
          watch = new Stopwatch();
-         castleRight = new CastlingRights(true, true, true, true); //get from fen
+         castleRight = other.castleRight ;  
          promoteToPieces = new List<int>()
          {
              Piece.Queen,
@@ -50,12 +52,13 @@ namespace ChessEngine
              Piece.Knight,
              Piece.Rook
          };
-
+         enPassantSquare = other.enPassantSquare;
+         isEnPassantAvaialble = other.isEnPassantAvaialble;
+         
 
      }
      public Board()
      {
-         
          
          Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine($"  Board created ! ");
@@ -310,19 +313,30 @@ namespace ChessEngine
                 }
                     break;
           case Piece.Pawn:
-              if (newIndex == p.specialIndex)
+              if (newIndex == p.enPassantIndex)
               {
-                 //Enpassant
-                  var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
-                  if (capturedPawnIndex == null) return;
-                  int  cellFinal = capturedPawnIndex.Value.Item2;
-                  
-                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  board);
-                  eng.ExecuteCommand(enPassMoveCommand);
-                  GameStateManager.Instance.enPassantMoves += 1;
+                  try
+                  {
+
+                      GameStateManager.Instance.enPassantMoves += 1;
+                      Console.WriteLine($"Executed En Passant at { p.enPassantIndex}");
+                      board.enPassantSquare = 999;
+                          //EnPassant
+                          var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
+                          if (capturedPawnIndex == null) return;
+                          int  cellFinal = capturedPawnIndex.Value.Item2;
+                          
+                          ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  board);
+                          eng.ExecuteCommand(enPassMoveCommand);
+                 
+                  }
+                  catch (Exception e)
+                  {
+                      Console.WriteLine(e);
+                      throw;
+                  }
                   KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-            //      Console.WriteLine($"Executed En Passant at {cellFinal}");
-                  //Execute command and keep track
+          
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {

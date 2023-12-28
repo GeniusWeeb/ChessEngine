@@ -20,6 +20,7 @@ public static  class FenMapper
         string fen = notation.Split(" ")[0];
         string turn = notation.Split(" ")[1];
         string castlingData = notation.Split(" ")[2];
+        string enPass = notation.Split(" ")[3];
         Console.WriteLine(fen);
         int rank = 7, file = 0;
         
@@ -81,6 +82,8 @@ public static  class FenMapper
             }
         }
         
+        
+        ChessEngineSystem.Instance.UpdateEnPassantFromFen(AlgebraicToIndex(enPass));
         ChessEngineSystem.Instance.UpdateTurnFromFen(turn);
         ChessEngineSystem.Instance.UpdateCastlingRightsFromFen(K16,Q16,k32,q32);
         
@@ -106,7 +109,24 @@ public static  class FenMapper
 
     }
 
+    private  static int AlgebraicToIndex(string algebraic)
+    {
+        if (algebraic.Length != 2)
+        {
+            return 999;
+        }
 
+        int file = algebraic[0] - 'a';
+        int rank = int.Parse(algebraic[1].ToString()) - 1;
+
+        // Ensure the rank and file are within the valid range
+        if (rank < 0 || rank >= 8 || file < 0 || file >= 8)
+        {
+            throw new ArgumentException("Invalid algebraic notation.");
+        }
+       
+        return rank * 8 + file;
+    }
     public static (int, int) AlgebricToBoard(string code)
     {   
           

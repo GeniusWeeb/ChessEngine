@@ -12,7 +12,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";  
+        public string TestFen = "r3k2r/p2pqpb1/bn2pnp1/2pPN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R w KQkq c6 0 2";  
       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
@@ -48,13 +48,32 @@ namespace ChessEngine
             
         
         }
+
         
-      
         public void UpdateTurnFromFen(string t)
         {
             board.SetTurn(t == "w" ? Turn.White : Turn.Black);
 
         }
+
+        public void UpdateEnPassantFromFen(int index)
+        {
+            Console.WriteLine("En passant index is "  + index);
+            if (index == 999)
+            {
+                board.isEnPassantAvaialble = false;
+                return;
+            }
+            else
+            {
+                board.enPassantSquare = index;
+                board.isEnPassantAvaialble = true;
+            }
+            
+            
+            
+        }
+
 
         public void UpdateCastlingRightsFromFen(bool WK16, bool WQ16, bool Bk32, bool Bq32 )
         {
@@ -70,11 +89,7 @@ namespace ChessEngine
         
 
         public int[] MapFen() => FenMapper.MapFen(TestFen);
-
-        public void SetCurrentTurnToMove(int turn)
-        {
-            GameStateManager.Instance.playerToMove = turn;
-        }
+        
 
         public int GetPlayerToMove => GameStateManager.Instance.playerToMove;
         public void Init()
