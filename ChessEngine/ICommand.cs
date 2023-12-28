@@ -1,3 +1,4 @@
+    using System.Diagnostics;
     using ChessEngine;
     using Utility ;
     public interface ICommand
@@ -118,7 +119,9 @@ public class CastlingCommand : Command
 
     public override void Execute()
     {
-
+        
+        
+      
         GameStateManager.Instance.castlingCount++;
         switch(color)
         {
@@ -148,6 +151,11 @@ public class CastlingCommand : Command
         // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
+      
+     
+     
+       
+        
     }
     
 
@@ -275,10 +283,11 @@ public class kingMoveCommand : MoveCommand
 
     public override void Execute()
     {
-        base.Execute();
+        
         switch(pColor)
         {
             case Piece.White:
+               
                 currentBoard.castleRight.whiteKingSideCastling = false;
                 currentBoard.castleRight.whiteQueenSideCastling = false;
                 break;
@@ -288,7 +297,7 @@ public class kingMoveCommand : MoveCommand
                 break;    
         }
 
-     
+        base.Execute();
 
     }
 
@@ -320,7 +329,7 @@ public class kingMoveCommand : MoveCommand
             currentBoard.chessBoard[currentCell] =  Piece.Empty ;
             currentBoard.chessBoard[capturedPawnIndex] =  Piece.Empty ; 
             
-            Console.WriteLine($"en Passant executed , caching the captured index -> {capturedPawnIndex}");
+           // Console.WriteLine($"en Passant executed , caching the captured index -> {capturedPawnIndex}");
             engine.UpdateUIWithNewIndex(capturedPawnIndex);
           
         }

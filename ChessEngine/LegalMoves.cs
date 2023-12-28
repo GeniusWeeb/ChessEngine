@@ -244,6 +244,8 @@ sealed class LegalMoves
 
     private ChessPiece GenerateMovesForKing(int ind, int thisColCode, Board board , bool isCustom)
     {
+        int whiteKingDefaultIndex = 4;
+        int blackKingDefaultIndex = 60;
         int index = ind;
         int myColCode = thisColCode;
         King king = new King(myColCode, index);
@@ -275,7 +277,7 @@ sealed class LegalMoves
                 king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
                 
             }
-            else if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
+             if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
         }
         
         //for castling infinite looping -> only check for moves
@@ -285,18 +287,18 @@ sealed class LegalMoves
         {
             case Piece.White:
                 
-                if(board.chessBoard[7]!= (myColCode | Piece.Rook ))
+                if(board.chessBoard[7]!= (myColCode | Piece.Rook ) || index!= whiteKingDefaultIndex)
                     board.castleRight.whiteKingSideCastling = false;
-                if(board.chessBoard[0]!= (myColCode | Piece.Rook ))
+                if(board.chessBoard[0]!= (myColCode | Piece.Rook)  || index!= whiteKingDefaultIndex)
                     board.castleRight.whiteQueenSideCastling = false;
                
                 if(board.castleRight.whiteKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.Black);
                 if(board.castleRight.whiteQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.Black); 
                 break;
             case Piece.Black:
-                if(board.chessBoard[63]!= (myColCode | Piece.Rook ))
+                if(board.chessBoard[63]!= (myColCode | Piece.Rook ) || index != blackKingDefaultIndex )
                     board.castleRight.blackKingSideCastling = false;
-                if(board.chessBoard[56]!= (myColCode | Piece.Rook ))
+                if(board.chessBoard[56]!= (myColCode | Piece.Rook )|| index!= blackKingDefaultIndex)
                     board.castleRight.blackQueenSideCastling = false;
                 if (board.castleRight.blackKingSideCastling) CastlingKingSideCompute(index,board,king,2,1, Piece.White); 
                 if(board.castleRight.blackQueenSideCastling) CastlingQueenSideCompute(index,board, king,-2,-1,Piece.White); 
@@ -347,11 +349,12 @@ sealed class LegalMoves
     }
     private void  CastlingQueenSideCompute(int currentKingIndex,Board board , ChessPiece king , int maxStep ,int minStep , int OppColor )
     {
-      
+      //this 3 square space but the king only moves 2 unlike the king side castling
         List<int> castlingIndexList = new List<int>()
         {
             currentKingIndex+minStep,
-            currentKingIndex+maxStep
+            currentKingIndex+maxStep,
+            currentKingIndex-3
         };
 
         foreach (int indexForCastling in castlingIndexList)

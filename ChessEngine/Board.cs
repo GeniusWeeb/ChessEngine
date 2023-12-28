@@ -321,15 +321,13 @@ namespace ChessEngine
                   eng.ExecuteCommand(enPassMoveCommand);
                   GameStateManager.Instance.enPassantMoves += 1;
                   KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-                  Console.WriteLine($"Executed En Passant at {cellFinal}");
+            //      Console.WriteLine($"Executed En Passant at {cellFinal}");
                   //Execute command and keep track
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {
-                  // ICommand promote = new PromotionCommand(oldIndex, newIndex, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
-                  // ChessEngineSystem.Instance.ExecuteCommand(promote);
-                 // Console.WriteLine($"Trying to promote , not right now -< {newIndex}");
-                  GameStateManager.Instance.promotionCount += 1;
+                
+                
                
               }            
                 else  {
@@ -353,7 +351,7 @@ namespace ChessEngine
      
      //Happens on main copy that is sent
      public void KingCheckCalculation(int pColor, int oldIndex, int newIndex ,int pCode)
-     {
+     {  
          if (!IsOppKingInCheck(pColor, oldIndex, newIndex, pColor | pCode)) return; //Help us build on Undo
 
          GameStateManager.Instance.checkCount++;
@@ -429,7 +427,19 @@ namespace ChessEngine
                  {
                      piece.allPossibleMovesIndex.Remove(movesTo);
                  }
+
+                
+
              }
+
+             int moveCount = 0;
+             foreach (var moves in myLegalMoves )
+             {
+                 moveCount += moves.allPossibleMovesIndex.Count;
+             }
+
+             if (moveCount == 0)
+                 GameStateManager.Instance.checkMateCount++;
              
              return myLegalMoves;
 
