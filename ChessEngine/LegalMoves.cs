@@ -31,7 +31,7 @@ sealed class LegalMoves
             {
                 case Piece.Pawn:
                 {
-                    ChessPiece p = GenerateMovesForPawn(i, colorCode, b);
+                    ChessPiece p = GenerateMovesForPawn(i, colorCode, b , isCustom);
                     if (p != null) moveList.Add(p);
                     break;
                 }
@@ -74,7 +74,7 @@ sealed class LegalMoves
     }
 
     //going thru every  piece
-    private ChessPiece GenerateMovesForPawn(int ind,int colCode, Board board)
+    private ChessPiece GenerateMovesForPawn(int ind,int colCode, Board board, bool isCustom = false)
     {
             int index = ind;
             int thisColorCode = colCode;
@@ -126,6 +126,27 @@ sealed class LegalMoves
 
             PawnCheckEnPassant(pawn, index, colCode, board.chessBoard);
 
+
+            if (!isCustom) return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
+            
+            if (board.chessBoard[ApplyIndexBasedOnColor] != Piece.Empty)
+            {
+                if (rdIndex is >= 0 and < 64)
+                {
+                   
+                    if (rdIndex / 8 == targetRow  && board.chessBoard[rdIndex] == Piece.Empty)
+                        pawn.AddAllPossibleMoves(rdIndex);
+                }
+                
+                if (ldIndex is >= 0 and < 64)
+                {
+                    
+                    if (ldIndex / 8 == targetRow  && board.chessBoard[ldIndex] == Piece.Empty)
+                        pawn.AddAllPossibleMoves(ldIndex);
+                }
+
+                   
+            }
 
             //Prevent looping all times
             return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
@@ -277,7 +298,8 @@ sealed class LegalMoves
                 king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
                 
             }
-             if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
+            
+            if (!isSameColor) king.AddAllPossibleMoves(king.kingCanMoveTo[i]);
         }
         
         //for castling infinite looping -> only check for moves
