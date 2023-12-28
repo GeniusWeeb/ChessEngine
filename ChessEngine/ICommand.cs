@@ -132,7 +132,7 @@ public class CastlingCommand : Command
 
                 currentBoard.castleRight.blackKingSideCastling = false;       
                 currentBoard.castleRight.blackQueenSideCastling = false;       
-         engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
+     //    engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
             case Piece.White:   
@@ -141,8 +141,8 @@ public class CastlingCommand : Command
                  else 
                     PerformCastle(+1,0);      
                      
-                 currentBoard.castleRight.blackKingSideCastling = false;       
-                 currentBoard.castleRight.blackQueenSideCastling = false;   
+                 currentBoard.castleRight.whiteKingSideCastling = false;       
+                 currentBoard.castleRight.whiteQueenSideCastling = false;   
                
        
         // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
@@ -173,14 +173,14 @@ public class CastlingCommand : Command
 
     private void PerformCastle(int step , int rookCell ) // +1 , 0
     {
-            Console.WriteLine($"King new cell is  {kingNewCell}, Rook default cell is at 0 and  { currentBoard.chessBoard[rookCell]}");
+           // Console.WriteLine($"King new cell is  {kingNewCell}, Rook default cell is at 0 and  { currentBoard.chessBoard[rookCell]}");
             currentBoard.chessBoard[kingNewCell + step] =  currentBoard.chessBoard[rookCell];
             currentBoard.chessBoard[kingNewCell] =   currentBoard.chessBoard[kingDefaultCell];
             currentBoard.chessBoard[kingDefaultCell] = Piece.Empty;
             currentBoard.chessBoard[rookCell] = Piece.Empty;
             RookNewCell = kingNewCell + step;
             this.RookDefaultCell = rookCell;
-            Console.WriteLine($" CRook new cell is  {RookNewCell}");
+          //  Console.WriteLine($" CRook new cell is  {RookNewCell}");
           
     }
 }
@@ -355,7 +355,7 @@ public class kingMoveCommand : MoveCommand
 
         public override void Execute()
         {
-            Console.WriteLine($"Promoted to {promotedToPiece}" );
+           
             
             currentBoard.chessBoard[targetCell] = promotedToPiece;
             currentBoard.chessBoard[currentCell] = Piece.Empty;

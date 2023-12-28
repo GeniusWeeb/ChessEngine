@@ -129,10 +129,10 @@ public class PerfTest
         }
         foreach (var move in currentList)
         {
-            if(IsPawnPromotion(move.to, move.p.GetPieceCode))
-                DoPromotion(customDepth,move,board);
-            else
-            {  
+           if(IsPawnPromotion(move.to, move.p.GetPieceCode))
+               DoPromotion(customDepth,move,board);
+           else
+           {  
                 Board board_cpy =  new Board(board , $"clone at  {currentDepth}");
                 board_cpy.MakeMoveClone(move);
                 nodeCount += RunPerft(currentDepth-1,  board_cpy);

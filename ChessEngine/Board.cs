@@ -189,19 +189,18 @@ namespace ChessEngine
         PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p, this);
     }
 
-    private int CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
+    private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     
     {
         int pCode =newIndex & Piece.CPiece;
-    
+
+        if (pCode == Piece.Empty)
+            return;
+        
        // Console.WriteLine("Chessboard Index" + newIndex);
         
         switch (pCode)
         {
-            case 0:
-               
-               // Console.WriteLine("0 point for Empty");
-                break;
             case 1:
                 GameStateManager.Instance.captureCount += 1;
              
@@ -235,7 +234,7 @@ namespace ChessEngine
             
         }
 
-        return 0;
+        
     }
 
     
@@ -313,7 +312,7 @@ namespace ChessEngine
           case Piece.Pawn:
               if (newIndex == p.specialIndex)
               {
-                 
+                 //Enpassant
                   var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
@@ -327,14 +326,14 @@ namespace ChessEngine
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {
-                   
-                  Console.WriteLine($"Trying to promote , not right now -< {newIndex}");
-                 
+                  // ICommand promote = new PromotionCommand(oldIndex, newIndex, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
+                  // ChessEngineSystem.Instance.ExecuteCommand(promote);
+                 // Console.WriteLine($"Trying to promote , not right now -< {newIndex}");
                   GameStateManager.Instance.promotionCount += 1;
                
               }            
                 else  {
-                  
+                  //normal pawn move
                   
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  board);
                     eng.ExecuteCommand(movePawn);
@@ -351,6 +350,8 @@ namespace ChessEngine
         
      }
      //Opposite king
+     
+     //Happens on main copy that is sent
      public void KingCheckCalculation(int pColor, int oldIndex, int newIndex ,int pCode)
      {
          if (!IsOppKingInCheck(pColor, oldIndex, newIndex, pColor | pCode)) return; //Help us build on Undo
