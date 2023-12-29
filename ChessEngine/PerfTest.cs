@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 2;
+    private readonly int customDepth = 4;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -39,7 +39,6 @@ public class PerfTest
         foreach (Move move in moveList)
         {
             GameStateManager.Instance.isInitialNode = true;
-            Console.WriteLine($"STARTING ITERATION , piece moved -> {move.p.GetPieceCode} from {move.from} to {move.to}");
             if(IsPawnPromotion(move.to, move.p.GetPieceCode))
                 DoPromotion(customDepth,move,board);
             else

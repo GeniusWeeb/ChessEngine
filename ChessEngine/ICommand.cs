@@ -107,12 +107,6 @@ public class CastlingCommand : Command
 
     public  CastlingCommand ( ChessEngineSystem eng, int KingD , int KingN , int pColor ,  Board  board)
     {
-
-      
-      
-      
-        Console.WriteLine($"Current castling count is {GameStateManager.Instance.castlingCount }");
-
      
         this.savedBoard = new Board(board);
         this.currentBoard = board;
@@ -126,10 +120,7 @@ public class CastlingCommand : Command
     public override void Execute()
     {
         
-        Console.WriteLine($"Stats before castling {JsonConvert.SerializeObject(currentBoard.castleRight)}");
         GameStateManager.Instance.UpdateCastlingCount(); 
-        Console.WriteLine($"Current castling kings default cell{kingDefaultCell}");
-      
         switch(color)
         {
             case  Piece.Black:
@@ -142,13 +133,13 @@ public class CastlingCommand : Command
                 
                 
                 
-                Console.WriteLine("Black castling");
+               
                 currentBoard.castleRight.blackKingSideCastling = false;       
                 currentBoard.castleRight.blackQueenSideCastling = false; 
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 GameStateManager.Instance.blackCastlingCount++;
-                Console.WriteLine("-------------------------------------------------------------------------------------------------");
-                Console.ResetColor();
+              
+            
      //    engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
@@ -158,16 +149,11 @@ public class CastlingCommand : Command
                  else 
                     PerformCastle(+1,0);              
                  
-                 Console.WriteLine("White caslting");
+             
                  currentBoard.castleRight.whiteKingSideCastling = false;       
                  currentBoard.castleRight.whiteQueenSideCastling = false;   
                  Console.ForegroundColor = ConsoleColor.Cyan;
                  GameStateManager.Instance.whiteCastlingCount++;
-
-                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
-                 Console.ResetColor();
-               
-       
         // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }

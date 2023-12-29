@@ -10,7 +10,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";  
+        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1";  
       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
@@ -24,12 +24,6 @@ namespace ChessEngine
         private bool isUndoRequest;
         
         
-        
-        
-        
-        
-       
-
 
         private PerfTest test = new PerfTest();
         

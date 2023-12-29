@@ -199,7 +199,7 @@ namespace ChessEngine
         int pCode =newIndex & Piece.CPiece;
        
         int myPieceCol = ChessEngineSystem.Instance.GetColorCode(pieceThatMoved);
-        Console.WriteLine($"my color is pcode -> {myPieceCol}");
+      
 
         if (pCode == Piece.Empty)
             return;
