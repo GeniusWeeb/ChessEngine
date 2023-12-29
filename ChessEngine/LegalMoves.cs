@@ -351,9 +351,13 @@ sealed class LegalMoves
         
         var oppMoveList =   board. GenerateMoves(OppColor , board, true, true);
         foreach (var piece in oppMoveList)
-        {
-            if(piece.allPossibleMovesIndex.Contains(currentKingIndex))
-                return;
+        {   
+            
+            foreach (var moveIndex in piece.allPossibleMovesIndex )
+            {
+                if(moveIndex ==  currentKingIndex)
+                    return;
+            }
         }
 
 

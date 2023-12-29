@@ -1,5 +1,3 @@
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using ChessEngine.Bot;
 using Newtonsoft.Json;
 using Utility;
@@ -24,6 +22,9 @@ namespace ChessEngine
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
         private bool isUndoRequest;
+        
+        
+        
         
         
         

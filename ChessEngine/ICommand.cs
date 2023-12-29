@@ -1,5 +1,6 @@
     using System.Diagnostics;
     using ChessEngine;
+    using Newtonsoft.Json;
     using Utility ;
     public interface ICommand
     {
@@ -30,7 +31,7 @@ public class MoveCommand : Command
 {
 
 
-
+    protected Board savedBoard;
     protected Board currentBoard;
     protected  int currentCell;
     protected int targetCell ;
@@ -79,8 +80,7 @@ public class MoveCommand : Command
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
          this.capturedPiece = Piece.Empty;
          engine.UpdateBoard(currentBoard);
-  
-        
+         
     }
 
 }
@@ -107,7 +107,13 @@ public class CastlingCommand : Command
 
     public  CastlingCommand ( ChessEngineSystem eng, int KingD , int KingN , int pColor ,  Board  board)
     {
+
       
+      
+      
+        Console.WriteLine($"Current castling count is {GameStateManager.Instance.castlingCount }");
+
+     
         this.savedBoard = new Board(board);
         this.currentBoard = board;
         this.kingDefaultCell = KingD ;
@@ -120,9 +126,10 @@ public class CastlingCommand : Command
     public override void Execute()
     {
         
-        
+        Console.WriteLine($"Stats before castling {JsonConvert.SerializeObject(currentBoard.castleRight)}");
+        GameStateManager.Instance.UpdateCastlingCount(); 
+        Console.WriteLine($"Current castling kings default cell{kingDefaultCell}");
       
-        GameStateManager.Instance.castlingCount++;
         switch(color)
         {
             case  Piece.Black:
@@ -132,9 +139,16 @@ public class CastlingCommand : Command
                 }
                 else 
                     PerformCastle(+1, 56 );
-
+                
+                
+                
+                Console.WriteLine("Black castling");
                 currentBoard.castleRight.blackKingSideCastling = false;       
-                currentBoard.castleRight.blackQueenSideCastling = false;       
+                currentBoard.castleRight.blackQueenSideCastling = false; 
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                GameStateManager.Instance.blackCastlingCount++;
+                Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                Console.ResetColor();
      //    engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
@@ -142,19 +156,21 @@ public class CastlingCommand : Command
                  if (kingNewCell > kingDefaultCell)  
                      PerformCastle(-1,7);
                  else 
-                    PerformCastle(+1,0);      
-                     
+                    PerformCastle(+1,0);              
+                 
+                 Console.WriteLine("White caslting");
                  currentBoard.castleRight.whiteKingSideCastling = false;       
                  currentBoard.castleRight.whiteQueenSideCastling = false;   
+                 Console.ForegroundColor = ConsoleColor.Cyan;
+                 GameStateManager.Instance.whiteCastlingCount++;
+
+                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                 Console.ResetColor();
                
        
         // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
-      
-     
-     
-       
         
     }
     
@@ -187,7 +203,12 @@ public class CastlingCommand : Command
             currentBoard.chessBoard[kingDefaultCell] = Piece.Empty;
             currentBoard.chessBoard[rookCell] = Piece.Empty;
             RookNewCell = kingNewCell + step;
+            
+            
             this.RookDefaultCell = rookCell;
+            Console.ForegroundColor = ConsoleColor.Red;
+          
+            
           //  Console.WriteLine($" CRook new cell is  {RookNewCell}");
           
     }
@@ -205,19 +226,21 @@ public class RookMoveCommand : Command
     int pColor ;
 
     int capturedPiece;
+    public Board savedBoard;
 
     bool BkingSideRook;
     bool BQueenSideRook;
 
     bool WKingSideRook;
     bool WQueenSideRook;
-
+    
     private Board currentBoard;
     
     private ChessEngineSystem engine;
 
     public RookMoveCommand (ChessEngineSystem engs,int old , int newCell ,int color ,  Board board )
     {
+        savedBoard = new Board(board, "Clone from rook move");
         currentBoard = board;
         this.engine = engs;
         this.currentCell = old ;
@@ -227,21 +250,25 @@ public class RookMoveCommand : Command
     }
 
     public override void Execute()
-    {   
+    { 
         
+    
        switch(pColor)
        {
         case Piece.White:
-            if (targetCheck % 8 == 0)
+            if (targetCheck == 0 && currentBoard.castleRight.whiteQueenSideCastling)
+            {   
+               
                 currentBoard.castleRight.whiteQueenSideCastling = false;
-            else
+            }
+            else if(targetCheck == 7&& currentBoard.castleRight.whiteKingSideCastling)
                 currentBoard.castleRight.whiteKingSideCastling = false;
             break;   
          
         case Piece.Black:
-            if (targetCheck % 8 == 0)
+            if (targetCheck  == 0 && currentBoard.castleRight.blackQueenSideCastling)
                 currentBoard.castleRight.blackQueenSideCastling = false;
-            else
+            else if (targetCheck == 7 && currentBoard.castleRight.blackKingSideCastling)
                 currentBoard.castleRight.blackKingSideCastling = false;
             break;
        }
@@ -249,6 +276,8 @@ public class RookMoveCommand : Command
        capturedPiece =   currentBoard.chessBoard[targetCell];   
        currentBoard.chessBoard[targetCell] =   currentBoard.chessBoard[currentCell];
        currentBoard.chessBoard[currentCell] = Piece.Empty;
+       
+       
     }
 
     public override void Undo()
@@ -260,7 +289,7 @@ public class RookMoveCommand : Command
 
     engine.UpdateUIWithNewIndex(targetCell, currentCell,capturedPiece );
     capturedPiece = Piece.Empty;
-    engine.UpdateBoard(currentBoard);
+    engine.UpdateBoard(savedBoard);
 
     }
 
@@ -273,12 +302,15 @@ public class RookMoveCommand : Command
 public class kingMoveCommand : MoveCommand
 {   
     
+    
     int pColor;
     
     public kingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board) : base(currnt, target, eng, board)
-    {
+    {   
         pColor = color;
-        
+        savedBoard = new Board(board, "cloned from King move");
+        currentBoard = board;
+
     }
 
     public override void Execute()

@@ -11,9 +11,10 @@ namespace ChessEngine
  public class Board : IDisposable
  {
 
+     public string name;
      public int[] chessBoard;
      private Turn currentTurn = Turn.White;
-     public CastlingRights castleRight = new CastlingRights(true, true, true, true); //get from fen
+     public CastlingRights castleRight; //get from fen
      public readonly List<int> promoteToPieces = new List<int>()
      {
          
@@ -25,6 +26,7 @@ namespace ChessEngine
      
      LegalMoves moves = new LegalMoves();
      Stopwatch watch = new Stopwatch();
+     public string enPassantSquare;
      
      
 
@@ -33,16 +35,18 @@ namespace ChessEngine
      public void SetTurn(Turn turn) => currentTurn = turn;
      public Board(Board other, string type="main")
      {
+         name = type;
          chessBoard =  new int[64];
          for (int i = 0; i < 64; i++)
          {
              chessBoard[i] = other.chessBoard[i];
          }
 
+         castleRight = new CastlingRights(other.castleRight); // copy constructor
          currentTurn = other.currentTurn;
          moves = new LegalMoves();
          watch = new Stopwatch();
-         castleRight = new CastlingRights(true, true, true, true); //get from fen
+       
          promoteToPieces = new List<int>()
          {
              Piece.Queen,
@@ -55,8 +59,8 @@ namespace ChessEngine
      }
      public Board()
      {
-         
-         
+         name = "MAIN BOARD";
+         castleRight = new CastlingRights(true, true, true, true);
          Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine($"  Board created ! ");
          Console.ResetColor();
@@ -117,7 +121,7 @@ namespace ChessEngine
             {
                 Console.WriteLine("Found move");
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
-                PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p ,  this);
+                PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p );
                 //ShowBoard();
                // UpdateTurns();
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -186,13 +190,16 @@ namespace ChessEngine
         int piece =chessBoard[move.from];
         CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
         UpdateTurns(); 
-        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p, this);
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p);
     }
 
     private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     
-    {
+    {   
         int pCode =newIndex & Piece.CPiece;
+       
+        int myPieceCol = ChessEngineSystem.Instance.GetColorCode(pieceThatMoved);
+        Console.WriteLine($"my color is pcode -> {myPieceCol}");
 
         if (pCode == Piece.Empty)
             return;
@@ -202,32 +209,47 @@ namespace ChessEngine
         switch (pCode)
         {
             case 1:
-                GameStateManager.Instance.captureCount += 1;
-             
+                GameStateManager.Instance.UpdateCaptureCount();
+                if (myPieceCol == Piece.Black)
+                    GameStateManager.Instance.WhitePiecesCaptureCoint++;
+                else
+                    GameStateManager.Instance.BlackPiecesCapturedCount++;
                // Console.WriteLine("1 point for Pawn");
                 break;
             case 2:
-                GameStateManager.Instance.captureCount += 1;
-
+                if (myPieceCol == Piece.Black)
+                    GameStateManager.Instance.WhitePiecesCaptureCoint++;
+                else
+                    GameStateManager.Instance.BlackPiecesCapturedCount++;
+                GameStateManager.Instance.UpdateCaptureCount();
                // Console.WriteLine("2 points for Rook");
               
                 break;
             case 3: 
-                GameStateManager.Instance.captureCount += 1;
-              
+                if (myPieceCol == Piece.Black)
+                    GameStateManager.Instance.WhitePiecesCaptureCoint++;
+                else
+                    GameStateManager.Instance.BlackPiecesCapturedCount++;
+                GameStateManager.Instance.UpdateCaptureCount();              
 
                // Console.WriteLine("3 points for Knight");
                 break;
             case 4: 
-                GameStateManager.Instance.captureCount += 1;
-              
+                if (myPieceCol == Piece.Black)
+                    GameStateManager.Instance.WhitePiecesCaptureCoint++;
+                else
+                    GameStateManager.Instance.BlackPiecesCapturedCount++;
+                GameStateManager.Instance.UpdateCaptureCount();              
 
                // Console.WriteLine("4 points for Bishop");
                 break;
             
             case 6:// Console.WriteLine("6 points for Queen");
-                GameStateManager.Instance.captureCount += 1;
-            
+                if (myPieceCol == Piece.Black)
+                    GameStateManager.Instance.WhitePiecesCaptureCoint++;
+                else
+                    GameStateManager.Instance.BlackPiecesCapturedCount++;
+                GameStateManager.Instance.UpdateCaptureCount();            
 
                 break;
             
@@ -277,7 +299,7 @@ namespace ChessEngine
      }
      
      //Check for check on opponent king here
-     private void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece,  ChessPiece p , Board board)
+     private void PerformPostMoveCalculation ( ChessEngineSystem eng,int oldIndex,  int newIndex, int piece,  ChessPiece p )
      {
             //Means this move has been confirmed
          int pCode = piece & Piece.CPiece;
@@ -290,7 +312,7 @@ namespace ChessEngine
           case Piece.Bishop:
           case Piece.Knight:
 
-              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , board);
+              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , this);
               eng.ExecuteCommand(justMove);
               KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               break;
@@ -298,13 +320,15 @@ namespace ChessEngine
                 //Castling
                 if (MathF.Abs(newIndex - oldIndex) == 2)
                     {   //if castling
-                        ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , board);
+                        
+                        
+                        ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , this);
                         eng.ExecuteCommand(kingCastlingCommand); 
                         KingCheckCalculation(pColor,oldIndex,newIndex,pCode); }
                 else
                 { 
                     //Normal move
-                    ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  board);   
+                    ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  this);   
                     eng.ExecuteCommand(moveKing);  
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                 }
@@ -317,7 +341,7 @@ namespace ChessEngine
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
-                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  board);
+                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  this);
                   eng.ExecuteCommand(enPassMoveCommand);
                   GameStateManager.Instance.enPassantMoves += 1;
                   KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
@@ -333,13 +357,13 @@ namespace ChessEngine
                 else  {
                   //normal pawn move
                   
-                    ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  board);
+                    ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  this);
                     eng.ExecuteCommand(movePawn);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     } break; 
           case Piece.Rook:
                    
-                    ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  board);
+                    ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  this);
                     eng.ExecuteCommand(moveRook);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
             break;
@@ -498,6 +522,16 @@ namespace ChessEngine
              this.blackKingSideCastling = blackKingSide;
              this.blackQueenSideCastling = blackQueenSide;
              
+         }
+
+
+         public CastlingRights(CastlingRights other)
+         {
+
+             this.whiteKingSideCastling = other.whiteKingSideCastling;
+             this.whiteQueenSideCastling = other.whiteQueenSideCastling;
+             this.blackKingSideCastling = other.blackKingSideCastling;
+             this.blackQueenSideCastling = other.blackQueenSideCastling;
          }
 
  }

@@ -5,11 +5,12 @@ using Utility;
 
 namespace ChessEngine;
 
+
 public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 4;
+    private readonly int customDepth = 2;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -31,11 +32,14 @@ public class PerfTest
                 moveList.Add(new Move( piece.GetCurrentIndex, movesIndex,  piece));
             }
 
+            
         }
         
         watch.Start();
         foreach (Move move in moveList)
         {
+            GameStateManager.Instance.isInitialNode = true;
+            Console.WriteLine($"STARTING ITERATION , piece moved -> {move.p.GetPieceCode} from {move.from} to {move.to}");
             if(IsPawnPromotion(move.to, move.p.GetPieceCode))
                 DoPromotion(customDepth,move,board);
             else
@@ -70,6 +74,10 @@ public class PerfTest
                         Console.WriteLine($"Promotion count is {GameStateManager.Instance.promotionCount}");
                         Console.WriteLine($"Castling count is {GameStateManager.Instance.castlingCount}");
                         Console.WriteLine($"Checkmate count is {GameStateManager.Instance.checkMateCount}");
+                        Console.WriteLine($"White castle count is {GameStateManager.Instance.whiteCastlingCount}"); 
+                        Console.WriteLine($"Black Castling count is {GameStateManager.Instance.blackCastlingCount}");
+                        Console.WriteLine($"Black pieces capture count is {GameStateManager.Instance.BlackPiecesCapturedCount}");
+                        Console.WriteLine($"white pieces capture count is {GameStateManager.Instance.WhitePiecesCaptureCoint}");
                     Console.ResetColor();
         #endregion
         
@@ -110,7 +118,8 @@ public class PerfTest
 
 
     private int RunPerft(int currentDepth ,  Board board)
-    {  
+    {
+        GameStateManager.Instance.isInitialNode = false;
         
         if (currentDepth == 0)
         {   
@@ -134,6 +143,10 @@ public class PerfTest
             //has issue with if conditions here
             if (IsPawnPromotion(move.to, move.p.GetPieceCode))
             {
+                
+                if(move.p.GetPieceCode ==  Piece.Pawn ||  move.p.GetPieceCode == Piece.King)
+                    Console.WriteLine("maybe castling");
+                        
                 int pCol = ChessEngineSystem.Instance.GetColorCode(move.p.GetPieceCode);
         
                 foreach (int piece in board.promoteToPieces)

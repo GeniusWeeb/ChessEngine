@@ -19,6 +19,20 @@ public class GameStateManager
     public HashSet<ChessPiece> allPiecesThatCanMove = new HashSet<ChessPiece>();
     public int? player1MoveCol;
     public int? player2MoveCol; // 
+    public int whiteCastlingCount = 0;
+    public int blackCastlingCount = 0;
+
+
+    public bool isInitialNode = false;
+
+
+    public int BlackPiecesCapturedCount = 0;
+    public int WhitePiecesCaptureCoint = 0; 
+    
+    
+    
+    
+    
     
     
     //Default player to move -> Make black to make black move first
@@ -29,25 +43,23 @@ public class GameStateManager
     
     //k32 stands for KingSide castling for Black color , small k means black
     //Q32 stands for queenside castling for White color
-    public void UpdateCastlingStateFromFen( bool K16 , bool Q16,bool k32 ,bool q32 )
-    {
-        // whiteKingSideRookMoved = K16;
-        // whiteQueenSideRookMoved = Q16;
-        //
-        // blackKingSideRookMoved = k32;
-        // blackQueenSideRookMoved = q32;
 
-    }
-    //Both castling unavailable
-    public void UpdateCastlingStateFromFen(bool WFalse , bool BFalse)
+    public void UpdateCastlingCount()
     {
-        Console.WriteLine($"Castling allowed for white black? {WFalse}{BFalse}");
-       
-        // isWhiteCastlingAvailable = WFalse;
-        // isBlackCastlingAvailable = BFalse;
-
+        if(isInitialNode)
+            return;
+        
+        castlingCount += 1;
     }
 
+
+    public void UpdateCaptureCount()
+    {
+        if (isInitialNode)
+            return;
+
+        captureCount += 1;
+    }
 
 
     public static GameStateManager Instance { get; private set; }
@@ -116,6 +128,7 @@ public class GameStateManager
      checkCount = 0;
      enPassantMoves = 0;
      castlingCount = 0;
+     isInitialNode = false;
     }
 
 
