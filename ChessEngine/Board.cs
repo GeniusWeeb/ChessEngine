@@ -23,10 +23,12 @@ namespace ChessEngine
          Piece.Rook,
          Piece.Queen,
      };
+
+     public Stack<ICommand> moveHistory;
      
      LegalMoves moves = new LegalMoves();
      Stopwatch watch = new Stopwatch();
-     public string enPassantSquare;
+     public string enPassantSquare = "-";
      
      
 
@@ -44,6 +46,7 @@ namespace ChessEngine
 
          castleRight = new CastlingRights(other.castleRight); // copy constructor
          currentTurn = other.currentTurn;
+         moveHistory = new Stack<ICommand>(other.moveHistory.Reverse());
          moves = new LegalMoves();
          watch = new Stopwatch();
        
@@ -54,18 +57,48 @@ namespace ChessEngine
              Piece.Knight,
              Piece.Rook
          };
-
-
      }
+     
      public Board()
      {
          name = "MAIN BOARD";
          castleRight = new CastlingRights(true, true, true, true);
+         moveHistory = new Stack<ICommand>();
          Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine($"  Board created ! ");
          Console.ResetColor();
          
      }
+     
+     public void ExecuteCommand(ICommand move)
+     {      
+         moveHistory.Push(move);
+         move.Execute();
+            
+     }
+     
+     //needs to be debugged
+     
+     private void UndoCommand(string data)
+     {
+         if (moveHistory.Count == 0) return; // no  more moves to make
+         GameStateManager.Instance.UpdateTurns();
+         Console.ForegroundColor = ConsoleColor.Cyan;
+         Console.ResetColor();
+         ICommand lastMove = moveHistory.Pop();
+         lastMove.Undo();
+         Console.ForegroundColor = ConsoleColor.Red;
+         Console.WriteLine($"Received Undo Command showing board\n");
+         Console.ResetColor();
+         this.ShowBoard();
+         GameStateManager.Instance.ResetMoves();
+         this.GenerateMoves( (int)this.GetCurrentTurn, this, false);
+         // ChessEngineSystem.Instance.CheckForGameModeAndPerform();
+
+     }
+     
+     
+     
      
      //HAPPENS AT THE TIME OF NEW BOARD -> COULD BE USED FOR A FORCE RESET 
     public  void SetupDefaultBoard(string gameMode)
@@ -75,14 +108,11 @@ namespace ChessEngine
          var data = JsonConvert.SerializeObject(chessBoard);
          Protocols finalData = new Protocols(ProtocolTypes.GAMESTART.ToString(),data ,16.ToString());
          ChessEngineSystem.Instance.SendDataToUI(finalData);
-
          Console.ForegroundColor = ConsoleColor.Yellow;
          ShowBoard();
          Console.ResetColor();
          
     //     GenerateMoves( (int)currentTurn , this , false);
-         
-
      }
     
     //If a method deosnt send depth , means its a firdst time search , 
@@ -111,11 +141,8 @@ namespace ChessEngine
     {
         Console.WriteLine("Checking UI ");
         var piece = chessBoard[oldIndex];
-        
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
         {   
-            
-            
             if (p.GetPieceCode == piece && p.GetAllMovesForThisPiece.Contains(newIndex) &&
                 oldIndex == p.GetCurrentIndex)
             {
@@ -140,10 +167,14 @@ namespace ChessEngine
             return false;
      }
 
-    public void UnMakeMove(ICommand lastMove)
+    public void UnMakeMove()
     {
+        if (moveHistory.Count == 0)
+            return;
+        ICommand lastMove = moveHistory.Pop();
         lastMove.Undo();
-        
+        UpdateTurns();
+
     }
 
 
@@ -312,61 +343,54 @@ namespace ChessEngine
           case Piece.Bishop:
           case Piece.Knight:
 
-              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , this);
-              eng.ExecuteCommand(justMove);
+              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , this  );
+              this.ExecuteCommand(justMove);
               KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               break;
           case Piece.King:
                 //Castling
-                if (MathF.Abs(newIndex - oldIndex) == 2)
+                if (Math.Abs(newIndex - oldIndex) == 2)
                     {   //if castling
-                        
-                        
                         ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , this);
-                        eng.ExecuteCommand(kingCastlingCommand); 
-                        KingCheckCalculation(pColor,oldIndex,newIndex,pCode); }
-                else
+                        this.ExecuteCommand( kingCastlingCommand); 
+                        KingCheckCalculation(pColor,oldIndex,newIndex,pCode); }else
                 { 
                     //Normal move
-                    ICommand moveKing = new kingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  this);   
-                    eng.ExecuteCommand(moveKing);  
+                    ICommand moveKing = new KingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  this);   
+                    this.ExecuteCommand(moveKing);  
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                 }
                     break;
           case Piece.Pawn:
               if (newIndex == p.specialIndex)
               {
-                 //Enpassant
-                  var capturedPawnIndex =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
+                 //EnPassant
+                  var capturedPawnIndex =  this. moveHistory.Peek().GetInfo();
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
                   ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  this);
-                  eng.ExecuteCommand(enPassMoveCommand);
+                  this.ExecuteCommand(enPassMoveCommand);
                   GameStateManager.Instance.enPassantMoves += 1;
                   KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-            //      Console.WriteLine($"Executed En Passant at {cellFinal}");
+                  Console.WriteLine($"Executed En Passant at {newIndex}");
                   //Execute command and keep track
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {
-                
-                
-               
+                //Promotion index
               }            
                 else  {
                   //normal pawn move
-                  
                     ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  this);
-                    eng.ExecuteCommand(movePawn);
+                    this.ExecuteCommand(movePawn);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     } break; 
           case Piece.Rook:
-                   
                     ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  this);
-                    eng.ExecuteCommand(moveRook);
+                    this.ExecuteCommand(moveRook);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-            break;
+                    break;
         }
         
         
@@ -417,8 +441,6 @@ namespace ChessEngine
          {
              //legal moves -> filter -> send a new hashset
              int myKing = Piece.King | forThisPlayer;
-           
-           
              foreach (ChessPiece piece in myLegalMoves.ToList())
              {  
                  List<int> movesToRemove = new List<int>();
@@ -535,6 +557,13 @@ namespace ChessEngine
          }
 
  }
+
+ public enum MoveType
+ {
+     Regular , EnPassant, Promotion , Castling
+ }
+
+
 
 
 

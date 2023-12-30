@@ -10,7 +10,7 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1";  
+        public string TestFen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";  
       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
@@ -18,7 +18,6 @@ namespace ChessEngine
         private BotBrain? bot2 = new BotBrain();
         private readonly int boardSetupDelay = 50;
         private readonly int botDecisionDelay = 50;
-        public  Stack<ICommand> moveHistory = new Stack<ICommand>();
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
         private bool isUndoRequest;
@@ -43,8 +42,13 @@ namespace ChessEngine
             
         
         }
-        
-      
+
+        public void UndoCommand(string data)
+        {   
+            board.UnMakeMove();
+        }
+
+
         public void UpdateTurnFromFen(string t)
         {
             board.SetTurn(t == "w" ? Turn.White : Turn.Black);
@@ -313,12 +317,7 @@ namespace ChessEngine
 
 
       //Pawn , Bishop , Queen , Rook , Kings , Knight
-       public void ExecuteCommand(ICommand move)
-       {      
-            moveHistory.Push(move);
-            move.Execute();
-            
-       }
+     
 
        public void UpdateBoard(Board newBoard)
        {
@@ -328,23 +327,7 @@ namespace ChessEngine
        /// <summary>
         /// Event for Ui for Undo just a simple event
         /// </summary>
-       private void UndoCommand(string data)
-        {
-            if (moveHistory.Count == 0) return; // no  more moves to make
-            GameStateManager.Instance.UpdateTurns();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.ResetColor();
-            ICommand lastMove = moveHistory.Pop();
-            lastMove.Undo();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Received Undo Command showing board\n");
-            Console.ResetColor();
-            board.ShowBoard();
-            GameStateManager.Instance.ResetMoves();
-            board.GenerateMoves( (int)board.GetCurrentTurn, board, false);
-            CheckForGameModeAndPerform();
-
-        }
+   
         
 
         public void ReloadEngine()
@@ -358,7 +341,7 @@ namespace ChessEngine
          board = newBoard;
          bot1 = newBot1;
          bot2 = newBot2;
-         moveHistory.Clear();
+         board.moveHistory.Clear();
          startingNewBoard = true;
          GameStateManager.Instance.ResetGameState();
        

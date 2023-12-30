@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 4;
+    private readonly int customDepth = 2;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -77,6 +77,7 @@ public class PerfTest
                         Console.WriteLine($"Black Castling count is {GameStateManager.Instance.blackCastlingCount}");
                         Console.WriteLine($"Black pieces capture count is {GameStateManager.Instance.BlackPiecesCapturedCount}");
                         Console.WriteLine($"white pieces capture count is {GameStateManager.Instance.WhitePiecesCaptureCoint}");
+                        Console.WriteLine("move history is ->");
                     Console.ResetColor();
         #endregion
         
@@ -155,7 +156,7 @@ public class PerfTest
                     Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
                     board_cpy.MakeMoveClone(move);
                     ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
-                    ChessEngineSystem.Instance.ExecuteCommand(promote);
+                    board_cpy.ExecuteCommand(promote);
                     GameStateManager.Instance.promotionCount += 1;
                     nodeCount += RunPerft(currentDepth-1, board_cpy);
                  
@@ -190,7 +191,7 @@ public class PerfTest
             Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
             board_cpy.MakeMoveClone(move);
             ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
-            ChessEngineSystem.Instance.ExecuteCommand(promote);
+            board_cpy.ExecuteCommand(promote);
             GameStateManager.Instance.promotionCount += 1;
             nodeCount += RunPerft(depth-1, board_cpy);
                  
@@ -213,7 +214,7 @@ public class PerfTest
             Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
             board_cpy.MakeMoveClone(move);
             ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
-            ChessEngineSystem.Instance.ExecuteCommand(promote);
+            board_cpy.ExecuteCommand(promote);
             GameStateManager.Instance.promotionCount += 1;
             promCount+= RunPerft(depth-1, board_cpy);
             PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to)+ GetPromotedPieceCode(promoP),promCount));
@@ -221,14 +222,14 @@ public class PerfTest
     }
 
 
-    private void UnMakeMove()
+    private void UnMakeMove(Board board)
     {
-        Stack<ICommand> moveHistory = ChessEngineSystem.Instance.moveHistory;
+        Stack<ICommand> moveHistory = board.moveHistory;
         if ( moveHistory.Count > 0)
         {
             ICommand lastMove = moveHistory.Pop();
-            lastMove.Undo();
-            GameStateManager.Instance.UpdateTurns();
+            lastMove.Undo(); 
+            board.UpdateTurns();
             
         }
     }

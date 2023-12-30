@@ -14,13 +14,16 @@
     }
 
     
-    public abstract class Command : ICommand 
-    {   
-        
+    public abstract class Command : ICommand
+    {
+
+        public  MoveType moveType;
         public abstract void Execute();
         public abstract void Undo();
 
         public abstract (int, int)? GetInfo();
+        
+        
 
 
     }
@@ -30,7 +33,7 @@
 public class MoveCommand : Command
 {
 
-
+    public new MoveType moveType = MoveType.Regular;
     protected Board savedBoard;
     protected Board currentBoard;
     protected  int currentCell;
@@ -44,7 +47,8 @@ public class MoveCommand : Command
 
 
    public MoveCommand(int currnt ,int target , ChessEngineSystem eng  ,Board board )
-    {
+   {
+           
             this.currentCell = currnt ;
             this.targetCell = target ;
             this.engine = eng;
@@ -73,8 +77,6 @@ public class MoveCommand : Command
     //Sent to board for UI .
     public override void Undo()
     {
-        
-        
          currentBoard.chessBoard[currentCell] =  currentBoard.chessBoard[targetCell];
          currentBoard.chessBoard[targetCell] =  capturedPiece;
          engine.UpdateUIWithNewIndex(targetCell , currentCell , capturedPiece);
@@ -88,6 +90,7 @@ public class MoveCommand : Command
     
 public class CastlingCommand : Command
 {
+    public new MoveType moveType = MoveType.Castling;
     private Board savedBoard;
     private Board currentBoard;
     private int kingDefaultCell ;
@@ -189,12 +192,8 @@ public class CastlingCommand : Command
             currentBoard.chessBoard[kingDefaultCell] = Piece.Empty;
             currentBoard.chessBoard[rookCell] = Piece.Empty;
             RookNewCell = kingNewCell + step;
-            
-            
             this.RookDefaultCell = rookCell;
             Console.ForegroundColor = ConsoleColor.Red;
-          
-            
           //  Console.WriteLine($" CRook new cell is  {RookNewCell}");
           
     }
@@ -204,7 +203,7 @@ public class CastlingCommand : Command
 
 public class RookMoveCommand : Command
 {
-    
+    public new MoveType moveType = MoveType.Regular;
     int currentCell ;
     int targetCell;
     
@@ -237,8 +236,6 @@ public class RookMoveCommand : Command
 
     public override void Execute()
     { 
-        
-    
        switch(pColor)
        {
         case Piece.White:
@@ -285,13 +282,11 @@ public class RookMoveCommand : Command
     }
 }
 
-public class kingMoveCommand : MoveCommand
+public class KingMoveCommand : MoveCommand
 {   
-    
-    
     int pColor;
     
-    public kingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board) : base(currnt, target, eng, board)
+    public KingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board) : base(currnt, target, eng, board)
     {   
         pColor = color;
         savedBoard = new Board(board, "cloned from King move");
@@ -329,8 +324,8 @@ public class kingMoveCommand : MoveCommand
 }
     
     public class EnPassantCommand : MoveCommand
-    {   
-        
+    {
+        public new MoveType moveType = MoveType.EnPassant;
         private int capturedPawnIndex;
         
         public EnPassantCommand(int currnt, int target, ChessEngineSystem eng ,int capPawnIndex , Board board) : base(currnt, target, eng , board)
@@ -367,7 +362,8 @@ public class kingMoveCommand : MoveCommand
     }
     public class PromotionCommand : MoveCommand
     {
-        
+
+        public new MoveType moveType = MoveType.Promotion;
         public int promotedToPiece = -1;
         private ChessPiece piece;
         public PromotionCommand(int currnt, int target, int PromoPiece, ChessPiece p,ChessEngineSystem eng ,  Board board) : base(currnt, target, eng , board)
@@ -382,11 +378,8 @@ public class kingMoveCommand : MoveCommand
 
         public override void Execute()
         {
-           
-            
             currentBoard.chessBoard[targetCell] = promotedToPiece;
             currentBoard.chessBoard[currentCell] = Piece.Empty;
-          //  engine.GetBoardClass.ShowBoard();
             engine.UpdateUIWithNewIndex(targetCell , currentCell , promotedToPiece);
 
         }

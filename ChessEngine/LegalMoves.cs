@@ -124,7 +124,7 @@ sealed class LegalMoves
             }
 
 
-            PawnCheckEnPassant(pawn, index, colCode, board.chessBoard);
+            PawnCheckEnPassant(pawn, index, colCode, board);
 
 
             if (!isCustom) return pawn.GetAllMovesForThisPiece.Count > 0 ? pawn : null;
@@ -153,15 +153,15 @@ sealed class LegalMoves
         
        
     }
-    private void   PawnCheckEnPassant(Pawn pawn , int index,int colCode ,int[] board)
+    private void   PawnCheckEnPassant(Pawn pawn , int index,int colCode ,Board board)
     {
         int cellFinal, cellOld;
        
 
-        if (ChessEngineSystem.Instance.moveHistory.Count == 0)
+        if (board.moveHistory.Count == 0)
             return;
         
-       var piece =  ChessEngineSystem.Instance.moveHistory.Peek().GetInfo();
+       var piece =  board.moveHistory.Peek().GetInfo();
        if (piece == null) return;
 
 
@@ -169,8 +169,8 @@ sealed class LegalMoves
        cellOld = piece.Value.Item1;
      
        if (Math.Abs(cellFinal - cellOld) == 16 && // The last move was a double move
-           ( board[cellFinal] & Piece.CPiece)  == Piece.Pawn  && 
-           !IsSameColorAsMe(colCode, GetColorCode( board[cellFinal]))
+           ( board.chessBoard[cellFinal] & Piece.CPiece)  == Piece.Pawn  && 
+           !IsSameColorAsMe(colCode, GetColorCode( board.chessBoard[cellFinal]))
            )
        {
            if (Math.Abs(cellFinal % 8 - index % 8) == 1 && (cellFinal / 8 == index /8))
