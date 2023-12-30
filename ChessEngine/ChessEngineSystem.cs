@@ -1,5 +1,3 @@
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using ChessEngine.Bot;
 using Newtonsoft.Json;
 using Utility;
@@ -12,21 +10,19 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-
-        public string TestFen = "rnbq1kr1/pp1Pbppp/2p5/8/2B5/2N5/PPP1NnPP/R1BQK2R w KQ - 3 9";       
+        public string TestFen = "8/2p5/3p4/KP5r/7k/8/4P1p1/7R b - - 1 3";  
+      
         public static ChessEngineSystem Instance { get; private set; }
-        private Board? board = new Board();
+        private Board board;
         private BotBrain? bot1 = new BotBrain();
         private BotBrain? bot2 = new BotBrain();
         private readonly int boardSetupDelay = 50;
         private readonly int botDecisionDelay = 50;
-        public  Stack<ICommand> moveHistory = new Stack<ICommand>();
-       
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
-
         private bool isUndoRequest;
-
+        
+        
 
         private PerfTest test = new PerfTest();
         
@@ -34,17 +30,43 @@ namespace ChessEngine
         {
             
             Console.WriteLine("Console initialized");
-           
             Event.inComingData += PassDataToBoard;
             Event.GetCellsForThisIndex += SendUICellIndicatorData;
             Event.undoMove  += UndoCommand;
             Event.ClientConncted += SetupDefaultBoard;
+           
         }
         static ChessEngineSystem()
         {
             Instance = new ChessEngineSystem();
+            
         
         }
+
+        public void UndoCommand(string data)
+        {   
+            board.UnMakeMove();
+        }
+
+
+        public void UpdateTurnFromFen(string t)
+        {
+            board.SetTurn(t == "w" ? Turn.White : Turn.Black);
+
+        }
+
+        public void UpdateCastlingRightsFromFen(bool WK16, bool WQ16, bool Bk32, bool Bq32 )
+        {
+            board.castleRight.whiteKingSideCastling = WK16;
+            board.castleRight.whiteQueenSideCastling = WQ16;
+            
+            
+            //black
+            
+            board.castleRight.blackKingSideCastling = Bk32;
+            board.castleRight.blackQueenSideCastling = Bq32;
+        }
+        
 
         public int[] MapFen() => FenMapper.MapFen(TestFen);
 
@@ -60,6 +82,7 @@ namespace ChessEngine
             Console.WriteLine(" --> Simple Chess Engine 0.1 <--" );
             Connection.Instance.Init(); 
             Console.ResetColor();
+            board = new Board();
         }
         
         
@@ -80,7 +103,7 @@ namespace ChessEngine
                     {   
                         Console.WriteLine("Bot is gonna make the move");
                         bot1.Think();
-                        ScanBoardForMoves();
+                        board.GenerateMoves( (int)board.GetCurrentTurn, board,false);
                     }
                     break;
                 
@@ -101,6 +124,7 @@ namespace ChessEngine
                     
                     break;
                 case GameMode.PlayerVsPlayer :
+                    board.GenerateMoves(board.GetCurrentTurn, board, true);
                     break;
                 
                 case GameMode.PerfTest:
@@ -121,12 +145,10 @@ namespace ChessEngine
             Thread.Sleep(botDecisionDelay);
             
             //main issue is here
-            ScanBoardForMoves();
+            board.GenerateMoves( (int)board.GetCurrentTurn, board , false);
             UtilityWriteToConsoleWithColor("Scanning Finished  bot gonna think", ConsoleColor.Red);
-            
             brain.Think();          
             UtilityWriteToConsoleWithColor("Bots thinking finished", ConsoleColor.DarkGreen);
-
             CheckForGameModeAndPerform();
             
             //Fix this
@@ -139,12 +161,9 @@ namespace ChessEngine
                 string validationData = ProcessMoveInEngine(data) ? "true" : "false";
                 Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, GameStateManager.Instance.GetTurnToMove.ToString());
                 SendDataToUI(finalData);
-                
-                if(GameStateManager.Instance.GetCurrentGameMode != GameMode.BotVsBot)
-                    ScanBoardForMoves();
-                
+            
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
-                CheckForGameModeAndPerform();
+                //CheckForGameModeAndPerform();
 
             
         }
@@ -155,12 +174,6 @@ namespace ChessEngine
             Console.WriteLine(content);
             Console.ResetColor();
         }
-
-
-
-
-
-
 
         //convert notations to the board index
         private bool ProcessMoveInEngine(string incomingDta)
@@ -213,17 +226,24 @@ namespace ChessEngine
 
 
         private void SetupDefaultBoard(string gameMode)
-        {
+        {   
+            
+            GameStateManager.Instance.SetCurrentGameModeAndTurn(gameMode);
+         
             if (newServerInstance)
-            {
+            {  
+                board.chessBoard = MapFen();
                 board.SetupDefaultBoard(gameMode);
                 newServerInstance = false; 
             }
             else
             {
                 ReloadEngine();
+                board.chessBoard = MapFen();
                 board.SetupDefaultBoard(gameMode);
             }
+            
+            CheckForGameModeAndPerform();
         }
 
         //BASICALLY , JUST DO POST FORMAT FOR MOVES CASTLING, PROMOTION ETC
@@ -258,9 +278,6 @@ namespace ChessEngine
             
         }
 
-      
-
-
         public void SendDataToUI <T>(T data)
        {
            if(!useUI) return; 
@@ -271,58 +288,26 @@ namespace ChessEngine
 
        public bool IsPawnDefIndex(int pCode, int index)  =>board.CheckIfPawnDefaultIndex(pCode, index);
 
-
        
-       //Main Scan
-       public void ScanBoardForMoves()
-       {
-            
-           Console.ForegroundColor = ConsoleColor.Yellow;
-         //  Console.WriteLine(" Main Scanning board");
-           Console.ResetColor();
-           board.ProcessMovesUpdate();
-          GetBoardClass.KingBePreCheckTest(  board.chessBoard, GameStateManager.Instance.playerToMove);
-       }
-       
-       
-     
-   
-       
-       // Used for any precomputes
-       public void CustomScanBoardForMoves(int[] testBoard , int toMoveColour , string reason)
-       {    
-           Console.ForegroundColor = ConsoleColor.Red;
-          // Console.WriteLine( $"{GameStateManager.Instance.GetTurnToMove } is custom Scanning board for {reason} ");
-           Console.ResetColor();
-           try
+       #region Util Methods
+           public bool IsBlack(int colorCode)
            {
-               board.ProcessMovesUpdate(testBoard , toMoveColour);
+               return (colorCode & Piece.Black) == Piece.Black;
            }
-           catch (Exception e)
+
+           public int GetPieceCode(int code)
            {
-               Console.WriteLine(e);
-               throw;
+               return (code & Piece.CPiece);
            }
-           
+           public  int GetColorCode(int code )
+           {
+               if (IsBlack(code))
+                   return Piece.Black;
             
-       }
-
-       public bool IsBlack(int colorCode)
-       {
-           return (colorCode & Piece.Black) == Piece.Black;
-       }
-
-       public int GetPieceCode(int code)
-       {
-           return (code & Piece.CPiece);
-       }
-       public  int GetColorCode(int code )
-       {
-           if (IsBlack(code))
-               return Piece.Black;
-        
-           return (code & Piece.White) == Piece.White ? Piece.White : Piece.Empty;
-       }
+               return (code & Piece.White) == Piece.White ? Piece.White : Piece.Empty;
+           }
+       
+       #endregion
 
 
        public Board GetBoardClass => board;
@@ -332,66 +317,31 @@ namespace ChessEngine
 
 
       //Pawn , Bishop , Queen , Rook , Kings , Knight
-       public void ExecuteCommand(ICommand move)
-       {      
-            moveHistory.Push(move);
-            move.Execute();
-            
+     
+
+       public void UpdateBoard(Board newBoard)
+       {
+           board = newBoard;
        }
 
-
-        /// <summary>
+       /// <summary>
         /// Event for Ui for Undo just a simple event
         /// </summary>
-       private void UndoCommand(string data)
-        {
-            if (moveHistory.Count == 0) return; // no  more moves to make
-            GameStateManager.Instance.UpdateTurns();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.ResetColor();
-            ICommand lastMove = moveHistory.Pop();
-            lastMove.Undo();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Received Undo Command showing board\n");
-            Console.ResetColor();
-            board.ShowBoard();
-            GameStateManager.Instance.ResetMoves();
-            ScanBoardForMoves();
-            CheckForGameModeAndPerform();
-
-        }
+   
         
-        
-        // private void UndoCommand(string data)
-        // {
-        //     if (moveHistory.Count == 0) return; // no  more moves to make
-        //     GameStateManager.Instance.UpdateTurns();
-        //     Console.ForegroundColor = ConsoleColor.Cyan;
-        //     Console.ResetColor();
-        //     ICommand lastMove = moveHistory.Pop();
-        //     lastMove.Undo();
-        //     Console.ForegroundColor = ConsoleColor.Red;
-        //     Console.WriteLine($"Received Undo Command showing board\n");
-        //     Console.ResetColor();
-        //     board.ShowBoard();
-        //     GameStateManager.Instance.ResetMoves();
-        //     ScanBoardForMoves();
-        //     CheckForGameModeAndPerform();
-        //
-        // }
 
         public void ReloadEngine()
         { 
             board = null;
             bot1 = null;
             bot2 = null;
-        Board newBoard = new Board();
-        BotBrain newBot1 = new BotBrain();
-        BotBrain newBot2 = new BotBrain();
+         Board newBoard = new Board();
+         BotBrain newBot1 = new BotBrain();
+         BotBrain newBot2 = new BotBrain();
          board = newBoard;
          bot1 = newBot1;
          bot2 = newBot2;
-         moveHistory.Clear();
+         board.moveHistory.Clear();
          startingNewBoard = true;
          GameStateManager.Instance.ResetGameState();
        
