@@ -57,7 +57,8 @@ public class GameStateManager
     {
         if (isInitialNode)
             return;
-
+    
+        
         captureCount += 1;
     }
 
@@ -129,6 +130,7 @@ public class GameStateManager
      enPassantMoves = 0;
      castlingCount = 0;
      isInitialNode = false;
+     checkMateCount = 0;
     }
 
 

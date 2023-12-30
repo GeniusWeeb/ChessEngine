@@ -415,6 +415,9 @@ namespace ChessEngine
      {  
          if (!IsOppKingInCheck(pColor, oldIndex, newIndex, pColor | pCode)) return; //Help us build on Undo
 
+
+         if (name == BoardCloneTypes.GetOnlyLegalMoves)
+             return;
          GameStateManager.Instance.checkCount++;
          //Console.WriteLine($"{pColor}King has been checked ");
      }

@@ -125,7 +125,7 @@ public class CastlingCommand : Command
     public override void Execute()
     {
         
-        GameStateManager.Instance.UpdateCastlingCount(); 
+      
         switch(color)
         {
             case  Piece.Black:
@@ -158,7 +158,11 @@ public class CastlingCommand : Command
         // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
-        
+
+
+        if (currentBoard.name == BoardCloneTypes.GetOnlyLegalMoves)
+            return;
+        GameStateManager.Instance.UpdateCastlingCount(); 
     }
     
 
