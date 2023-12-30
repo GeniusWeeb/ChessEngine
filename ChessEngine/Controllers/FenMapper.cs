@@ -49,7 +49,7 @@ public static  class FenMapper
         }
         
         bool K16 = false, Q16 = false, k32 = false, q32 = false;
-        int sideCount = 0;
+
 
         for (int i = 0; i < castlingData.Length; i++)
         {   
@@ -83,6 +83,7 @@ public static  class FenMapper
         
         ChessEngineSystem.Instance.UpdateTurnFromFen(turn);
         ChessEngineSystem.Instance.UpdateCastlingRightsFromFen(K16,Q16,k32,q32);
+        
         
             
         return board;

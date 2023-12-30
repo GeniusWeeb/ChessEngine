@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 1;
+    private readonly int customDepth = 3;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -73,10 +73,6 @@ public class PerfTest
                         Console.WriteLine($"Promotion count is {GameStateManager.Instance.promotionCount}");
                         Console.WriteLine($"Castling count is {GameStateManager.Instance.castlingCount}");
                         Console.WriteLine($"Checkmate count is {GameStateManager.Instance.checkMateCount}");
-                        Console.WriteLine($"White castle count is {GameStateManager.Instance.whiteCastlingCount}"); 
-                        Console.WriteLine($"Black Castling count is {GameStateManager.Instance.blackCastlingCount}");
-                        Console.WriteLine($"Black pieces capture count is {GameStateManager.Instance.BlackPiecesCapturedCount}");
-                        Console.WriteLine($"white pieces capture count is {GameStateManager.Instance.WhitePiecesCaptureCoint}");
                         Console.WriteLine("move history is ->");
                     Console.ResetColor();
         #endregion
