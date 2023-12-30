@@ -194,7 +194,7 @@ sealed class LegalMoves
         int movesLength = knight.knightCanMoveTo.Length;
         for (int i = 0; i < movesLength; i++)
         {   
-            if( knight.knightCanMoveTo[i] <= 0 || knight.knightCanMoveTo[i] > 63)
+            if( knight.knightCanMoveTo[i] < 0 || knight.knightCanMoveTo[i] > 63)
                 continue;
             
             int otherPColorCode = GetColorCode(board.chessBoard[knight.knightCanMoveTo[i]]);
@@ -207,8 +207,8 @@ sealed class LegalMoves
                 int newPos =knight.knightCanMoveTo[i];
                 //After having all moves  , we try to check for L move shape 
                 //INTERESTING LOGIC FOR THIS -> coz it always moves 2 spaces in 1 dir and 1 dir perpendicular
-                int rowDiff = (int)MathF.Abs(newPos / 8 - ind / 8);
-                int colDiff = (int)MathF.Abs(newPos % 8 - ind % 8);
+                int rowDiff = (int)Math.Abs(newPos / 8 - ind / 8);
+                int colDiff = (int)Math.Abs(newPos % 8 - ind % 8);
                 
                 if((rowDiff ==2 && colDiff == 1) || (rowDiff==1 && colDiff==2))
                     knight.AddAllPossibleMoves(newPos);
