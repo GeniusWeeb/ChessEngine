@@ -85,7 +85,6 @@ sealed class LegalMoves
 
             if (ApplyIndexBasedOnColor is < 0 or > 63) return null;
             
-
             //front move -> normal move
             if ( board.chessBoard[ApplyIndexBasedOnColor] == Piece.Empty)
             {

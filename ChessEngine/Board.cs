@@ -11,7 +11,7 @@ namespace ChessEngine
  public class Board : IDisposable
  {
 
-     public string name;
+     public BoardCloneTypes name;
      public int[] chessBoard;
      private Turn currentTurn = Turn.White;
      public CastlingRights castleRight; //get from fen
@@ -35,9 +35,9 @@ namespace ChessEngine
      public int GetCurrentTurn => (int)currentTurn;
 
      public void SetTurn(Turn turn) => currentTurn = turn;
-     public Board(Board other, string type="main")
+     public Board(Board other, BoardCloneTypes cloneType = BoardCloneTypes.MAIN)
      {
-         name = type;
+         name = cloneType;
          chessBoard =  new int[64];
          for (int i = 0; i < 64; i++)
          {
@@ -61,7 +61,7 @@ namespace ChessEngine
      
      public Board()
      {
-         name = "MAIN BOARD";
+         name = BoardCloneTypes.MAIN;
          castleRight = new CastlingRights(true, true, true, true);
          moveHistory = new Stack<ICommand>();
          Console.ForegroundColor = ConsoleColor.Green;
@@ -225,8 +225,11 @@ namespace ChessEngine
     }
 
     private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
-    
-    {   
+    {
+
+        if (name == BoardCloneTypes.GetOnlyLegalMoves)
+            return;
+        
         int pCode =newIndex & Piece.CPiece;
        
         int myPieceCol = ChessEngineSystem.Instance.GetColorCode(pieceThatMoved);
@@ -240,6 +243,7 @@ namespace ChessEngine
         switch (pCode)
         {
             case 1:
+                
                 GameStateManager.Instance.UpdateCaptureCount();
                 if (myPieceCol == Piece.Black)
                     GameStateManager.Instance.WhitePiecesCaptureCoint++;
@@ -343,7 +347,7 @@ namespace ChessEngine
           case Piece.Bishop:
           case Piece.Knight:
 
-              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , this  );
+              ICommand justMove = new MoveCommand(oldIndex, newIndex, ChessEngineSystem.Instance , this, MoveType.Regular  );
               this.ExecuteCommand(justMove);
               KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
               break;
@@ -351,12 +355,12 @@ namespace ChessEngine
                 //Castling
                 if (Math.Abs(newIndex - oldIndex) == 2)
                     {   //if castling
-                        ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , this);
+                        ICommand kingCastlingCommand = new CastlingCommand(ChessEngineSystem.Instance , oldIndex,newIndex  , pColor , this, MoveType.Castling);
                         this.ExecuteCommand( kingCastlingCommand); 
                         KingCheckCalculation(pColor,oldIndex,newIndex,pCode); }else
                 { 
                     //Normal move
-                    ICommand moveKing = new KingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  this);   
+                    ICommand moveKing = new KingMoveCommand(oldIndex ,newIndex ,ChessEngineSystem.Instance , pColor ,  this , MoveType.Regular);   
                     this.ExecuteCommand(moveKing);  
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                 }
@@ -369,25 +373,34 @@ namespace ChessEngine
                   if (capturedPawnIndex == null) return;
                   int  cellFinal = capturedPawnIndex.Value.Item2;
                   
-                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  this);
+                  ICommand enPassMoveCommand = new EnPassantCommand(oldIndex, newIndex, ChessEngineSystem.Instance, cellFinal,  this , MoveType.EnPassant);
                   this.ExecuteCommand(enPassMoveCommand);
-                  GameStateManager.Instance.enPassantMoves += 1;
+                  
+                  if(this.name != BoardCloneTypes.GetOnlyLegalMoves ) GameStateManager.Instance.enPassantMoves++;
+                  
+                
                   KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
-                  Console.WriteLine($"Executed En Passant at {newIndex}");
+                //  Console.WriteLine($"Executed En Passant at {newIndex}");
                   //Execute command and keep track
               }
               else if (newIndex / 8 == 7 || newIndex / 8 == 0)
               {
-                //Promotion index
+                  Random ran = new Random();
+                  int randIndecx = ran.Next(0, 4); //4 exclusive and 0 is inclusive
+                  ICommand promPawnCommand = new PromotionCommand(oldIndex, newIndex,promoteToPieces[randIndecx], p, 
+                      ChessEngineSystem.Instance, this, MoveType.Promotion);
+                  this.ExecuteCommand(promPawnCommand);
+                  KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
+                  //What piece to promote could use evaluation
               }            
                 else  {
                   //normal pawn move
-                    ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  this);
+                    ICommand movePawn = new MoveCommand(oldIndex,newIndex ,ChessEngineSystem.Instance,  this , MoveType.Regular);
                     this.ExecuteCommand(movePawn);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     } break; 
           case Piece.Rook:
-                    ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  this);
+                    ICommand moveRook =  new RookMoveCommand(ChessEngineSystem.Instance,oldIndex , newIndex,pColor,  this,MoveType.Regular );
                     this.ExecuteCommand(moveRook);
                     KingCheckCalculation(pColor,oldIndex,newIndex,pCode);
                     break;
@@ -408,7 +421,13 @@ namespace ChessEngine
 
 //after my move
 
-     public int getOpponent => (int)currentTurn == Piece.White ? Piece.Black : Piece.White;
+     public int getOpponent() => (int)currentTurn == Piece.White ? Piece.Black : Piece.White;
+
+     public int GetOpponentOfThis(int col)
+     {
+         return col == Piece.White ? Piece.Black : Piece.White;
+     }
+
      private  bool IsOppKingInCheck(int pColor , int oldIndex, int newIndex, int pCode)
      {      
        
@@ -438,21 +457,20 @@ namespace ChessEngine
      {
          //2- 1 => depth
          try
-         {
-             //legal moves -> filter -> send a new hashset
+         {    //legal moves -> filter -> send a new hashset
              int myKing = Piece.King | forThisPlayer;
              foreach (ChessPiece piece in myLegalMoves.ToList())
              {  
                  List<int> movesToRemove = new List<int>();
                  foreach (int moveIndex in piece.allPossibleMovesIndex.ToList())
                  {   
-                     Board boardCopy = new Board(board, "filterFinalMovesClone");
-                     boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
-                     boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
+                     Board boardCopy = new Board(board, BoardCloneTypes.GetOnlyLegalMoves);
+                     // boardCopy.chessBoard[moveIndex] = piece.GetPieceCode;
+                     // boardCopy.chessBoard[piece.GetCurrentIndex] = Piece.Empty;
+                     boardCopy.MakeMoveClone(new Move(piece.GetCurrentIndex ,  moveIndex , piece));
 
                      //For opponent and get their ONLY LEGAL MOVES //1st case -> dep 1
-                     List<ChessPiece> oppsMovesList = new List<ChessPiece>();
-                     oppsMovesList  = GenerateMoves( boardCopy.getOpponent , boardCopy , true); //2 -> 
+                     List<ChessPiece>  oppsMovesList  = GenerateMoves( boardCopy.GetOpponentOfThis(forThisPlayer), boardCopy , true, true); //2 -> 
 
                      foreach (ChessPiece oppPiece in oppsMovesList)
                      {
@@ -472,6 +490,7 @@ namespace ChessEngine
                  foreach (var movesTo in movesToRemove)
                  {
                      piece.allPossibleMovesIndex.Remove(movesTo);
+                
                  }
 
                 
@@ -479,9 +498,9 @@ namespace ChessEngine
              }
 
              int moveCount = 0;
-             foreach (var moves in myLegalMoves )
+             foreach (var move in myLegalMoves )
              {
-                 moveCount += moves.allPossibleMovesIndex.Count;
+                 moveCount += move.allPossibleMovesIndex.Count;
              }
 
              if (moveCount == 0)
@@ -563,7 +582,18 @@ namespace ChessEngine
      Regular , EnPassant, Promotion , Castling
  }
 
-
+ public enum BoardCloneTypes
+ {
+  
+     GetOnlyLegalMoves, 
+     MAIN , 
+     FILTERING,
+     RookMoveClone,
+     KingMoveClone,
+     PromotionClone,
+     DepthCloning
+     
+ }
 
 
 

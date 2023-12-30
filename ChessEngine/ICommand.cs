@@ -17,7 +17,7 @@
     public abstract class Command : ICommand
     {
 
-        public  MoveType moveType;
+      
         public abstract void Execute();
         public abstract void Undo();
 
@@ -33,7 +33,7 @@
 public class MoveCommand : Command
 {
 
-    public new MoveType moveType = MoveType.Regular;
+    public MoveType moveType;
     protected Board savedBoard;
     protected Board currentBoard;
     protected  int currentCell;
@@ -46,9 +46,9 @@ public class MoveCommand : Command
     //promotion //en Passant
 
 
-   public MoveCommand(int currnt ,int target , ChessEngineSystem eng  ,Board board )
+   public MoveCommand(int currnt ,int target , ChessEngineSystem eng  ,Board board , MoveType type )
    {
-           
+            moveType = type;
             this.currentCell = currnt ;
             this.targetCell = target ;
             this.engine = eng;
@@ -90,7 +90,8 @@ public class MoveCommand : Command
     
 public class CastlingCommand : Command
 {
-    public new MoveType moveType = MoveType.Castling;
+    public MoveType moveType;
+
     private Board savedBoard;
     private Board currentBoard;
     private int kingDefaultCell ;
@@ -108,9 +109,10 @@ public class CastlingCommand : Command
     //When Rook moved -> it could be king side or Queen side  -> since the king can always 
     //castle to the other remaining one
 
-    public  CastlingCommand ( ChessEngineSystem eng, int KingD , int KingN , int pColor ,  Board  board)
+    public  CastlingCommand ( ChessEngineSystem eng, int KingD , int KingN , int pColor ,  Board  board, MoveType type)
     {
-     
+
+         moveType = type;
         this.savedBoard = new Board(board);
         this.currentBoard = board;
         this.kingDefaultCell = KingD ;
@@ -133,10 +135,6 @@ public class CastlingCommand : Command
                 }
                 else 
                     PerformCastle(+1, 56 );
-                
-                
-                
-               
                 currentBoard.castleRight.blackKingSideCastling = false;       
                 currentBoard.castleRight.blackQueenSideCastling = false; 
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -203,7 +201,8 @@ public class CastlingCommand : Command
 
 public class RookMoveCommand : Command
 {
-    public new MoveType moveType = MoveType.Regular;
+    public MoveType moveType;
+
     int currentCell ;
     int targetCell;
     
@@ -223,9 +222,10 @@ public class RookMoveCommand : Command
     
     private ChessEngineSystem engine;
 
-    public RookMoveCommand (ChessEngineSystem engs,int old , int newCell ,int color ,  Board board )
+    public RookMoveCommand (ChessEngineSystem engs,int old , int newCell ,int color ,  Board board ,  MoveType type )
     {
-        savedBoard = new Board(board, "Clone from rook move");
+        moveType = type;
+        savedBoard = new Board(board, BoardCloneTypes.RookMoveClone);
         currentBoard = board;
         this.engine = engs;
         this.currentCell = old ;
@@ -285,11 +285,13 @@ public class RookMoveCommand : Command
 public class KingMoveCommand : MoveCommand
 {   
     int pColor;
-    
-    public KingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board) : base(currnt, target, eng, board)
-    {   
+    public MoveType moveType;
+
+    public KingMoveCommand(int currnt, int target, ChessEngineSystem eng , int color ,  Board board , MoveType type) : base(currnt, target, eng, board, type)
+    {
+        moveType = type;
         pColor = color;
-        savedBoard = new Board(board, "cloned from King move");
+        savedBoard = new Board(board, BoardCloneTypes.KingMoveClone);
         currentBoard = board;
 
     }
@@ -324,19 +326,20 @@ public class KingMoveCommand : MoveCommand
 }
     
     public class EnPassantCommand : MoveCommand
-    {
-        public new MoveType moveType = MoveType.EnPassant;
+    {   
+       
         private int capturedPawnIndex;
-        
-        public EnPassantCommand(int currnt, int target, ChessEngineSystem eng ,int capPawnIndex , Board board) : base(currnt, target, eng , board)
-        {
+        public EnPassantCommand(int currnt, int target, ChessEngineSystem eng ,int capPawnIndex , Board board, MoveType type ) : base(currnt, target, eng , board ,type)
+        {   
             capturedPawnIndex = capPawnIndex;
+            moveType = type;
             // = eng.Get//;
         }
 
 
         public override void Execute()
         {
+            
             this.capturedPiece =  currentBoard.chessBoard[capturedPawnIndex];
             currentBoard.chessBoard[targetCell] =  currentBoard.chessBoard[currentCell];
             currentBoard.chessBoard[currentCell] =  Piece.Empty ;
@@ -362,12 +365,12 @@ public class KingMoveCommand : MoveCommand
     }
     public class PromotionCommand : MoveCommand
     {
-
-        public new MoveType moveType = MoveType.Promotion;
+        public MoveType moveType;
         public int promotedToPiece = -1;
         private ChessPiece piece;
-        public PromotionCommand(int currnt, int target, int PromoPiece, ChessPiece p,ChessEngineSystem eng ,  Board board) : base(currnt, target, eng , board)
+        public PromotionCommand(int currnt, int target, int PromoPiece, ChessPiece p,ChessEngineSystem eng ,  Board board , MoveType type) : base(currnt, target, eng , board , type)
         {
+            moveType = type;
             this.promotedToPiece = PromoPiece;
             capturedPiece =  currentBoard.chessBoard[targetCell];
             piece = p;

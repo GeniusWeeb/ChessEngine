@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 2;
+    private readonly int customDepth = 1;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -43,7 +43,7 @@ public class PerfTest
                 DoPromotion(customDepth,move,board);
             else
             { 
-                Board board_cpy = new Board(board,"clone");
+                Board board_cpy = new Board(board,BoardCloneTypes.MAIN);
                 board_cpy.MakeMoveClone(move);
                 nodes += RunPerft(customDepth - 1 , board_cpy);
                 PerftList.Add(new ShowMoveList(FenMapper.IndexToAlgebric(move.from, move.to), nodes));
@@ -153,9 +153,9 @@ public class PerfTest
                 {
                   
                     int promoP = piece | pCol;
-                    Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
+                    Board board_cpy = new Board(board, BoardCloneTypes.PromotionClone);
                     board_cpy.MakeMoveClone(move);
-                    ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
+                    ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy, MoveType.Promotion);
                     board_cpy.ExecuteCommand(promote);
                     GameStateManager.Instance.promotionCount += 1;
                     nodeCount += RunPerft(currentDepth-1, board_cpy);
@@ -165,7 +165,7 @@ public class PerfTest
 
 
             else {  
-                Board board_cpy =  new Board(board , $"clone at  {currentDepth}");
+                Board board_cpy =  new Board(board , BoardCloneTypes.DepthCloning);
                 board_cpy.MakeMoveClone(move);
                 nodeCount += RunPerft(currentDepth-1,  board_cpy);
                 Thread.Sleep((int)(moveDelay));
@@ -188,9 +188,9 @@ public class PerfTest
         {
                   
             int promoP = piece | pCol;
-            Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
+            Board board_cpy = new Board(board, BoardCloneTypes.PromotionClone);
             board_cpy.MakeMoveClone(move);
-            ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
+            ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy, MoveType.Promotion);
             board_cpy.ExecuteCommand(promote);
             GameStateManager.Instance.promotionCount += 1;
             nodeCount += RunPerft(depth-1, board_cpy);
@@ -211,9 +211,9 @@ public class PerfTest
         {
             int promCount = 0;
             int promoP = piece | pCol;
-            Board board_cpy = new Board(board, $"clone board for promotion -> {promoP}");
+            Board board_cpy = new Board(board, BoardCloneTypes.PromotionClone);
             board_cpy.MakeMoveClone(move);
-            ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy);
+            ICommand promote = new PromotionCommand(move.from, move.to, promoP, move.p, ChessEngineSystem.Instance, board_cpy, MoveType.Promotion);
             board_cpy.ExecuteCommand(promote);
             GameStateManager.Instance.promotionCount += 1;
             promCount+= RunPerft(depth-1, board_cpy);
