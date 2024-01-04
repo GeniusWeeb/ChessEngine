@@ -158,7 +158,7 @@ public static  class FenMapper
 
         string result = algebraic_old + algebraic_new;
         //Console.WriteLine(result);
-
+        
         return result;
     }
 
