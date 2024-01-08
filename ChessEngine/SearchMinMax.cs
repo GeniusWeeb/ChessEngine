@@ -4,16 +4,13 @@ using System.Text;
 using Tensorflow;
 namespace ChessEngine
 {   
-
     //MiniMax search algorithm : 
     public class SearchMinMax
     {
-        private string modelPath = "model_v1.keras";
-        private List<Move> moveList = new List<Move>();
-        
-         
-        public Move? FindBestMove(Board board,  int defaultDepth = 3)
+        public Move? FindBestMove(Board board , bool supremeBot , int defaultDepth = 3)
         {
+            string modelPath = supremeBot ? "dumb.keras" : "smart.keras";
+            List<Move> moveList = new List<Move>();
             int colorToScanFor = Piece.White;
             List<ChessPiece> startNodePieces = board.GenerateMoves(colorToScanFor,board,false );
             int bestEvalScore = int.MinValue;
@@ -26,27 +23,26 @@ namespace ChessEngine
                     moveList.Add(new Move( piece.GetCurrentIndex,  movesIndex,  piece));
                 }
             }
-
             foreach (Move move in moveList)
             {
                 Board board_cpy = new Board(board,BoardCloneTypes.MAIN);
                 board_cpy.MakeMoveClone(move);
                 //different for black and white
-                int score =PerformMiniMax(board_cpy , defaultDepth, false);
+                int score =PerformMiniMax(board_cpy , defaultDepth, false, modelPath);
                 if (score > bestEvalScore)
                 {
                     bestEvalScore = score;
                     bestMove = move;
                 }
-
             }
             
             return bestMove;
         }
         //return the Score
-        private int PerformMiniMax(Board board , int depth , bool isMaximizingPlayer)
+        private int PerformMiniMax(Board board , int depth , bool isMaximizingPlayer, string path)
         {
-            if (depth == 0) return EvaluateBoard(board); // or the GAME OVer state
+            string modelPath = path;
+            if (depth == 0) return EvaluateBoard(board, modelPath); // or the GAME OVer state
             List<Move> tempLegalMoves = new List<Move>();
             List<ChessPiece> piecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, false);
             foreach (var piece in piecesThatCanMove) //Root node
@@ -65,7 +61,7 @@ namespace ChessEngine
                 {
                     Board board_cpy = new Board(board,BoardCloneTypes.DepthCloning);
                     board_cpy.MakeMoveClone(move);
-                    int eval = PerformMiniMax(board_cpy, depth - 1, false);
+                    int eval = PerformMiniMax(board_cpy, depth - 1, false, modelPath);
                     maxEval = Math.Max(maxEval, eval);
                 }
                 return maxEval;
@@ -80,14 +76,13 @@ namespace ChessEngine
                     board_cpy.MakeMoveClone(move);
                     //Since this is the black side or so, this will then update to white side which is 
                     // trying to maximize the value
-                    int eval = PerformMiniMax(board_cpy, depth - 1, true);
+                    int eval = PerformMiniMax(board_cpy, depth - 1, true, modelPath);
                     minEval = Math.Min(minEval, eval);
                 }
                 return minEval;
             }
         }
-
-        private int EvaluateBoard(Board board )
+        private int EvaluateBoard(Board board , string modelPath)
         { 
             var model = Keras.Models.Model.LoadModel(modelPath);
             string fenIs = GenerateFenDataFromBoard(board);
@@ -95,8 +90,6 @@ namespace ChessEngine
             var takenInput = input.Take(768).ToArray();
             // Reshape the array
             var reshapedInput = ReshapeInputArray(takenInput, 1, 8, 8, 12);
-            
-          
             var eval =  model.Predict(reshapedInput);
             int evalFinal = (int)eval[0][0];
             Console.WriteLine($"Eval score is {evalFinal}");
