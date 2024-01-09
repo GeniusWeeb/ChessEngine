@@ -9,7 +9,7 @@ namespace Utility;
 
 public static  class FenMapper
 {
-    private static string defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  //  private static string defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     
     
     //Fen start from top left to right

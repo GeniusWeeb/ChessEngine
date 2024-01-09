@@ -1,50 +1,62 @@
 
-using System.Diagnostics;
+
 using System.Text;
-using Tensorflow;
+using System.Net.Http;
+using Newtonsoft.Json;
+
 namespace ChessEngine
-{   
+{
+    
     //MiniMax search algorithm : 
     public class SearchMinMax
-    {
-        public Move? FindBestMove(Board board , bool supremeBot , int defaultDepth = 3)
+    {   string apiUrl = "http://127.0.0.1:8000//api/GetEval";
+        private int defaultDepth = 1;
+        public Move? FindBestMove(Board board , bool supremeBot ,int depth)
         {
-            string modelPath = supremeBot ? "dumb.keras" : "smart.keras";
-            List<Move> moveList = new List<Move>();
-            int colorToScanFor = Piece.White;
-            List<ChessPiece> startNodePieces = board.GenerateMoves(colorToScanFor,board,false );
-            int bestEvalScore = int.MinValue;
-            Move bestMove = null;
-            
-            foreach (var piece in startNodePieces) //Root node
+            try
             {
-                foreach (var movesIndex in piece.allPossibleMovesIndex)
+                string modelPath = supremeBot ? "dumb.keras" : "smart.keras";
+                List<Move> moveList = new List<Move>();
+                List<ChessPiece> startNodePieces = board.GenerateMoves(board.GetCurrentTurn,board,false );
+                int bestEvalScore = int.MinValue;
+                Move bestMove = null;
+                foreach (var piece in startNodePieces) //Root node
                 {
-                    moveList.Add(new Move( piece.GetCurrentIndex,  movesIndex,  piece));
+                    foreach (var movesIndex in piece.allPossibleMovesIndex)
+                    {
+                        moveList.Add(new Move( piece.GetCurrentIndex,  movesIndex,  piece));
+                    }
                 }
-            }
-            foreach (Move move in moveList)
-            {
-                Board board_cpy = new Board(board,BoardCloneTypes.MAIN);
-                board_cpy.MakeMoveClone(move);
-                //different for black and white
-                int score =PerformMiniMax(board_cpy , defaultDepth, false, modelPath);
-                if (score > bestEvalScore)
+                foreach (Move move in moveList)
                 {
-                    bestEvalScore = score;
-                    bestMove = move;
+                    Board board_cpy = new Board(board,BoardCloneTypes.MAIN);
+                    board_cpy.MakeMoveClone(move);
+                    //different for black and white
+                    int score =PerformMiniMax(board_cpy , defaultDepth-1, true, supremeBot);
+                    if (score > bestEvalScore)
+                    {
+                        bestEvalScore = score;
+                        bestMove = move;
+                    }
                 }
-            }
             
-            return bestMove;
+                return bestMove;
+            
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine(e.StackTrace);
+                throw;
+            }
         }
         //return the Score
-        private int PerformMiniMax(Board board , int depth , bool isMaximizingPlayer, string path)
+        private int PerformMiniMax(Board board , int depth , bool isMaximizingPlayer,bool weakModel)
         {
-            string modelPath = path;
-            if (depth == 0) return EvaluateBoard(board, modelPath); // or the GAME OVer state
+           
+            if (depth == 0) return EvaluateBoard(board, weakModel); // or the GAME OVer state
             List<Move> tempLegalMoves = new List<Move>();
-            List<ChessPiece> piecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, false);
+            List<ChessPiece> piecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, true);
             foreach (var piece in piecesThatCanMove) //Root node
             {
                 foreach (var movesIndex in piece.allPossibleMovesIndex)
@@ -61,7 +73,7 @@ namespace ChessEngine
                 {
                     Board board_cpy = new Board(board,BoardCloneTypes.DepthCloning);
                     board_cpy.MakeMoveClone(move);
-                    int eval = PerformMiniMax(board_cpy, depth - 1, false, modelPath);
+                    int eval = PerformMiniMax(board_cpy, depth - 1, false, weakModel);
                     maxEval = Math.Max(maxEval, eval);
                 }
                 return maxEval;
@@ -73,28 +85,66 @@ namespace ChessEngine
                 foreach (var move in tempLegalMoves)
                 {
                     Board board_cpy = new Board(board,BoardCloneTypes.DepthCloning);
-                    board_cpy.MakeMoveClone(move);
-                    //Since this is the black side or so, this will then update to white side which is 
+                    board_cpy.MakeMoveClone(move); //Since this is the black side or so, this will then update to white side which is 
                     // trying to maximize the value
-                    int eval = PerformMiniMax(board_cpy, depth - 1, true, modelPath);
+                    int eval = PerformMiniMax(board_cpy, depth - 1, true, weakModel);
                     minEval = Math.Min(minEval, eval);
                 }
                 return minEval;
             }
         }
-        private int EvaluateBoard(Board board , string modelPath)
+        
+        
+        // Note : We are trying to evaluate the endboard always because that is how many steps we are looking ahead
+        public int EvaluateBoard(Board board ,bool weakModel)
         { 
-            var model = Keras.Models.Model.LoadModel(modelPath);
+            string Fen = "rnbqkbnr/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; 
             string fenIs = GenerateFenDataFromBoard(board);
-            var input = FenToCombinedInput(fenIs);
-            var takenInput = input.Take(768).ToArray();
-            // Reshape the array
-            var reshapedInput = ReshapeInputArray(takenInput, 1, 8, 8, 12);
-            var eval =  model.Predict(reshapedInput);
-            int evalFinal = (int)eval[0][0];
-            Console.WriteLine($"Eval score is {evalFinal}");
-            return evalFinal;
+         //   Console.WriteLine("Feis "+ fenIs);
+            var result = GetEvalSyncly(fenIs , weakModel);
+          //  Console.WriteLine($"result is {result}");
+            return (int)result;
+            //     var input = FenToCombinedInput(Fen);
+            //     var takenInput = input.Take(768).ToArray(); 
+            //    Reshape the array
+            //       var reshapedInput = ReshapeInputArray(takenInput, 1, 8, 8, 12); 
+            //    var eval =  model.Predict(reshapedInput);
+
+            //  Console.WriteLine("Result is " + eval);
+            //  Console.WriteLine($"Eval score is {(int)eval}");
         }
+        public float  GetEvalSyncly(string fenString , bool weakModel)
+        {
+          
+            var payload = new
+            {
+                fen = fenString, 
+                model = weakModel
+            };
+
+            using (HttpClient client = new HttpClient())
+            {
+                var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = client.PostAsync(apiUrl, content).Result;
+
+                // Check if the request was successful (status code 200 OK)
+                if (response.IsSuccessStatusCode)
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    
+                    var resultObject = JsonConvert.DeserializeAnonymousType(result, new { result = 0.0f });
+                    return (resultObject.result); // Adjust parsing based on your actual response format
+                }
+                else
+                {
+                    Console.WriteLine($"Error: {response.StatusCode}");
+                    return float.NaN; // Handle error case, return a float or use a different approach
+                }
+                
+            }
+        }
+
         static sbyte[,,,] ReshapeInputArray(sbyte[] inputArray, int dim1, int dim2, int dim3, int dim4)
         {
             sbyte[,,,] reshapedArray = new sbyte[dim1, dim2, dim3, dim4];
@@ -114,8 +164,10 @@ namespace ChessEngine
             return reshapedArray;
         }
         
+
         private string GenerateFenDataFromBoard(Board board)
         {
+          
             StringBuilder fenBuilder = new StringBuilder();
             int turnToMove = board.GetCurrentTurn;
             
@@ -219,7 +271,7 @@ namespace ChessEngine
 
             return castleRight.ToString();
         }
-        public static sbyte[] FenToCombinedInput(string fen)
+        public static float[] FenToCombinedInput(string fen)
         {
             string[] parts = fen.Split(' ');
             string board = parts[0];
@@ -270,9 +322,11 @@ namespace ChessEngine
             // Combine representations
             sbyte[] combinedInput = boardMatrix.Cast<sbyte>().Concat(turnVector).Concat(new sbyte[] { (sbyte)castlingBits }).ToArray();
 
-            return combinedInput;
+            // Convert sbyte[] to float[]
+            float[] floatCombinedInput = combinedInput.Select(x => (float)x).ToArray();
+
+            return floatCombinedInput;
         }
-    
 
 
     }

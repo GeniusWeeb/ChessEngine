@@ -56,6 +56,7 @@ namespace Utility{
         void ClientConnected(IWebSocketConnection socket)
         {
             
+            Console.WriteLine("New client connected");
             connectedClient.Add(socket);
             mainSocket = socket;
             //Move this to wait till a game mode has been passed.

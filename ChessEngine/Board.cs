@@ -77,9 +77,7 @@ namespace ChessEngine
          moveHistory.Push(move);
          move.Execute();
      }
-     
      //needs to be debugged
-     
      private void UndoCommand(string data)
      {
          if (moveHistory.Count == 0) return; // no  more moves to make
@@ -130,11 +128,9 @@ namespace ChessEngine
         }
     } 
     
-    
-    
     //UIMakeMove -> Tailor it to look like the clone .
     public bool MakeMove( int oldIndex, int newIndex)
-    {
+    { 
         Console.WriteLine("Checking UI ");
         var piece = chessBoard[oldIndex];
         foreach (var p in GameStateManager.Instance.allPiecesThatCanMove)
@@ -144,17 +140,13 @@ namespace ChessEngine
             {
                 Console.WriteLine("Found move");
                 CheckForBonusBasedOnPieceCapture(piece,chessBoard[newIndex]);
+                UpdateTurns();
                 PerformPostMoveCalculation( ChessEngineSystem.Instance, oldIndex , newIndex ,piece, p );
-                //ShowBoard();
-               // UpdateTurns();
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{p.GetPieceCode} moved from {oldIndex} to {newIndex}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------");
                 Console.ResetColor();
-                //Castling flag doesnt change yet
-                // IsKingInCheck(chessBoard, 
-                //     (GameStateManager.Instance.GetTurnToMove));
-                //Check condition after move has been made
+                GameStateManager.Instance.allPiecesThatCanMove.Clear();
                 return true;
                 ; }
         }
@@ -162,6 +154,26 @@ namespace ChessEngine
         Console.WriteLine("Invalid Move");
             return false;
      }
+
+
+    public bool BotMakeMove(Move move)
+    {
+        int piece =chessBoard[move.from];
+        CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
+        UpdateTurns(); 
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p);
+
+        return true;
+    }
+
+    public void MakeMoveClone(Move move )
+    {
+        int piece =chessBoard[move.from];
+        CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
+        UpdateTurns(); 
+        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p);
+    }
+
 
     public void UnMakeMove()
     {
@@ -212,14 +224,7 @@ namespace ChessEngine
         promotionPieces.Push(Piece.Rook);
         promotionPieces.Push(Piece.Knight);
     }
-    public void MakeMoveClone(Move move )
-    {
-        int piece =chessBoard[move.from];
-        CheckForBonusBasedOnPieceCapture(piece,chessBoard[move.to]);
-        UpdateTurns(); 
-        PerformPostMoveCalculation( ChessEngineSystem.Instance, move.from, move.to ,piece, move.p);
-    }
-
+ 
     private void CheckForBonusBasedOnPieceCapture(int pieceThatMoved, int newIndex)
     {
 
