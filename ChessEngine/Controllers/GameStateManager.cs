@@ -16,7 +16,7 @@ public class GameStateManager
     public int enPassantMoves = 0;
     public int castlingCount = 0;
     public int checkMateCount = 0;
-    public HashSet<ChessPiece> allPiecesThatCanMove = new HashSet<ChessPiece>();
+    public List<ChessPiece> allPiecesThatCanMove = new List<ChessPiece>();
     public int? player1MoveCol;
     public int? player2MoveCol; // 
     public int whiteCastlingCount = 0;

@@ -1,6 +1,9 @@
+using System.Reflection;
 using ChessEngine.Bot;
 using Newtonsoft.Json;
+using Python.Runtime;
 using Utility;
+
 
 // This class will communicate with engine
 //have handlers whatever
@@ -10,37 +13,38 @@ namespace ChessEngine
     public class ChessEngineSystem : IDisposable
     {   
         public bool useUI = true;
-        public string TestFen = "8/2p5/3p4/KP5r/7k/8/4P1p1/7R b - - 1 3";  
+       // public string TestFen = "8/2p5/3p4/KP5r/7k/8/4P1p1/7R b - - 1 3";  
       
         public static ChessEngineSystem Instance { get; private set; }
         private Board board;
-        private BotBrain? bot1 = new BotBrain();
-        private BotBrain? bot2 = new BotBrain();
+        private BotBrain? bot1 = new BotBrain(true);
+        private BotBrain? bot2 = new BotBrain(false);
         private readonly int boardSetupDelay = 50;
         private readonly int botDecisionDelay = 50;
         private bool newServerInstance = true;
         private bool startingNewBoard = true;
         private bool isUndoRequest;
-        
-        
-
+        public SearchMinMax miniMax = new SearchMinMax();
         private PerfTest test = new PerfTest();
+       public IntPtr ptr;
+        public dynamic GetEval;
+        
         
         public ChessEngineSystem()
         {
-            
+         
             Console.WriteLine("Console initialized");
+           
             Event.inComingData += PassDataToBoard;
             Event.GetCellsForThisIndex += SendUICellIndicatorData;
             Event.undoMove  += UndoCommand;
             Event.ClientConncted += SetupDefaultBoard;
            
+           
         }
         static ChessEngineSystem()
         {
             Instance = new ChessEngineSystem();
-            
-        
         }
 
         public void UndoCommand(string data)
@@ -68,7 +72,7 @@ namespace ChessEngine
         }
         
 
-        public int[] MapFen() => FenMapper.MapFen(TestFen);
+        public int[] MapFen() => FenMapper.MapFen();
 
         public void SetCurrentTurnToMove(int turn)
         {
@@ -83,8 +87,18 @@ namespace ChessEngine
             Connection.Instance.Init(); 
             Console.ResetColor();
             board = new Board();
+            try
+            {
+               // var model = Keras.Models.Model.LoadModel("dumb.keras");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
         }
-        
+        //bot 1 is smart bot
         
         public async Task  CheckForGameModeAndPerform()
         {
@@ -99,71 +113,39 @@ namespace ChessEngine
             {   
                 // can use  diff bot for diff things
                 case GameMode.PlayerVsBot :
-                    if ( GameStateManager.Instance.player1MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
+                    if ( GameStateManager.Instance.player1MoveCol == board.GetCurrentTurn) // for the first turn
                     {   
                         Console.WriteLine("Bot is gonna make the move");
-                        bot1.Think();
-                        board.GenerateMoves( (int)board.GetCurrentTurn, board,false);
+                        bot1.Think( board);
                     }
+                   GameStateManager.Instance.allPiecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, false);
                     break;
-                
-                
                 case GameMode.BotVsBot :
-                    
-                    if ( GameStateManager.Instance.player1MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
-                    {
-                        BotMove(ref bot1);
-                        
-                    }
-                    else if ( GameStateManager.Instance.player2MoveCol == GameStateManager.Instance.playerToMove) // for the first turn
-                    {   
-                       
-                     BotMove(ref bot2);
-                       
-                    }
-                    
+                        if ( GameStateManager.Instance.player1MoveCol ==board.GetCurrentTurn) // for the first turn
+                            bot1.Think(board);
+                        else if ( GameStateManager.Instance.player2MoveCol ==  board.GetCurrentTurn) // for the first turn
+                            bot2.Think(board);
+
+                        CheckForGameModeAndPerform();    
                     break;
-                case GameMode.PlayerVsPlayer :
-                    board.GenerateMoves(board.GetCurrentTurn, board, true);
-                    break;
-                
                 case GameMode.PerfTest:
                     test.PerFMoveFinal();
                     break;
                     
             }
         }
-
-
-        private void BotMove(ref BotBrain brain)
-        {
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("--------------------------------------------------------------------------------------");
-                Console.WriteLine($"Bot {GameStateManager.Instance.playerToMove.ToString()}  is  gonna make the move , Waiting ...");
-            Console.ResetColor();
-            Thread.Sleep(botDecisionDelay);
-            
-            //main issue is here
-            board.GenerateMoves( (int)board.GetCurrentTurn, board , false);
-            UtilityWriteToConsoleWithColor("Scanning Finished  bot gonna think", ConsoleColor.Red);
-            brain.Think();          
-            UtilityWriteToConsoleWithColor("Bots thinking finished", ConsoleColor.DarkGreen);
-            CheckForGameModeAndPerform();
-            
-            //Fix this
-        }
-
+        
+        
         //This will unwrap the data and send to the board 
         private void PassDataToBoard(string data)
         {   
               //   Console.WriteLine("Received move data");
                 string validationData = ProcessMoveInEngine(data) ? "true" : "false";
-                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, GameStateManager.Instance.GetTurnToMove.ToString());
+                Protocols finalData = new Protocols(ProtocolTypes.VALIDATE.ToString(), validationData, board.GetCurrentTurn.ToString());
                 SendDataToUI(finalData);
             
                 //After we performed moves -> we get if it is validated and the above things happen as usual 
-                //CheckForGameModeAndPerform();
+                CheckForGameModeAndPerform();
 
             
         }
@@ -195,7 +177,7 @@ namespace ChessEngine
         {
             List<int> update = new List<int>() { oldIndex, newIndex };
             var data = JsonConvert.SerializeObject(update);
-            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString());
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , board.GetCurrentTurn.ToString());
             SendDataToUI(finalData);
         }
         //Exclusively used for Undoing - REcived
@@ -203,7 +185,7 @@ namespace ChessEngine
         {
             List<int> update = new List<int>() { oldIndex, newIndex , capturedPiece};
             var data = JsonConvert.SerializeObject(update);
-            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString() );
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data ,board.GetCurrentTurn.ToString() );
             SendDataToUI(finalData);
             
          //EnPassant 
@@ -211,7 +193,7 @@ namespace ChessEngine
         {
             List<int> update = new List<int>() { oldIndex, newIndex , capturedPiece, capturedPawnIndex};
             var data = JsonConvert.SerializeObject(update);
-            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString() );
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , board.GetCurrentTurn.ToString() );
             SendDataToUI(finalData);
           
         }
@@ -219,7 +201,7 @@ namespace ChessEngine
         {
             List<int> update = new List<int>() { singleIndexToRemove };
             var data = JsonConvert.SerializeObject(update);
-            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , GameStateManager.Instance.playerToMove.ToString());
+            Protocols finalData = new Protocols(ProtocolTypes.UPDATEUI.ToString() , data , board.GetCurrentTurn.ToString());
             SendDataToUI(finalData);    
         }
         
@@ -286,7 +268,10 @@ namespace ChessEngine
             Connection.Instance.Send(toSend);
         }
 
-       public bool IsPawnDefIndex(int pCode, int index)  =>board.CheckIfPawnDefaultIndex(pCode, index);
+
+      
+
+        public bool IsPawnDefIndex(int pCode, int index)  =>board.CheckIfPawnDefaultIndex(pCode, index);
 
        
        #region Util Methods
@@ -336,8 +321,8 @@ namespace ChessEngine
             bot1 = null;
             bot2 = null;
          Board newBoard = new Board();
-         BotBrain newBot1 = new BotBrain();
-         BotBrain newBot2 = new BotBrain();
+         BotBrain newBot1 = new BotBrain(true);
+         BotBrain newBot2 = new BotBrain(false);
          board = newBoard;
          bot1 = newBot1;
          bot2 = newBot2;

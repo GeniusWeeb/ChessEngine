@@ -264,11 +264,27 @@ sealed class LegalMoves
 
     private ChessPiece GenerateMovesForKing(int ind, int thisColCode, Board board , bool isCustom)
     {
+        
+        
+        
         int whiteKingDefaultIndex = 4;
         int blackKingDefaultIndex = 60;
         int index = ind;
         int myColCode = thisColCode;
         King king = new King(myColCode, index);
+
+        switch (myColCode)
+        {
+         
+            case Piece.Black:
+                board.blackKingCurrentIndex = index;
+                break;
+            
+            case Piece.White:
+                board.whiteKingKingCurrentIndex = index;
+                break;
+        }
+        
         int movesLength = king.kingCanMoveTo.Length;
         for (int i = 0; i < movesLength; i++)
         { 

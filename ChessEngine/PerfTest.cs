@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 3;
+    private readonly int customDepth = 2;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;
@@ -23,8 +23,12 @@ public class PerfTest
         int nodes = 0;
         List<ChessPiece> startNodePieces = new List<ChessPiece>();
         Board board = ChessEngineSystem.Instance.GetBoardClass;
-        startNodePieces =board.GenerateMoves(board.GetCurrentTurn ,board , false );
         
+       
+        startNodePieces =board.GenerateMoves(board.GetCurrentTurn ,board , false );
+        watch.Stop();
+        Console.WriteLine($"Only legal move took {watch.ElapsedMilliseconds/1000} seconds for initial move gen");
+
         foreach (var piece in startNodePieces) //Root node
         {
             foreach (var movesIndex in piece.allPossibleMovesIndex)
