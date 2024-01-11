@@ -131,6 +131,11 @@ namespace ChessEngine
                 case GameMode.PerfTest:
                     test.PerFMoveFinal();
                     break;
+                
+                case GameMode.PlayerVsPlayer: 
+                    
+                    GameStateManager.Instance.allPiecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, false);
+                    break;
                     
             }
         }

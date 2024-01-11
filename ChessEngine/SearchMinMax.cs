@@ -3,6 +3,7 @@
 using System.Text;
 using System.Net.Http;
 using Newtonsoft.Json;
+using Razorvine.Pickle;
 
 namespace ChessEngine
 {
@@ -10,8 +11,8 @@ namespace ChessEngine
     //MiniMax search algorithm : 
     public class SearchMinMax
     {   string apiUrl = "http://127.0.0.1:8000//api/GetEval";
-        private int defaultDepth = 1;
-        public Move? FindBestMove(Board board , bool supremeBot ,int depth)
+      
+        public Move? FindBestMove(Board board , bool supremeBot ,int depth =1)
         {
             try
             {
@@ -35,7 +36,7 @@ namespace ChessEngine
                     
                     int alpha = int.MinValue;
                     int beta = int.MaxValue;
-                    int score =PerformAlphaBeta(board_cpy , defaultDepth-1, true, supremeBot, alpha, beta);
+                    int score =PerformAlphaBeta(board_cpy , depth-1, board.GetCurrentTurn == Piece.White, supremeBot, alpha, beta);
                     if (score > bestEvalScore)
                     {
                         bestEvalScore = score;
@@ -59,7 +60,7 @@ namespace ChessEngine
            
             if (depth == 0) return EvaluateBoard(board, weakModel); // or the GAME OVer state
             List<Move> tempLegalMoves = new List<Move>();
-            List<ChessPiece> piecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, true);
+            List<ChessPiece> piecesThatCanMove = board.GenerateMoves(board.GetCurrentTurn, board, false);
             foreach (var piece in piecesThatCanMove) //Root node
             {
                 foreach (var movesIndex in piece.allPossibleMovesIndex)
@@ -108,13 +109,16 @@ namespace ChessEngine
         // Note : We are trying to evaluate the endboard always because that is how many steps we are looking ahead
         public int EvaluateBoard(Board board ,bool weakModel)
         { 
-            string Fen = "rnbqkbnr/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; 
+            
             string fenIs = GenerateFenDataFromBoard(board);
-       
+         
+            
             var result = GetEvalSyncly(fenIs , weakModel);
             return (int)result;
            
         }
+        
+        private static readonly HttpClient client = new HttpClient();
         public float  GetEvalSyncly(string fenString , bool weakModel)
         {
           
@@ -124,11 +128,10 @@ namespace ChessEngine
                 model = weakModel
             };
 
-            using (HttpClient client = new HttpClient())
-            {
+           
                 var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = client.PostAsync(apiUrl, content).Result;
+                HttpResponseMessage response =  client.PostAsync(apiUrl, content).Result;
 
                 // Check if the request was successful (status code 200 OK)
                 if (response.IsSuccessStatusCode)
@@ -144,7 +147,7 @@ namespace ChessEngine
                     return float.NaN; // Handle error case, return a float or use a different approach
                 }
                 
-            }
+            
         }
 
         static sbyte[,,,] ReshapeInputArray(sbyte[] inputArray, int dim1, int dim2, int dim3, int dim4)
@@ -169,6 +172,7 @@ namespace ChessEngine
 
         private string GenerateFenDataFromBoard(Board board)
         {
+            
           
             StringBuilder fenBuilder = new StringBuilder();
             int turnToMove = board.GetCurrentTurn;
