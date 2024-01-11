@@ -10,7 +10,7 @@ public class PerfTest
 {
     private Stopwatch watch = new Stopwatch();
     private bool firstScan = true;
-    private readonly int customDepth = 2;
+    private readonly int customDepth = 5;
     private  int moveDelay = 0;
     private int finalpos = 0;
     int currentColor;

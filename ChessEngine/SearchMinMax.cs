@@ -32,7 +32,10 @@ namespace ChessEngine
                     Board board_cpy = new Board(board,BoardCloneTypes.MAIN);
                     board_cpy.MakeMoveClone(move);
                     //different for black and white
-                    int score =PerformMiniMax(board_cpy , defaultDepth-1, true, supremeBot);
+                    
+                    int alpha = int.MinValue;
+                    int beta = int.MaxValue;
+                    int score =PerformAlphaBeta(board_cpy , defaultDepth-1, true, supremeBot, alpha, beta);
                     if (score > bestEvalScore)
                     {
                         bestEvalScore = score;
@@ -51,7 +54,7 @@ namespace ChessEngine
             }
         }
         //return the Score
-        private int PerformMiniMax(Board board , int depth , bool isMaximizingPlayer,bool weakModel)
+        private int PerformAlphaBeta(Board board , int depth , bool isMaximizingPlayer,bool weakModel, int alpha, int beta)
         {
            
             if (depth == 0) return EvaluateBoard(board, weakModel); // or the GAME OVer state
@@ -73,8 +76,12 @@ namespace ChessEngine
                 {
                     Board board_cpy = new Board(board,BoardCloneTypes.DepthCloning);
                     board_cpy.MakeMoveClone(move);
-                    int eval = PerformMiniMax(board_cpy, depth - 1, false, weakModel);
+                    int eval = PerformAlphaBeta(board_cpy, depth - 1, false, weakModel, alpha, beta);
                     maxEval = Math.Max(maxEval, eval);
+                    alpha = Math.Max(alpha, maxEval);
+
+                    if (beta <= alpha)
+                        break;
                 }
                 return maxEval;
             }
@@ -87,8 +94,11 @@ namespace ChessEngine
                     Board board_cpy = new Board(board,BoardCloneTypes.DepthCloning);
                     board_cpy.MakeMoveClone(move); //Since this is the black side or so, this will then update to white side which is 
                     // trying to maximize the value
-                    int eval = PerformMiniMax(board_cpy, depth - 1, true, weakModel);
+                    int eval = PerformAlphaBeta(board_cpy, depth - 1, true, weakModel, alpha, beta);
                     minEval = Math.Min(minEval, eval);
+                    beta = Math.Min(beta, minEval);
+                    if (beta <= alpha)
+                        break;
                 }
                 return minEval;
             }
@@ -100,18 +110,10 @@ namespace ChessEngine
         { 
             string Fen = "rnbqkbnr/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; 
             string fenIs = GenerateFenDataFromBoard(board);
-         //   Console.WriteLine("Feis "+ fenIs);
+       
             var result = GetEvalSyncly(fenIs , weakModel);
-          //  Console.WriteLine($"result is {result}");
             return (int)result;
-            //     var input = FenToCombinedInput(Fen);
-            //     var takenInput = input.Take(768).ToArray(); 
-            //    Reshape the array
-            //       var reshapedInput = ReshapeInputArray(takenInput, 1, 8, 8, 12); 
-            //    var eval =  model.Predict(reshapedInput);
-
-            //  Console.WriteLine("Result is " + eval);
-            //  Console.WriteLine($"Eval score is {(int)eval}");
+           
         }
         public float  GetEvalSyncly(string fenString , bool weakModel)
         {

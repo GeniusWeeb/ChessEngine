@@ -8,11 +8,11 @@ public class BotBrain
 
     public bool isSmart;
 
-   public  BotBrain(bool supremeBot)
-   {
+    public  BotBrain(bool supremeBot)
+    {
    
-       this.isSmart = supremeBot;
-   }
+        this.isSmart = supremeBot;
+    }
 
     public void Think(Board board )
     {
