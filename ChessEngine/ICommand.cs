@@ -141,7 +141,7 @@ public class CastlingCommand : Command
                 GameStateManager.Instance.blackCastlingCount++;
               
             
-     //    engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
+         engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);
          break;
 
             case Piece.White:   
@@ -155,7 +155,7 @@ public class CastlingCommand : Command
                  currentBoard.castleRight.whiteQueenSideCastling = false;   
                  Console.ForegroundColor = ConsoleColor.Cyan;
                  GameStateManager.Instance.whiteCastlingCount++;
-        // engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
+         engine.UpdateUIWithNewIndex(RookDefaultCell, RookNewCell);        
         break;
         }
 
